@@ -265,7 +265,7 @@ export function RuleConfigurePanel() {
         </div>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-x-auto">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
           <div>
             <h2 className="font-semibold text-slate-900">Individual Rules</h2>

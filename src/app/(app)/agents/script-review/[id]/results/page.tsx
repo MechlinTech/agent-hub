@@ -135,7 +135,7 @@ export default async function ReviewResultsPage({
           <h3 className="mb-2 font-semibold text-sm">Severity Distribution</h3>
           <SeverityDonut counts={counts} />
         </div>
-        <div className="card overflow-hidden lg:col-span-2">
+        <div className="card overflow-x-auto lg:col-span-2">
           <div className="border-b px-4 py-3 font-semibold">Findings</div>
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs text-slate-500">

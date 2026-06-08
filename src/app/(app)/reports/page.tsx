@@ -17,7 +17,7 @@ export default async function ReportsPage() {
       <h1 className="text-2xl font-bold">Reports</h1>
       <p className="mt-2 text-slate-500">Script review reports generated from your workspace.</p>
 
-      <div className="card mt-6 overflow-hidden">
+      <div className="card mt-6 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>

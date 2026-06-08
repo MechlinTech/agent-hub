@@ -76,7 +76,7 @@ export default async function ScriptReviewAgentPage() {
             Active · Rule-based Engine v1
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/agents/script-review/new"
             className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
@@ -143,7 +143,7 @@ export default async function ScriptReviewAgentPage() {
             </div>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="card overflow-x-auto">
             <div className="border-b border-slate-100 px-4 py-3 font-semibold">Recent Reviews</div>
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">

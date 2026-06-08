@@ -13,7 +13,7 @@ In **Supabase Dashboard → Authentication → URL Configuration**:
 
 For local dev, also add:
 
-- `http://localhost:3000/auth/callback`
+- `http://localhost:3040/auth/callback`
 
 ### 2. Email (recommended for production)
 

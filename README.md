@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 → Sign up → **New Review** → upload `public/sample-checkout.jmx`.
+Open http://localhost:3040 → Sign up → **New Review** → upload `public/sample-checkout.jmx`.
 
 ## Environment
 
@@ -48,6 +48,16 @@ npm run start
 ```
 
 Health: `GET /api/health`
+
+## Mobile & PWA
+
+The app is mobile-responsive with a slide-out navigation menu on small screens. To install as a PWA:
+
+1. Deploy over **HTTPS** (required for service workers)
+2. Run `npm run build && npm start` (PWA is enabled in production builds only)
+3. On mobile: **Add to Home Screen** (iOS Safari) or **Install app** (Chrome/Android)
+
+The manifest and service worker are generated automatically via `@ducanh2912/next-pwa`.
 
 ## AI Recommendation Mode
 

@@ -118,7 +118,7 @@ export default function NewReviewPage() {
   }
 
   return (
-    <div>
+    <div className="pb-24">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/dashboard" },
@@ -127,9 +127,9 @@ export default function NewReviewPage() {
           { label: "New Review" },
         ]}
       />
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
+          <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold text-slate-900 sm:text-2xl">
             <FileCode className="h-7 w-7 text-brand-600" />
             New Script Review
           </h1>
@@ -356,7 +356,7 @@ export default function NewReviewPage() {
         <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-800">{startError}</p>
       )}
 
-      <div className="fixed bottom-0 left-56 right-0 flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4">
+      <div className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 safe-bottom sm:px-6 lg:left-56">
         <Link href="/agents/script-review" className="text-sm text-slate-600 hover:text-slate-900">
           Cancel
         </Link>
