@@ -1,0 +1,46 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set tag
+        id: vars
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+            --build-arg PORT="${{ secrets.PORT }}" \
+            -t akshatpareek/agenthub:${{ env:TAG }} -f docker/Dockerfile .
+
+      - name: Push Docker image
+        run: |
+          docker push akshatpareek/agenthub:${{ env:TAG }}
+
+      - name: Stop existing container
+        run: docker-compose -f docker/docker-compose.yml down || echo "nothing running"
+
+      - name: Update docker-compose image tag
+        run: |
+          (Get-Content docker/docker-compose.yml) -replace "akshatpareek/agenthub:.*", "akshatpareek/agenthub:${{ env:TAG }}" | Set-Content docker/docker-compose.yml
+
+      - name: Start containers
+        run: docker-compose -f docker/docker-compose.yml up -d
+
+      - name: Cleanup old images
+        run: docker image prune -f
