@@ -26,20 +26,24 @@ jobs:
             --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
             --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
             --build-arg PORT="${{ secrets.PORT }}" \
-            -t akshatpareek/agenthub:${{ env:TAG }} -f docker/Dockerfile .
+            -t akshatpareek/agenthub:${{ env.TAG }} -f docker/Dockerfile .
 
       - name: Push Docker image
         run: |
-          docker push akshatpareek/agenthub:${{ env:TAG }}
+          docker push akshatpareek/agenthub:${{ env.TAG }}
 
       - name: Stop existing container
         run: docker-compose -f docker/docker-compose.yml down || echo "nothing running"
 
       - name: Update docker-compose image tag
         run: |
-          (Get-Content docker/docker-compose.yml) -replace "akshatpareek/agenthub:.*", "akshatpareek/agenthub:${{ env:TAG }}" | Set-Content docker/docker-compose.yml
+          (Get-Content docker/docker-compose.yml) -replace "akshatpareek/agenthub:.*", "akshatpareek/agenthub:${{ env.TAG }}" | Set-Content docker/docker-compose.yml
 
       - name: Start containers
+        env:
+          PORT: ${{ secrets.PORT }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: docker-compose -f docker/docker-compose.yml up -d
 
       - name: Cleanup old images
