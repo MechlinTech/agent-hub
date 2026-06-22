@@ -2,6 +2,7 @@ node_modules
 .next
 .env.local
 .env*.local
+.env.example
 dist
 *.log
 .DS_Store
@@ -11,3 +12,6 @@ public/workbox-*.js
 public/workbox-*.js.map
 public/swe-worker-*.js
 public/fallback-*.js
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat

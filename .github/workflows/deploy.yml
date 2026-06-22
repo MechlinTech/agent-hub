@@ -1,0 +1,86 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      # --- CLEAN + FRESH CHECKOUT ---
+      - name: Checkout Code (force clean)
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 0
+
+      # --- DEBUG: SHOW FILES ---
+      - name: Show latest files
+        run: Get-ChildItem -Force
+
+      # --- SET IMAGE TAG ---
+      - name: Set Docker Tag
+        shell: powershell
+        run: |
+          "TAG=$($env:GITHUB_SHA.Substring(0,7))" >> $env:GITHUB_ENV
+
+      # --- LOGIN TO DOCKER HUB ---
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # --- BUILD IMAGE ---
+      - name: Build Docker Image
+        run: |
+          docker build `
+            --no-cache `
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" `
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" `
+            --build-arg PORT="${{ secrets.PORT }}" `
+            -f docker/Dockerfile `
+            -t akshatpareek/agenthub:${{ env.TAG }} `
+            -t akshatpareek/agenthub:latest `
+            .
+
+      # --- PUSH IMAGE ---
+      - name: Push Image to Docker Hub
+        run: |
+          docker push akshatpareek/agenthub:${{ env.TAG }}
+          docker push akshatpareek/agenthub:latest
+
+      # --- STOP OLD CONTAINERS ---
+      - name: Stop Containers and Remove Network
+        run: |
+          docker compose -f docker/docker-compose.yml down --remove-orphans
+          docker network prune -f
+        continue-on-error: true
+
+      # --- REMOVE OLD IMAGE TO FORCE FRESH PULL ---
+      - name: Remove Old Local Images
+        run: |
+          docker image rm -f akshatpareek/agenthub:latest
+          docker image rm -f akshatpareek/agenthub:${{ env.TAG }}
+        continue-on-error: true
+
+      # --- PULL LATEST IMAGE ---
+      - name: Pull Latest Image from Docker Hub
+        run: |
+          docker compose -f docker/docker-compose.yml pull
+
+      # --- DEPLOY WITH FRESH IMAGE ---
+      - name: Deploy with Docker Compose
+        env:
+          PORT: ${{ secrets.PORT }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          docker compose -f docker/docker-compose.yml up -d --force-recreate
+
+      # --- CLEANUP ---
+      - name: Cleanup Old Images
+        run: docker image prune -f

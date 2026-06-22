@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  agent-hub:
+    container_name: agent-hub
+    # The workflow will replace everything after the colon with the short commit SHA
+    image: akshatpareek/agenthub:latest
+    ports:
+      # Maps the host port to the container port dynamically
+      - "${PORT:-3040}:${PORT:-3040}"
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3040}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
