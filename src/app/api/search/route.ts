@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       id: a.id,
       label: a.file_name,
       sub: "Test asset",
-      href: "/test-assets",
+      href: "/agents/script-review/test-assets",
     })),
   ];
 

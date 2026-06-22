@@ -59,7 +59,10 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
           (pathname.startsWith(`${SCRIPT_REVIEW_BASE}/`) &&
             !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/new`) &&
             !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/history`) &&
-            !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/configure`)),
+            !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/configure`) &&
+            !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/test-assets`) &&
+            !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/reports`) &&
+            !pathname.startsWith(`${SCRIPT_REVIEW_BASE}/executions`)),
       },
       {
         href: `${SCRIPT_REVIEW_BASE}/new`,
@@ -76,9 +79,17 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
         label: "Configure Rules",
         icon: SlidersHorizontal,
       },
-      { href: "/test-assets", label: "Test Assets", icon: FolderOpen },
-      { href: "/reports", label: "Reports", icon: FileBarChart },
-      { href: "/executions", label: "Executions", icon: Play },
+      {
+        href: `${SCRIPT_REVIEW_BASE}/test-assets`,
+        label: "Test Assets",
+        icon: FolderOpen,
+      },
+      {
+        href: `${SCRIPT_REVIEW_BASE}/reports`,
+        label: "Reports",
+        icon: FileBarChart,
+      },
+      { href: `${SCRIPT_REVIEW_BASE}/executions`, label: "Executions", icon: Play },
     ],
   },
   "results-analysis": {
