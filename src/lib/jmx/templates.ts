@@ -1,6 +1,6 @@
 import type { Finding, JmxInventory } from "@/lib/types";
 
-/** Built-in rule templates — used when AI Recommendation Mode is disabled */
+/** Built-in rule templates, used when AI Recommendation Mode is disabled */
 export const RULE_TEMPLATES: Record<
   string,
   Omit<Finding, "findingCode"> & { findingCodePrefix: string }
@@ -202,7 +202,7 @@ export const RULE_TEMPLATES: Record<
     severity: "medium",
     category: "Plugins",
     element: "Test Plan",
-    issue: "Custom plugin elements detected — verify BlazeMeter compatibility.",
+    issue: "Custom plugin elements detected. Verify BlazeMeter compatibility.",
     impact: "Unsupported plugins may fail in cloud execution.",
     recommendation: "Document plugin dependencies and confirm BlazeMeter support before upload.",
     whyItMatters: "Cloud environments may not include all JMeter plugins from local installs.",

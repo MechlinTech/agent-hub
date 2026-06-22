@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Mail, RefreshCw } from "lucide-react";
+import { getAuthCallbackUrl } from "@/lib/auth-urls";
 import { createClient } from "@/lib/supabase/client";
 
 export default function VerifyEmailPage() {
@@ -26,7 +27,7 @@ export default function VerifyEmailPage() {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: getAuthCallbackUrl("/dashboard"),
       },
     });
     setLoading(false);

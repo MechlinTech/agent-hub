@@ -1,16 +1,14 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Database,
-  FileBarChart,
-  FileSearch,
-  GitBranch,
-  LineChart,
-  Play,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
-
 export type AgentStatus = "active" | "coming_soon";
+
+export type AgentIconKey =
+  | "file-search"
+  | "sliders-horizontal"
+  | "git-branch"
+  | "database"
+  | "play"
+  | "line-chart"
+  | "search"
+  | "file-bar-chart";
 
 export interface AgentDefinition {
   id: string;
@@ -18,7 +16,7 @@ export interface AgentDefinition {
   description: string;
   status: AgentStatus;
   href?: string;
-  icon: LucideIcon;
+  iconKey: AgentIconKey;
   iconBg: string;
   iconColor: string;
   recommended?: boolean;
@@ -32,17 +30,28 @@ export const AGENT_CATALOG: AgentDefinition[] = [
       "Reviews JMeter scripts for quality, correlation, assertions, timers, and BlazeMeter readiness.",
     status: "active",
     href: "/agents/script-review",
-    icon: FileSearch,
+    iconKey: "file-search",
     iconBg: "bg-blue-50",
     iconColor: "text-blue-600",
     recommended: true,
+  },
+  {
+    id: "results-analysis",
+    name: "BlazeMeter Results Analysis Agent",
+    description:
+      "Analyze BlazeMeter results, validate SLAs, detect bottlenecks, and generate executive summaries.",
+    status: "active",
+    href: "/agents/results-analysis",
+    iconKey: "line-chart",
+    iconBg: "bg-rose-50",
+    iconColor: "text-rose-600",
   },
   {
     id: "workload-modeling",
     name: "Workload Modeling Agent",
     description: "Converts NFRs and traffic patterns into user models and SLAs.",
     status: "coming_soon",
-    icon: SlidersHorizontal,
+    iconKey: "sliders-horizontal",
     iconBg: "bg-violet-50",
     iconColor: "text-violet-600",
   },
@@ -51,7 +60,7 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     name: "Correlation Agent",
     description: "Detects dynamic values and extractor recommendations.",
     status: "coming_soon",
-    icon: GitBranch,
+    iconKey: "git-branch",
     iconBg: "bg-emerald-50",
     iconColor: "text-emerald-600",
   },
@@ -60,7 +69,7 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     name: "Test Data Agent",
     description: "Validates and generates datasets and CSV inputs.",
     status: "coming_soon",
-    icon: Database,
+    iconKey: "database",
     iconBg: "bg-amber-50",
     iconColor: "text-amber-600",
   },
@@ -69,25 +78,16 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     name: "Execution Agent",
     description: "Orchestrates BlazeMeter test runs.",
     status: "coming_soon",
-    icon: Play,
+    iconKey: "play",
     iconBg: "bg-rose-50",
     iconColor: "text-rose-600",
-  },
-  {
-    id: "results-analysis",
-    name: "Results Analysis Agent",
-    description: "Compares baselines and identifies regressions.",
-    status: "coming_soon",
-    icon: LineChart,
-    iconBg: "bg-cyan-50",
-    iconColor: "text-cyan-600",
   },
   {
     id: "rca",
     name: "RCA Agent",
     description: "Correlates errors with infra and app signals.",
     status: "coming_soon",
-    icon: Search,
+    iconKey: "search",
     iconBg: "bg-orange-50",
     iconColor: "text-orange-600",
   },
@@ -96,7 +96,7 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     name: "Executive Report Agent",
     description: "Creates summary reports and release recommendations.",
     status: "coming_soon",
-    icon: FileBarChart,
+    iconKey: "file-bar-chart",
     iconBg: "bg-indigo-50",
     iconColor: "text-indigo-600",
   },
@@ -108,4 +108,8 @@ export function getActiveAgentCount(): number {
 
 export function getTotalAgentCount(): number {
   return AGENT_CATALOG.length;
+}
+
+export function getComingSoonAgentCount(): number {
+  return AGENT_CATALOG.filter((a) => a.status === "coming_soon").length;
 }

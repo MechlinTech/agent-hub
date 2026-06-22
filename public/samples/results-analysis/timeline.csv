@@ -1,0 +1,16 @@
+Script,Time,Status,Failed Transaction,Users
+Claims Load Script,2026-06-11T10:00:00Z,pass,,50
+Claims Load Script,2026-06-11T10:05:00Z,pass,,100
+Claims Load Script,2026-06-11T10:10:00Z,pass,,150
+Claims Load Script,2026-06-11T10:15:00Z,fail,Search Claim,200
+Claims Load Script,2026-06-11T10:20:00Z,fail,Save Estimate,250
+Claims Load Script,2026-06-11T10:25:00Z,fail,Save Estimate,300
+Claims Load Script,2026-06-11T10:30:00Z,fail,Document Upload,350
+Claims Load Script,2026-06-11T10:35:00Z,fail,Save Estimate,400
+Claims Load Script,2026-06-11T10:40:00Z,fail,Document Upload,450
+Claims Load Script,2026-06-11T10:45:00Z,fail,Search Claim,500
+Upload Script,2026-06-11T10:00:00Z,pass,,25
+Upload Script,2026-06-11T10:10:00Z,pass,,50
+Upload Script,2026-06-11T10:20:00Z,fail,Document Upload,75
+Upload Script,2026-06-11T10:30:00Z,fail,Document Upload,100
+Upload Script,2026-06-11T10:40:00Z,fail,Document Upload,125

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { FindingActions } from "@/components/findings/FindingActions";
 import { createClient } from "@/lib/supabase/server";
-import { severityColor } from "@/lib/utils";
+import { severityColor, pillBadge } from "@/lib/utils";
 
 export default async function FindingDetailPage({
   params,
@@ -92,7 +92,7 @@ export default async function FindingDetailPage({
 
         <div className="card mt-4 min-w-0 overflow-hidden p-6">
           <div className="flex flex-wrap gap-2">
-            <span className={`rounded-full border px-2 py-0.5 text-xs capitalize ${severityColor(finding.severity)}`}>
+            <span className={pillBadge(severityColor(finding.severity))}>
               {finding.severity}
             </span>
             <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">Rule: {finding.rule_id}</span>
@@ -102,7 +102,7 @@ export default async function FindingDetailPage({
             </span>
           </div>
           <h2 className="mt-4 break-words text-lg font-semibold">
-            {finding.finding_code} — {finding.issue}
+            {finding.finding_code} - {finding.issue}
           </h2>
           <p className="mt-1 text-sm text-slate-500">Impacted: {finding.element}</p>
 

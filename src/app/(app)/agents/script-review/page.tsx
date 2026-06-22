@@ -3,7 +3,7 @@ import { FileSearch, Plus, History, Settings } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { createClient } from "@/lib/supabase/server";
 import { getRulePacks } from "@/lib/analytics";
-import { formatDate, readinessLabel, scoreColor, severityColor } from "@/lib/utils";
+import { formatDate, readinessLabel, scoreColor, severityColor, pillBadge } from "@/lib/utils";
 
 export default async function ScriptReviewAgentPage() {
   const supabase = await createClient();
@@ -101,8 +101,8 @@ export default async function ScriptReviewAgentPage() {
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Scripts Reviewed", value: String(completedCount ?? 0), sub: "Completed reviews" },
-          { label: "Avg Score", value: avgScore ? `${avgScore}/100` : "—", sub: "Across all completed" },
-          { label: "Readiness Pass Rate", value: completedAll.length ? `${passRate}%` : "—", sub: "Ready or minor fixes" },
+          { label: "Avg Score", value: avgScore ? `${avgScore}/100` : "-", sub: "Across all completed" },
+          { label: "Readiness Pass Rate", value: completedAll.length ? `${passRate}%` : "-", sub: "Ready or minor fixes" },
           { label: "In Progress", value: String(inProgressCount ?? 0), sub: "Active reviews" },
         ].map((c) => (
           <div key={c.label} className="card p-4">
@@ -145,30 +145,40 @@ export default async function ScriptReviewAgentPage() {
 
           <div className="card overflow-x-auto">
             <div className="border-b border-slate-100 px-4 py-3 font-semibold">Recent Reviews</div>
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[28rem] text-sm">
               <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-4 py-2">Script</th>
-                  <th className="px-4 py-2">Date</th>
-                  <th className="px-4 py-2">Score</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2"></th>
+                  <th className="px-3 py-2 sm:px-4">Script</th>
+                  <th className="hidden px-3 py-2 sm:table-cell sm:px-4">Date</th>
+                  <th className="whitespace-nowrap px-3 py-2 sm:px-4">Score</th>
+                  <th className="whitespace-nowrap px-3 py-2 sm:px-4">Status</th>
+                  <th className="px-3 py-2 sm:px-4"></th>
                 </tr>
               </thead>
               <tbody>
                 {(reviews ?? []).map((r) => (
                   <tr key={r.id} className="border-t border-slate-50">
-                    <td className="px-4 py-3 font-medium">{r.script_name}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
-                    <td className={`px-4 py-3 font-bold ${scoreColor(r.score ?? 0)}`}>
-                      {r.score ?? "—"}
+                    <td className="max-w-[7rem] truncate px-3 py-3 font-medium sm:max-w-none sm:px-4">
+                      {r.script_name}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-3 py-3 text-slate-500 sm:table-cell sm:px-4">
+                      {formatDate(r.created_at)}
+                    </td>
+                    <td className={`whitespace-nowrap px-3 py-3 font-bold sm:px-4 ${scoreColor(r.score ?? 0)}`}>
+                      {r.score ?? "-"}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 sm:px-4">
                       {r.readiness ? (
                         <span
-                          className={`rounded-full border px-2 py-0.5 text-xs ${severityColor(
-                            r.readiness === "ready" ? "low" : r.readiness === "not_ready" ? "critical" : "medium"
-                          )}`}
+                          className={pillBadge(
+                            severityColor(
+                              r.readiness === "ready"
+                                ? "low"
+                                : r.readiness === "not_ready"
+                                  ? "critical"
+                                  : "medium"
+                            )
+                          )}
                         >
                           {readinessLabel(r.readiness)}
                         </span>
@@ -176,7 +186,7 @@ export default async function ScriptReviewAgentPage() {
                         r.status
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="whitespace-nowrap px-3 py-3 sm:px-4">
                       {r.status === "completed" && (
                         <Link
                           href={`/agents/script-review/${r.id}/results`}

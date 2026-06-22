@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { getAuthCallbackUrl } from "@/lib/auth-urls";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
@@ -25,7 +26,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: fullName, team_name: team },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: getAuthCallbackUrl("/dashboard"),
       },
     });
     if (authError) {

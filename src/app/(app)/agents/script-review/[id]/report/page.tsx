@@ -90,7 +90,7 @@ export default async function ReviewReportPage({
         </div>
         <div>
           <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800">
-            {review.readiness ? readinessLabel(review.readiness) : "—"}
+            {review.readiness ? readinessLabel(review.readiness) : "-"}
           </span>
           <p className="mt-1 text-xs text-slate-500">Confidence: High (rules)</p>
         </div>
@@ -145,7 +145,7 @@ export default async function ReviewReportPage({
             <ol>
               {bySeverity.critical.map((f) => (
                 <li key={f.id}>
-                  <strong>{f.issue}</strong> — {f.recommendation}
+                  <strong>{f.issue}</strong> - {f.recommendation}
                 </li>
               ))}
             </ol>
@@ -156,7 +156,7 @@ export default async function ReviewReportPage({
             <ol>
               {bySeverity.high.map((f) => (
                 <li key={f.id}>
-                  <strong>{f.issue}</strong> — {f.recommendation}
+                  <strong>{f.issue}</strong> - {f.recommendation}
                 </li>
               ))}
             </ol>

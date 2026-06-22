@@ -96,4 +96,4 @@ Connected to project `aqrcuwgwwpwijgugdhrk` (jmxagent). Schema includes:
 
 ## License
 
-Private — Mechlin / performance engineering use.
+Private. Mechlin / performance engineering use.

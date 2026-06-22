@@ -5,7 +5,7 @@ import { ExportButtons } from "@/components/reports/ExportButtons";
 import { SeverityDonut } from "@/components/charts/SeverityDonut";
 import { RerunReviewButton } from "@/components/reviews/RerunReviewButton";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, readinessLabel, scoreColor, severityColor } from "@/lib/utils";
+import { formatDate, readinessLabel, scoreColor, severityColor, pillBadge } from "@/lib/utils";
 
 export default async function ReviewResultsPage({
   params,
@@ -74,7 +74,7 @@ export default async function ReviewResultsPage({
       </div>
 
       <div className="card mb-6 grid gap-6 p-6 lg:grid-cols-3">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-2xl font-bold text-brand-700">
             {review.score ?? 0}
           </div>
@@ -84,11 +84,11 @@ export default async function ReviewResultsPage({
               {review.score ?? 0}/100
             </p>
             <span
-              className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-xs ${severityColor(
-                review.readiness === "ready" ? "low" : "critical"
-              )}`}
+              className={pillBadge(
+                severityColor(review.readiness === "ready" ? "low" : "critical")
+              )}
             >
-              {review.readiness ? readinessLabel(review.readiness) : "—"}
+              {review.readiness ? readinessLabel(review.readiness) : "-"}
             </span>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default async function ReviewResultsPage({
         ))}
         <div className="card p-4">
           <p className="text-xs uppercase text-slate-500">Readiness</p>
-          <p className="font-semibold">{review.readiness ? readinessLabel(review.readiness) : "—"}</p>
+          <p className="font-semibold">{review.readiness ? readinessLabel(review.readiness) : "-"}</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default async function ReviewResultsPage({
               {(findings ?? []).map((f) => (
                 <tr key={f.id} className="border-t border-slate-50">
                   <td className="px-4 py-2">
-                    <span className={`rounded-full border px-2 py-0.5 text-xs capitalize ${severityColor(f.severity)}`}>
+                    <span className={pillBadge(severityColor(f.severity))}>
                       {f.severity}
                     </span>
                   </td>

@@ -1,0 +1,30 @@
+<h2 style="margin: 0 0 12px; color: #0f172a; font-size: 18px; font-weight: 600">Sign in to Agent Hub</h2>
+<p style="margin: 0 0 8px; color: #475569; font-size: 15px; line-height: 1.6">
+  Use the secure link below to sign in to your Agent Hub workspace as
+  <strong style="color: #0f172a">{{ .Email }}</strong>.
+</p>
+<p style="margin: 0 0 24px; color: #64748b; font-size: 14px; line-height: 1.6">
+  This link expires shortly and can only be used once.
+</p>
+<table role="presentation" cellspacing="0" cellpadding="0">
+  <tr>
+    <td style="border-radius: 8px; background-color: #2563eb">
+      <a
+        href="{{ .ConfirmationURL }}"
+        style="
+          display: inline-block;
+          padding: 14px 28px;
+          color: #ffffff;
+          font-size: 15px;
+          font-weight: 600;
+          text-decoration: none;
+        "
+        >Sign in to Agent Hub</a
+      >
+    </td>
+  </tr>
+</table>
+<p style="margin: 24px 0 0; color: #94a3b8; font-size: 12px; line-height: 1.6">
+  If the button does not work, copy and paste this link into your browser:<br />
+  <a href="{{ .ConfirmationURL }}" style="color: #2563eb; word-break: break-all">{{ .ConfirmationURL }}</a>
+</p>

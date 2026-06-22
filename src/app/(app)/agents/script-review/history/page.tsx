@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getFailurePatterns, getLatestCompletedReviewId } from "@/lib/analytics";
 import { CompareReviews } from "@/components/charts/CompareReviews";
 import { ScoreTrendChart } from "@/components/charts/ScoreTrendChart";
-import { formatDate, readinessLabel, scoreColor, severityColor } from "@/lib/utils";
+import { formatDate, readinessLabel, scoreColor, severityColor, pillBadge } from "@/lib/utils";
 
 export default async function ReviewHistoryPage() {
   const supabase = await createClient();
@@ -23,7 +23,7 @@ export default async function ReviewHistoryPage() {
   const avgScore =
     completed.length > 0
       ? (completed.reduce((s, r) => s + (r.score ?? 0), 0) / completed.length).toFixed(1)
-      : "—";
+      : "-";
   const readyCount = completed.filter(
     (r) => r.readiness === "ready" || r.readiness === "ready_minor"
   ).length;
@@ -105,47 +105,51 @@ export default async function ReviewHistoryPage() {
       </div>
 
       <div className="card overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[36rem] text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>
-              <th className="px-4 py-3">Script Name</th>
-              <th className="px-4 py-3">Review ID</th>
-              <th className="px-4 py-3">Review Date</th>
-              <th className="px-4 py-3">Score</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Actions</th>
+              <th className="px-3 py-3 sm:px-4">Script Name</th>
+              <th className="hidden px-3 py-3 md:table-cell sm:px-4">Review ID</th>
+              <th className="hidden px-3 py-3 lg:table-cell sm:px-4">Review Date</th>
+              <th className="whitespace-nowrap px-3 py-3 sm:px-4">Score</th>
+              <th className="whitespace-nowrap px-3 py-3 sm:px-4">Status</th>
+              <th className="whitespace-nowrap px-3 py-3 sm:px-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {completed.map((r) => (
               <tr key={r.id} className="border-t border-slate-50 hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium">{r.script_name}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                <td className="max-w-[8rem] truncate px-3 py-3 font-medium sm:max-w-none sm:px-4">
+                  {r.script_name}
+                </td>
+                <td className="hidden px-3 py-3 font-mono text-xs text-slate-500 md:table-cell sm:px-4">
                   {r.external_review_id ?? r.id.slice(0, 8)}
                 </td>
-                <td className="px-4 py-3 text-slate-500">{formatDate(r.created_at)}</td>
-                <td className={`px-4 py-3 font-bold ${scoreColor(r.score ?? 0)}`}>
-                  {r.score ?? "—"}
+                <td className="hidden px-3 py-3 text-slate-500 lg:table-cell sm:px-4">
+                  {formatDate(r.created_at)}
                 </td>
-                <td className="px-4 py-3">
+                <td className={`whitespace-nowrap px-3 py-3 font-bold sm:px-4 ${scoreColor(r.score ?? 0)}`}>
+                  {r.score ?? "-"}
+                </td>
+                <td className="whitespace-nowrap px-3 py-3 sm:px-4">
                   {r.readiness && (
                     <span
-                      className={`rounded-full border px-2 py-0.5 text-xs ${severityColor(
-                        r.readiness === "ready" ? "low" : "critical"
-                      )}`}
+                      className={pillBadge(
+                        severityColor(r.readiness === "ready" ? "low" : "critical")
+                      )}
                     >
                       {readinessLabel(r.readiness)}
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-3 py-3 sm:px-4">
                   <Link
                     href={`/agents/script-review/${r.id}/results`}
                     className="text-brand-600 hover:underline"
                   >
                     View
                   </Link>
-                  {" · "}
+                  <span className="hidden sm:inline"> · </span>
                   <Link
                     href={`/agents/script-review/${r.id}/report`}
                     className="text-brand-600 hover:underline"

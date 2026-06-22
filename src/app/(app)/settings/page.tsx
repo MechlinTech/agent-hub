@@ -68,7 +68,7 @@ export default function SettingsPage() {
     setError(null);
     if (aiMode === "enabled" && !aiAvailable) {
       setError(
-        "Cannot enable AI mode — set at least one of OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in .env.local and restart the dev server."
+        "Cannot enable AI mode. Set at least one of OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in .env.local and restart the dev server."
       );
       return;
     }
@@ -181,7 +181,7 @@ export default function SettingsPage() {
               className="mt-1"
             />
             <div>
-              <span className="font-medium">Disabled — use built-in rule templates</span>
+              <span className="font-medium">Disabled, use built-in rule templates</span>
               <p className="text-sm text-slate-500">No external API. Rules + templates only.</p>
             </div>
           </label>
@@ -200,7 +200,7 @@ export default function SettingsPage() {
               className="mt-1"
             />
             <div>
-              <span className="font-medium">Enabled — AI explanations</span>
+              <span className="font-medium">Enabled: AI explanations</span>
               <p className="text-sm text-slate-500">
                 Uses OpenAI, Gemini, or Groq (whichever API key is configured on the server).
               </p>

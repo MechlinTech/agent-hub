@@ -20,12 +20,12 @@ export function validateCsvContent(content: string, fileName: string): CsvValida
 
   const hasUsername = header.some((h) => /user|login|email/i.test(h));
   if (!hasUsername) {
-    warnings.push("No username/login column detected — verify unique user data for load tests");
+    warnings.push("No username/login column detected. Verify unique user data for load tests");
   }
 
   const dataRows = lines.length - 1;
   if (dataRows < 10) {
-    warnings.push(`Only ${dataRows} data row(s) — consider more rows for realistic concurrency`);
+    warnings.push(`Only ${dataRows} data row(s). Consider more rows for realistic concurrency`);
   }
 
   const duplicateCheck = new Set<string>();

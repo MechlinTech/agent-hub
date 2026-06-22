@@ -8,14 +8,36 @@ In **Supabase Dashboard → Authentication → URL Configuration**:
 
 | Setting | Value |
 |---------|--------|
-| Site URL | `https://your-production-domain.com` |
-| Redirect URLs | `https://your-production-domain.com/auth/callback` |
+| Site URL | `https://agenthub.mechlintech.com` |
+| Redirect URLs | `https://agenthub.mechlintech.com/auth/callback` |
 
 For local dev, also add:
 
 - `http://localhost:3040/auth/callback`
 
-### 2. Email (recommended for production)
+### 2. Email templates
+
+Professional HTML templates live in `supabase/email-templates/`. Apply them in either of these ways:
+
+**Option A — Dashboard (manual)**  
+Authentication → Email Templates → paste each template body and subject from the files:
+
+| Template | Subject | Body file |
+|----------|---------|-----------|
+| Confirm signup | Confirm your Agent Hub account | `confirm-signup.html` (wrap with `base-layout.html`) |
+| Reset password | Reset your Agent Hub password | `reset-password.html` |
+| Magic link | Sign in to Agent Hub | `magic-link.html` |
+| Invite user | You are invited to Agent Hub | `invite-user.html` |
+
+**Option B — Management API (automated)**
+
+```bash
+SUPABASE_ACCESS_TOKEN=your_pat SUPABASE_PROJECT_REF=aqrcuwgwwpwijgugdhrk node scripts/apply-email-templates.mjs
+```
+
+This also sets Site URL and redirect allow list to `agenthub.mechlintech.com`.
+
+### 3. Email provider (recommended for production)
 
 - Enable **Confirm email** under Authentication → Providers → Email
 - Configure SMTP (Authentication → Email Templates → SMTP) or use Supabase built-in mail
@@ -35,7 +57,7 @@ Set in Vercel / your host:
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_URL=https://agenthub.mechlintech.com
 ```
 
 ## Deploy to Vercel

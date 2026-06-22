@@ -15,7 +15,14 @@ export default async function TestAssetsPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Home", href: "/dashboard" }, { label: "Test Assets" }]} />
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/dashboard" },
+          { label: "Agents", href: "/agents" },
+          { label: "Script Review Agent", href: "/agents/script-review" },
+          { label: "Test Assets" },
+        ]}
+      />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Test Assets</h1>
@@ -54,7 +61,7 @@ export default async function TestAssetsPage() {
                 </td>
                 <td className="px-4 py-3">{a.file_type}</td>
                 <td className="px-4 py-3 text-slate-500">
-                  {a.file_size_bytes ? formatBytes(Number(a.file_size_bytes)) : "—"}
+                  {a.file_size_bytes ? formatBytes(Number(a.file_size_bytes)) : "-"}
                 </td>
                 <td className="px-4 py-3 text-slate-500">{formatDate(a.created_at)}</td>
                 <td className="px-4 py-3">
@@ -66,7 +73,7 @@ export default async function TestAssetsPage() {
                       View review
                     </Link>
                   ) : (
-                    "—"
+                    "-"
                   )}
                 </td>
                 <td className="px-4 py-3">

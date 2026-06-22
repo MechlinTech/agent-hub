@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Agent Hub",
     short_name: "Agent Hub",
-    description: "JMeter Script Review — performance engineering workspace",
+    description: "JMeter Script Review - performance engineering workspace",
     start_url: "/dashboard",
     display: "standalone",
     background_color: "#f8fafc",

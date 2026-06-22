@@ -9,7 +9,14 @@ export default async function ExecutionsPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Home", href: "/dashboard" }, { label: "Executions" }]} />
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/dashboard" },
+          { label: "Agents", href: "/agents" },
+          { label: "Script Review Agent", href: "/agents/script-review" },
+          { label: "Executions" },
+        ]}
+      />
       <h1 className="text-2xl font-bold">Executions</h1>
       <p className="mt-2 text-slate-500">
         BlazeMeter test run orchestration is not enabled in this workspace yet.

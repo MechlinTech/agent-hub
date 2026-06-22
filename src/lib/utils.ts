@@ -41,10 +41,17 @@ export function generateReviewId(): string {
   return `SR-${y}-${m}-${d}-${h}${min}`;
 }
 
+export function pillBadge(className?: string): string {
+  return cn(
+    "inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium leading-none",
+    className
+  );
+}
+
 export function readinessLabel(status: string): string {
   const map: Record<string, string> = {
     ready: "Ready",
-    ready_minor: "Ready with Minor Changes",
+    ready_minor: "Ready (Minor)",
     not_ready: "Not Ready",
     high_risk: "High Risk / Rebuild Recommended",
     failed: "Failed",

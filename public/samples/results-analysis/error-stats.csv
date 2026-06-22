@@ -1,0 +1,9 @@
+Label,Response Code,Response Message,# Samples
+Search Claim,504,Gateway Timeout,42
+Search Claim,502,Bad Gateway,18
+Save Estimate,500,Internal Server Error,285
+Save Estimate,502,Bad Gateway,54
+Document Upload,504,Gateway Timeout,68
+Document Upload,500,Internal Server Error,36
+Login,401,Unauthorized,12
+View Dashboard,400,Bad Request,4

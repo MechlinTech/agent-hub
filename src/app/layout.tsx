@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Agent Hub",
-  description: "JMeter Script Review Agent — Rules + Templates v1",
+  description: "JMeter Script Review Agent - Rules + Templates v1",
   applicationName: "Agent Hub",
   appleWebApp: {
     capable: true,

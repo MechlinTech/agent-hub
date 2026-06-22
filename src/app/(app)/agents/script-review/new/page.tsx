@@ -155,11 +155,11 @@ export default function NewReviewPage() {
       >
         <strong>AI Recommendation Mode:</strong>{" "}
         {config.aiRecommendationMode === "enabled"
-          ? `Enabled — findings enhanced via ${aiProviderLabel ?? "AI"} after rule scan`
-          : "Disabled — using built-in rule templates only"}
+          ? `Enabled: findings enhanced via ${aiProviderLabel ?? "AI"} after rule scan`
+          : "Disabled, using built-in rule templates only"}
         {config.aiRecommendationMode === "enabled" && !aiAvailable && (
           <span className="mt-1 block text-amber-800">
-            No AI provider configured — add OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY to
+            No AI provider configured. Add OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY to
             .env.local and restart the dev server. Analysis will fall back to templates.
           </span>
         )}
@@ -273,9 +273,9 @@ export default function NewReviewPage() {
                   })
                 }
               >
-                <option value="disabled">Disabled — built-in templates</option>
+                <option value="disabled">Disabled, built-in templates</option>
                 <option value="enabled" disabled={!aiAvailable}>
-                  Enabled — AI enhancements
+                  Enabled: AI enhancements
                   {!aiAvailable ? " (no provider configured)" : aiProviderLabel ? ` (${aiProviderLabel})` : ""}
                 </option>
               </select>

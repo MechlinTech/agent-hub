@@ -149,7 +149,7 @@ export async function runReviewAnalysis(
           })
           .eq("id", reviewId);
         await log(
-          "AI Explanation Layer skipped (AI Recommendation Mode disabled — using built-in templates)"
+          "AI Explanation Layer skipped (AI Recommendation Mode disabled, using built-in templates)"
         );
         continue;
       }
@@ -183,7 +183,7 @@ export async function runReviewAnalysis(
 
     const result = await runJmxReview(xmlContent, fileName, config, reviewId);
 
-    await log(`Rule engine completed — ${result.findings.length} findings detected`);
+    await log(`Rule engine completed with ${result.findings.length} findings detected`);
     if (config.aiRecommendationMode === "enabled") {
       await log("AI-enhanced recommendations applied to findings");
     }

@@ -14,7 +14,7 @@ import {
   toggleRule,
   type UserRuleConfig,
 } from "@/lib/rule-settings";
-import { cn, severityColor } from "@/lib/utils";
+import { cn, severityColor, pillBadge } from "@/lib/utils";
 
 export function RuleConfigurePanel() {
   const [config, setConfig] = useState<UserRuleConfig>(DEFAULT_USER_RULE_CONFIG);
@@ -329,9 +329,8 @@ export function RuleConfigurePanel() {
                     <td className="px-4 py-3">{rule.category}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={cn(
-                          "rounded-full border px-2 py-0.5 text-xs capitalize",
-                          severityColor(rule.severity)
+                        className={pillBadge(
+                          cn("capitalize", severityColor(rule.severity))
                         )}
                       >
                         {rule.severity}

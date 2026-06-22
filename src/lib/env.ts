@@ -1,3 +1,5 @@
+import { getSiteUrl } from "./auth-urls";
+
 const required = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"] as const;
 
 export function getEnv() {
@@ -13,7 +15,7 @@ export function getEnv() {
   return {
     supabaseUrl: url!,
     supabaseAnonKey: anonKey!,
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    siteUrl: getSiteUrl(),
   };
 }
 

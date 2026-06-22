@@ -138,7 +138,7 @@ export function buildReviewResult(
     ready: "Ready for Load Execution",
     ready_minor: "Ready with Minor Changes",
     not_ready: "Not Ready for BlazeMeter Execution",
-    high_risk: "High Risk — Rebuild Recommended",
+    high_risk: "High Risk: Rebuild Recommended",
     failed: "Review Failed",
   };
 
