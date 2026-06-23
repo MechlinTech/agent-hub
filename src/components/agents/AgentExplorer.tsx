@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { AgentCard } from "@/components/agents/AgentCard";
 import { AGENT_CATALOG, type AgentStatus } from "@/lib/agents/catalog";
+import { AGENT_RESOURCE_MAP } from "@/lib/permissions";
+import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
 
 type StatusFilter = "all" | AgentStatus;
@@ -19,7 +21,12 @@ export function AgentExplorer({
 }: {
   gridClassName?: string;
 }) {
-  const agents = AGENT_CATALOG;
+  const { canRead } = usePermissions();
+  const agents = AGENT_CATALOG.filter((agent) => {
+    const resource = AGENT_RESOURCE_MAP[agent.id];
+    if (!resource) return true;
+    return canRead(resource);
+  });
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 

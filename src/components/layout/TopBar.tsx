@@ -12,12 +12,17 @@ import {
   isMobileRootTab,
 } from "@/lib/mobile-nav";
 
+import type { AppRole } from "@/lib/permissions";
+import { getRoleLabel } from "@/lib/permissions";
+
 export function TopBar({
   user,
   profile,
+  role,
 }: {
   user: User;
   profile?: { full_name?: string; team_name?: string; avatar_url?: string } | null;
+  role?: AppRole;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -94,7 +99,10 @@ export function TopBar({
                 <p className="max-w-[120px] truncate text-sm font-medium text-slate-800 lg:max-w-none">
                   {name}
                 </p>
-                <p className="max-w-[120px] truncate text-xs text-slate-500 lg:max-w-none">{team}</p>
+                <p className="max-w-[120px] truncate text-xs text-slate-500 lg:max-w-none">
+                  {team}
+                  {role ? ` · ${getRoleLabel(role)}` : ""}
+                </p>
               </div>
               <button
                 type="button"

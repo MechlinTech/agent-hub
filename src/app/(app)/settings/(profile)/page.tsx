@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { usePermissions } from "@/lib/permissions-context";
 import { createClient } from "@/lib/supabase/client";
 import type { AiRecommendationMode } from "@/lib/types";
 
@@ -14,6 +14,8 @@ interface ProviderStatus {
 }
 
 export default function SettingsPage() {
+  const { canWrite } = usePermissions();
+  const canEdit = canWrite("settings");
   const [aiMode, setAiMode] = useState<AiRecommendationMode>("disabled");
   const [useTemplates, setUseTemplates] = useState(true);
   const [aiAvailable, setAiAvailable] = useState(false);
@@ -40,7 +42,11 @@ export default function SettingsPage() {
           .select("ai_recommendation_mode, use_builtin_templates")
           .eq("user_id", user.id)
           .single(),
-        supabase.from("profiles").select("full_name, team_name").eq("id", user.id).single(),
+        supabase
+          .from("profiles")
+          .select("full_name, team_name")
+          .eq("id", user.id)
+          .single(),
         fetch("/api/ai/status"),
       ]);
 
@@ -65,10 +71,11 @@ export default function SettingsPage() {
   }, []);
 
   async function save() {
+    if (!canEdit) return;
     setError(null);
     if (aiMode === "enabled" && !aiAvailable) {
       setError(
-        "Cannot enable AI mode. Set at least one of OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in .env.local and restart the dev server."
+        "Cannot enable AI mode. Set at least one of OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in .env.local and restart the dev server.",
       );
       return;
     }
@@ -79,12 +86,14 @@ export default function SettingsPage() {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error: settingsError } = await supabase.from("user_settings").upsert({
-      user_id: user.id,
-      ai_recommendation_mode: aiMode,
-      use_builtin_templates: useTemplates,
-      updated_at: new Date().toISOString(),
-    });
+    const { error: settingsError } = await supabase
+      .from("user_settings")
+      .upsert({
+        user_id: user.id,
+        ai_recommendation_mode: aiMode,
+        use_builtin_templates: useTemplates,
+        updated_at: new Date().toISOString(),
+      });
 
     if (settingsError) {
       setError(settingsError.message);
@@ -103,25 +112,30 @@ export default function SettingsPage() {
   }
 
   const activeLabel =
-    providers.find((p) => p.id === activeProvider)?.label ?? activeProvider ?? "Unknown";
+    providers.find((p) => p.id === activeProvider)?.label ??
+    activeProvider ??
+    "Unknown";
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <Breadcrumbs items={[{ label: "Home", href: "/dashboard" }, { label: "Settings" }]} />
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="mt-1 text-slate-500">Profile and Script Review Agent configuration</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-6">
+      {!canEdit && (
+        <div className="rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          You have read-only access to profile settings.
+        </div>
+      )}
 
       <div className="card p-6">
         <h2 className="font-semibold text-slate-900">Profile</h2>
         <div className="mt-4 space-y-3">
           <div>
-            <label className="text-sm font-medium text-slate-700">Full Name</label>
+            <label className="text-sm font-medium text-slate-700">
+              Full Name
+            </label>
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+              disabled={!canEdit}
+              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm disabled:bg-slate-50"
             />
           </div>
           <div>
@@ -129,7 +143,8 @@ export default function SettingsPage() {
             <input
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+              disabled={!canEdit}
+              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm disabled:bg-slate-50"
             />
           </div>
         </div>
@@ -138,7 +153,8 @@ export default function SettingsPage() {
       <div className="card p-6">
         <h2 className="font-semibold text-slate-900">AI Recommendation Mode</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Rules detect issues; AI enhances impact text and recommendations when enabled.
+          Rules detect issues; AI enhances impact text and recommendations when
+          enabled.
         </p>
 
         <div className="mt-3 space-y-2 rounded-lg border px-3 py-3 text-sm">
@@ -149,14 +165,18 @@ export default function SettingsPage() {
                 {activeLabel} ({activeModel})
               </span>
             ) : (
-              <span className="font-medium text-amber-700">None configured</span>
+              <span className="font-medium text-amber-700">
+                None configured
+              </span>
             )}
           </p>
           <ul className="space-y-1 text-slate-600">
             {providers.map((p) => (
               <li key={p.id} className="flex items-center justify-between">
                 <span>{p.label}</span>
-                <span className={p.configured ? "text-green-700" : "text-slate-400"}>
+                <span
+                  className={p.configured ? "text-green-700" : "text-slate-400"}
+                >
                   {p.configured ? `Ready · ${p.model}` : "Not configured"}
                 </span>
               </li>
@@ -164,9 +184,12 @@ export default function SettingsPage() {
           </ul>
           {!aiAvailable && (
             <p className="text-xs text-amber-700">
-              Add a real API key to <code className="rounded bg-slate-100 px-1">.env.local</code>{" "}
-              (not placeholder values like <code className="rounded bg-slate-100 px-1">sk-...</code>
-              ) and restart <code className="rounded bg-slate-100 px-1">npm run dev</code>.
+              Add a real API key to{" "}
+              <code className="rounded bg-slate-100 px-1">.env.local</code> (not
+              placeholder values like{" "}
+              <code className="rounded bg-slate-100 px-1">sk-...</code>) and
+              restart{" "}
+              <code className="rounded bg-slate-100 px-1">npm run dev</code>.
             </p>
           )}
         </div>
@@ -181,14 +204,20 @@ export default function SettingsPage() {
               className="mt-1"
             />
             <div>
-              <span className="font-medium">Disabled, use built-in rule templates</span>
-              <p className="text-sm text-slate-500">No external API. Rules + templates only.</p>
+              <span className="font-medium">
+                Disabled, use built-in rule templates
+              </span>
+              <p className="text-sm text-slate-500">
+                No external API. Rules + templates only.
+              </p>
             </div>
           </label>
 
           <label
             className={`flex items-start gap-3 rounded-lg border p-3 ${
-              aiAvailable ? "cursor-pointer hover:bg-slate-50" : "cursor-not-allowed opacity-60"
+              aiAvailable
+                ? "cursor-pointer hover:bg-slate-50"
+                : "cursor-not-allowed opacity-60"
             }`}
           >
             <input
@@ -202,7 +231,8 @@ export default function SettingsPage() {
             <div>
               <span className="font-medium">Enabled: AI explanations</span>
               <p className="text-sm text-slate-500">
-                Uses OpenAI, Gemini, or Groq (whichever API key is configured on the server).
+                Uses OpenAI, Gemini, or Groq (whichever API key is configured on
+                the server).
               </p>
             </div>
           </label>
@@ -219,18 +249,23 @@ export default function SettingsPage() {
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-        <button
-          type="button"
-          onClick={save}
-          disabled={loading}
-          className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-        >
-          {saved ? "Saved!" : "Save Settings"}
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={save}
+            disabled={loading}
+            className="mt-4 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          >
+            {saved ? "Saved!" : "Save Settings"}
+          </button>
+        )}
 
         <p className="mt-4 text-sm text-slate-500">
           Rule pack and individual rule toggles are configured in{" "}
-          <Link href="/agents/script-review/configure" className="text-brand-600 hover:underline">
+          <Link
+            href="/agents/script-review/configure"
+            className="text-brand-600 hover:underline"
+          >
             Configure Rules
           </Link>
           .

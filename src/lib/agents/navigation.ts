@@ -177,5 +177,8 @@ export function isGlobalNavActive(pathname: string, href: string): boolean {
   if (href === "/agents") {
     return pathname === "/agents" || (pathname.startsWith("/agents/") && !getActiveAgentFromPath(pathname));
   }
+  if (href === "/settings") {
+    return pathname === "/settings" || pathname.startsWith("/settings/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
