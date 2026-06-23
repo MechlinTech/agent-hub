@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { ResultsAnalysisNewLink } from "@/components/results-analysis/ResultsAnalysisOverviewActions";
 import { listResultsAnalyses } from "@/lib/results-analysis-service-server";
 import { formatDate, pillBadge, scoreColor } from "@/lib/utils";
 
@@ -21,9 +22,7 @@ export default async function ResultsAnalysisHistoryPage() {
           <h1 className="text-2xl font-bold text-slate-900">Analysis History</h1>
           <p className="mt-1 text-sm text-slate-500">Previously generated BlazeMeter result analyses.</p>
         </div>
-        <Link href="/agents/results-analysis/new" className="btn-primary">
-          New Analysis
-        </Link>
+        <ResultsAnalysisNewLink className="btn-primary">New Analysis</ResultsAnalysisNewLink>
       </div>
 
       <div className="card overflow-hidden">

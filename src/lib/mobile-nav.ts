@@ -38,6 +38,11 @@ export function getMobilePageTitle(pathname: string): string {
 
   for (const item of GLOBAL_NAV) {
     if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+      if (item.href === "/settings" && pathname !== "/settings") {
+        const segment = pathname.split("/")[2];
+        if (segment === "users") return "Users";
+        if (segment === "roles") return "Role permissions";
+      }
       return item.label;
     }
   }
@@ -50,7 +55,9 @@ export function isMobileRootTab(pathname: string): boolean {
     pathname === "/dashboard" ||
     pathname === "/agents" ||
     pathname === "/integrations" ||
-    pathname === "/settings"
+    pathname === "/settings" ||
+    pathname === "/settings/users" ||
+    pathname === "/settings/roles"
   );
 }
 
@@ -59,9 +66,15 @@ export function getMobileBackHref(pathname: string): string | null {
     pathname === "/dashboard" ||
     pathname === "/agents" ||
     pathname === "/integrations" ||
-    pathname === "/settings"
+    pathname === "/settings" ||
+    pathname === "/settings/users" ||
+    pathname === "/settings/roles"
   ) {
     return null;
+  }
+
+  if (pathname.startsWith("/settings/")) {
+    return "/settings";
   }
 
   const activeAgent = getActiveAgentFromPath(pathname);

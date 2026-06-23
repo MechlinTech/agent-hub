@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireWrite } from "@/lib/supabase/get-auth-context";
 import { createClient } from "@/lib/supabase/server";
 import { enhanceFindingsWithAI, generateAiExecutiveSummary, isAiConfigured } from "@/lib/jmx/ai-layer";
 import type { Finding, JmxInventory } from "@/lib/types";
 
 export async function POST(request: Request) {
+  const { response } = await requireWrite("script_review");
+  if (response) return response;
+
   const supabase = await createClient();
   const {
     data: { user },

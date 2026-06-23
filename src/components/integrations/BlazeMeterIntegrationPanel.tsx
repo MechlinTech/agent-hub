@@ -32,8 +32,10 @@ function provisioningLabel(mode: BlazeMeterTestProvisioningMode): string {
 }
 
 export function BlazeMeterIntegrationPanel({
+  readOnly = false,
   onStatusChange,
 }: {
+  readOnly?: boolean;
   onStatusChange?: (connected: boolean) => void;
 }) {
   const [status, setStatus] = useState<BlazeMeterPublicStatus | null>(null);
@@ -358,7 +360,7 @@ export function BlazeMeterIntegrationPanel({
   const connected = status.connected;
   const credentialsConfigured = status.credentialsConfigured;
   const canUseCredentials = canUseCredentialsFromConfig(config, credentialsConfigured);
-  const showViewMode = !isEditing && isConfigSaved(savedConfig);
+  const showViewMode = readOnly || (!isEditing && isConfigSaved(savedConfig));
   const hasUnsavedChanges = !configsEqual(config, savedConfig);
 
   return (
@@ -389,7 +391,7 @@ export function BlazeMeterIntegrationPanel({
               API key missing
             </span>
           )}
-          {showViewMode && (
+          {showViewMode && !readOnly && (
             <button
               type="button"
               onClick={startEditing}
@@ -452,7 +454,7 @@ export function BlazeMeterIntegrationPanel({
           </div>
         )}
 
-        {!showViewMode && (
+        {!showViewMode && !readOnly && (
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
@@ -483,7 +485,7 @@ export function BlazeMeterIntegrationPanel({
           </div>
         )}
 
-        {showViewMode && credentialsConfigured && (
+        {showViewMode && credentialsConfigured && !readOnly && (
           <div className="flex flex-wrap gap-3">
             <button
               type="button"

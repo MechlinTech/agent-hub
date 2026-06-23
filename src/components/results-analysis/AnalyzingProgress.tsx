@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { PermissionLink } from "@/components/permissions/PermissionLink";
 import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ANALYSIS_STEPS } from "@/lib/results-analysis/defaults";
@@ -78,9 +78,14 @@ export function AnalyzingProgress() {
             </p>
           )}
         </div>
-        <Link href="/agents/results-analysis/new" className="btn-secondary text-red-600">
+        <PermissionLink
+          href="/agents/results-analysis/new"
+          resource="results_analysis"
+          requireWrite
+          className="btn-secondary text-red-600"
+        >
           Cancel Analysis
-        </Link>
+        </PermissionLink>
       </div>
 
       {error && (

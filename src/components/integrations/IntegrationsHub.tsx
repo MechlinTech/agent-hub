@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, Clock } from "lucide-react";
 import { BlazeMeterIntegrationPanel } from "@/components/integrations/BlazeMeterIntegrationPanel";
 import { ComingSoonIntegrationPanel } from "@/components/integrations/ComingSoonIntegrationPanel";
+import { usePermissions } from "@/lib/permissions-context";
 import {
   INTEGRATION_CATALOG,
   type IntegrationDefinition,
@@ -13,6 +14,8 @@ import { cn } from "@/lib/utils";
 export function IntegrationsHub() {
   const [selectedId, setSelectedId] = useState("blazemeter");
   const [blazemeterConnected, setBlazemeterConnected] = useState(false);
+  const { canWrite } = usePermissions();
+  const canEdit = canWrite("integrations");
 
   useEffect(() => {
     fetch("/api/integrations/blazemeter")
@@ -64,6 +67,7 @@ export function IntegrationsHub() {
       <div>
         {selected.id === "blazemeter" ? (
           <BlazeMeterIntegrationPanel
+            readOnly={!canEdit}
             onStatusChange={(connected) => setBlazemeterConnected(connected)}
           />
         ) : (

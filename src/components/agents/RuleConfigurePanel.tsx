@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { PermissionLink } from "@/components/permissions/PermissionLink";
+import { usePermissions } from "@/lib/permissions-context";
 import { RotateCcw, Save } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { RulePackSelect } from "@/components/agents/RulePackSelect";
@@ -17,6 +18,8 @@ import {
 import { cn, severityColor, pillBadge } from "@/lib/utils";
 
 export function RuleConfigurePanel() {
+  const { canWrite } = usePermissions();
+  const canEdit = canWrite("script_review");
   const [config, setConfig] = useState<UserRuleConfig>(DEFAULT_USER_RULE_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -70,6 +73,7 @@ export function RuleConfigurePanel() {
   }
 
   async function save() {
+    if (!canEdit) return;
     setSaving(true);
     setError(null);
     const supabase = createClient();
@@ -130,23 +134,27 @@ export function RuleConfigurePanel() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={resetDefaults}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Reset
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {saved ? "Saved!" : saving ? "Saving..." : "Save Configuration"}
-          </button>
+          {canEdit && (
+            <>
+              <button
+                type="button"
+                onClick={resetDefaults}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {saved ? "Saved!" : saving ? "Saving..." : "Save Configuration"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -356,9 +364,14 @@ export function RuleConfigurePanel() {
 
       <p className="text-sm text-slate-500">
         These defaults apply to{" "}
-        <Link href="/agents/script-review/new" className="text-brand-600 hover:underline">
+        <PermissionLink
+          href="/agents/script-review/new"
+          resource="script_review"
+          requireWrite
+          className="text-brand-600 hover:underline"
+        >
           New Review
-        </Link>
+        </PermissionLink>
         . You can still override settings per review.
       </p>
     </div>

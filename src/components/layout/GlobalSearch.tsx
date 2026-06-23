@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import { canAccessNavHref } from "@/lib/navigation-access";
+import { usePermissions } from "@/lib/permissions-context";
 
 interface SearchResult {
   type: string;
@@ -14,6 +16,7 @@ interface SearchResult {
 
 export function GlobalSearch() {
   const router = useRouter();
+  const { canRead, canWrite } = usePermissions();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -44,6 +47,8 @@ export function GlobalSearch() {
     const t = setTimeout(() => search(query), 250);
     return () => clearTimeout(t);
   }, [query, search]);
+
+  const visibleResults = results.filter((r) => canAccessNavHref(r.href, canRead, canWrite));
 
   if (!open) {
     return (
@@ -78,7 +83,7 @@ export function GlobalSearch() {
           </button>
         </div>
         <ul className="max-h-72 overflow-y-auto py-2">
-          {results.map((r) => (
+          {visibleResults.map((r) => (
             <li key={`${r.type}-${r.id}`}>
               <button
                 type="button"
@@ -93,7 +98,7 @@ export function GlobalSearch() {
               </button>
             </li>
           ))}
-          {query.length >= 2 && !results.length && (
+          {query.length >= 2 && !visibleResults.length && (
             <li className="px-4 py-6 text-center text-sm text-slate-500">No results</li>
           )}
         </ul>
