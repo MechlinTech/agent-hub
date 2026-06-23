@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { PermissionLink } from "@/components/permissions/PermissionLink";
 import { useEffect, useState } from "react";
 import { usePermissions } from "@/lib/permissions-context";
 import { createClient } from "@/lib/supabase/client";
@@ -262,12 +262,14 @@ export default function SettingsPage() {
 
         <p className="mt-4 text-sm text-slate-500">
           Rule pack and individual rule toggles are configured in{" "}
-          <Link
+          <PermissionLink
             href="/agents/script-review/configure"
+            resource="script_review"
+            requireWrite
             className="text-brand-600 hover:underline"
           >
             Configure Rules
-          </Link>
+          </PermissionLink>
           .
         </p>
       </div>

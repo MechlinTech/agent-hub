@@ -3,20 +3,28 @@ import { createClient } from "@/lib/supabase/server";
 import type { AccessOverride, AppRole, Resource } from "@/lib/permissions";
 import type { AccessLevel } from "@/lib/permissions";
 import {
+  ALL_WRITE,
   canRead,
   canWrite,
+  applyAdminResourceScope,
+  getConfigurableResources,
   getEffectiveAccess,
   resolveRole,
 } from "@/lib/permissions";
-import { getOrgRolesContext } from "@/lib/role-access-defaults-server";
+import {
+  getAdminConfigurableResources,
+  getOrgRolesContext,
+} from "@/lib/role-access-defaults-server";
 
 export interface AuthContext {
   userId: string;
   email: string;
   fullName: string;
   role: AppRole;
+  isSuperAdmin: boolean;
   overrides: AccessOverride[];
   access: Record<Resource, AccessLevel>;
+  configurableResources: Resource[];
 }
 
 export function forbiddenResponse() {
@@ -49,27 +57,48 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [{ data: profile }, { data: overrideRows }] = await Promise.all([
-    supabase.from("profiles").select("full_name, role").eq("id", user.id).single(),
-    supabase
-      .from("user_access_overrides")
-      .select("resource, access_level")
-      .eq("user_id", user.id),
-  ]);
+  const [{ data: profile }, { data: superAdminRow }, { data: overrideRows }, adminConfigurable] =
+    await Promise.all([
+      supabase.from("profiles").select("full_name, role").eq("id", user.id).maybeSingle(),
+      supabase.from("super_admins").select("user_id").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("user_access_overrides")
+        .select("resource, access_level")
+        .eq("user_id", user.id),
+      getAdminConfigurableResources(),
+    ]);
 
+  const isSuperAdmin = Boolean(superAdminRow);
   const { roleDefaults, customRoles } = await getOrgRolesContext();
   const role = resolveRole(profile?.role, customRoles);
   const overrides = mapOverrides(overrideRows);
-  const access = getEffectiveAccess(role, overrides, roleDefaults, customRoles);
+  const access = isSuperAdmin
+    ? { ...ALL_WRITE }
+    : applyAdminResourceScope(
+        getEffectiveAccess(role, overrides, roleDefaults, customRoles),
+        role,
+        false,
+        adminConfigurable
+      );
+  const configurableResources = getConfigurableResources(adminConfigurable, isSuperAdmin);
 
   return {
     userId: user.id,
     email: user.email ?? "",
-    fullName: profile?.full_name ?? "",
+    fullName: profile?.full_name ?? user.email?.split("@")[0] ?? "",
     role,
+    isSuperAdmin,
     overrides,
     access,
+    configurableResources,
   };
+}
+
+export async function requireSuperAdmin() {
+  const ctx = await getAuthContext();
+  if (!ctx) return { ctx: null, response: unauthorizedResponse() };
+  if (!ctx.isSuperAdmin) return { ctx: null, response: forbiddenResponse() };
+  return { ctx, response: null };
 }
 
 export async function requireRead(resource: Resource) {
@@ -90,7 +119,20 @@ export async function requireWrite(resource: Resource) {
   return { ctx, response: null };
 }
 
-export async function listAllUsersForAdmin(customRoles?: import("@/lib/permissions").CustomRole[]) {
+/** Whether the user is listed in super_admins (regardless of profiles). */
+export async function isUserSuperAdmin(userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("super_admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+export async function listAllUsersForAdmin(
+  customRoles?: import("@/lib/permissions").CustomRole[]
+) {
   const supabase = await createClient();
   const resolvedCustomRoles =
     customRoles ?? (await getOrgRolesContext()).customRoles;

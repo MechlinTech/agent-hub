@@ -24,6 +24,7 @@ import {
   isCustomRole,
 } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
+import { usePermissions } from "@/lib/permissions-context";
 
 const EDITABLE_BUILT_IN: BuiltInRole[] = ["performance_engineer", "viewer"];
 
@@ -61,6 +62,8 @@ function AccessToggle({
 }
 
 export function RolePermissionsPanel() {
+  const { isSuperAdmin, configurableResources } = usePermissions();
+  const visibleResources = configurableResources;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -81,6 +84,10 @@ export function RolePermissionsPanel() {
   >({});
   const [creating, setCreating] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
+  const [adminVisibility, setAdminVisibility] = useState<Resource[]>([
+    ...RESOURCES,
+  ]);
+  const [visibilitySaving, setVisibilitySaving] = useState(false);
 
   const loadRoles = useCallback(async () => {
     setLoading(true);
@@ -109,7 +116,15 @@ export function RolePermissionsPanel() {
       ),
     );
     setLoading(false);
-  }, []);
+
+    if (isSuperAdmin) {
+      const configRes = await fetch("/api/admin/super-admin/config");
+      if (configRes.ok) {
+        const configData = await configRes.json();
+        setAdminVisibility(configData.resources ?? [...RESOURCES]);
+      }
+    }
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     loadRoles();
@@ -284,10 +299,81 @@ export function RolePermissionsPanel() {
     await loadRoles();
   }
 
+  async function saveAdminVisibility() {
+    setVisibilitySaving(true);
+    setError(null);
+    const res = await fetch("/api/admin/super-admin/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resources: adminVisibility }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Failed to save admin visibility settings");
+      setVisibilitySaving(false);
+      return;
+    }
+    setVisibilitySaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  function toggleAdminVisibility(resource: Resource) {
+    setAdminVisibility((prev) => {
+      if (prev.includes(resource)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((item) => item !== resource);
+      }
+      return [...prev, resource];
+    });
+  }
+
   const matrix = currentMatrix();
+  const editableResources = isSuperAdmin ? RESOURCES : visibleResources;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      {isSuperAdmin && (
+        <div className="card overflow-hidden">
+          <div className="border-b border-slate-100 bg-violet-50/50 px-5 py-4">
+            <p className="font-semibold text-slate-900">Admin visibility</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Choose which resources admins can see when configuring roles and
+              user permissions. Hidden resources stay invisible to them.
+            </p>
+          </div>
+          <div className="space-y-2 p-5">
+            {RESOURCES.map((resource) => {
+              const enabled = adminVisibility.includes(resource);
+              return (
+                <label
+                  key={resource}
+                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/40 px-3 py-3"
+                >
+                  <span className="text-sm font-medium text-slate-800">
+                    {RESOURCE_LABELS[resource]}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={enabled}
+                    onChange={() => toggleAdminVisibility(resource)}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  />
+                </label>
+              );
+            })}
+            <button
+              type="button"
+              onClick={saveAdminVisibility}
+              disabled={visibilitySaving || adminVisibility.length === 0}
+              className="btn-primary w-full"
+            >
+              {visibilitySaving ? "Saving…" : "Save admin visibility"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -460,7 +546,7 @@ export function RolePermissionsPanel() {
             </div>
 
             <div className="space-y-2">
-              {RESOURCES.map((resource) => {
+              {editableResources.map((resource) => {
                 const boxes = checkboxesFromAccess(matrix[resource]);
                 return (
                   <div

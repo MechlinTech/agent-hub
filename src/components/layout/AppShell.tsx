@@ -17,22 +17,32 @@ export function AppShell({
   user,
   profile,
   role,
+  isSuperAdmin,
   overrides,
   access,
+  configurableResources,
 }: {
   children: React.ReactNode;
   user: User;
   profile?: { full_name?: string; team_name?: string } | null;
   role: AppRole;
+  isSuperAdmin: boolean;
   overrides: AccessOverride[];
   access: Record<Resource, AccessLevel>;
+  configurableResources: Resource[];
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const showSettingsMobileNav = isSettingsPath(pathname);
 
   return (
-    <PermissionsProvider role={role} overrides={overrides} access={access}>
+    <PermissionsProvider
+      role={role}
+      isSuperAdmin={isSuperAdmin}
+      overrides={overrides}
+      access={access}
+      configurableResources={configurableResources}
+    >
       <div className="flex h-[100dvh] overflow-hidden app-shell-bg">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

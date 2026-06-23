@@ -14,20 +14,11 @@ import {
 import { isSettingsNavActive, isSettingsPath } from "@/lib/settings/navigation";
 import { useVisibleSettingsNav } from "@/components/settings/useVisibleSettingsNav";
 import { usePermissions } from "@/lib/permissions-context";
-import type { Resource } from "@/lib/permissions";
+import {
+  filterGlobalNavByAccess,
+  filterNavItemsByAccess,
+} from "@/lib/navigation-access";
 import { cn } from "@/lib/utils";
-
-const NAV_RESOURCE: Partial<Record<string, Resource>> = {
-  "/integrations": "integrations",
-  "/settings": "settings",
-};
-
-const WRITE_ONLY_AGENT_HREFS: Partial<Record<string, Resource>> = {
-  "/agents/script-review/new": "script_review",
-  "/agents/script-review/configure": "script_review",
-  "/agents/results-analysis/new": "results_analysis",
-  "/agents/results-analysis/sla": "results_analysis",
-};
 
 export function Sidebar({
   collapsed,
@@ -43,11 +34,7 @@ export function Sidebar({
   const resultsAnalysisId = getResultsAnalysisIdFromPath(pathname);
   const showLabels = !collapsed;
 
-  const visibleGlobalNav = GLOBAL_NAV.filter((item) => {
-    const resource = NAV_RESOURCE[item.href];
-    if (!resource) return true;
-    return canRead(resource);
-  });
+  const visibleGlobalNav = filterGlobalNavByAccess(canRead, canWrite);
 
   const visibleSettingsNav = useVisibleSettingsNav();
   const showSettingsSections = inSettings && visibleSettingsNav.length > 1;
@@ -142,13 +129,7 @@ export function Sidebar({
                 </Link>
               </div>
             )}
-            {activeAgent.items
-              .filter((item) => {
-                const writeResource = WRITE_ONLY_AGENT_HREFS[item.href];
-                if (writeResource) return canWrite(writeResource);
-                return true;
-              })
-              .map((item) => {
+            {filterNavItemsByAccess(activeAgent.items, canRead, canWrite).map((item) => {
                 const active = isNavItemActive(pathname, item);
                 const Icon = item.icon;
                 return (

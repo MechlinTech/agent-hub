@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MOBILE_TAB_NAV } from "@/lib/mobile-nav";
 import { isGlobalNavActive } from "@/lib/agents/navigation";
+import { filterGlobalNavByAccess } from "@/lib/navigation-access";
+import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { canRead, canWrite } = usePermissions();
+  const visibleTabs = filterGlobalNavByAccess(canRead, canWrite);
 
   return (
     <nav
@@ -15,7 +18,7 @@ export function BottomNav() {
       aria-label="Main navigation"
     >
       <div className="mx-auto flex h-[var(--bottom-nav-height)] max-w-lg items-stretch justify-around px-2">
-        {MOBILE_TAB_NAV.map((item) => {
+        {visibleTabs.map((item) => {
           const active = isGlobalNavActive(pathname, item.href);
           const Icon = item.icon;
           return (

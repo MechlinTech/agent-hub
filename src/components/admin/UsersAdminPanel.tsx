@@ -93,15 +93,21 @@ function AccessLevelPill({ level }: { level: AccessLevel }) {
   );
 }
 
-function ResourceAccessBadges({ access }: { access: Record<Resource, AccessLevel> }) {
-  const visible = RESOURCES.filter((resource) => access[resource] !== "none");
+function ResourceAccessBadges({
+  access,
+  resources = RESOURCES,
+}: {
+  access: Record<Resource, AccessLevel>;
+  resources?: Resource[];
+}) {
+  const visible = resources.filter((resource) => access[resource] !== "none");
 
   if (visible.length === 0) {
     return <span className="text-xs text-slate-400">No resource access</span>;
   }
 
   const allWrite =
-    visible.length === RESOURCES.length &&
+    visible.length === resources.length &&
     visible.reduce((ok, resource) => ok && access[resource] === "write", true);
 
   if (allWrite) {
@@ -165,7 +171,8 @@ function AccessToggle({
 }
 
 export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
-  const { canWrite } = usePermissions();
+  const { canWrite, configurableResources } = usePermissions();
+  const visibleResources = configurableResources;
   const canEdit = canWrite("users");
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -387,7 +394,10 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                           <p className="mt-0.5 text-xs text-slate-400">{user.team_name}</p>
                         )}
                         <div className="mt-3">
-                          <ResourceAccessBadges access={access} />
+                          <ResourceAccessBadges
+                            access={access}
+                            resources={visibleResources}
+                          />
                         </div>
                       </div>
                       <span className="btn-secondary mt-1 hidden shrink-0 px-3 py-1.5 text-xs sm:inline-flex">
@@ -467,7 +477,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                     )}
                   </div>
                   <div className="space-y-2">
-                    {RESOURCES.map((resource) => {
+                    {visibleResources.map((resource) => {
                       const boxes = checkboxesFromAccess(matrix[resource]);
                       return (
                         <div
@@ -503,10 +513,15 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
                     Effective access
                   </p>
-                  <ResourceAccessBadges access={effectivePreview} />
+                  <ResourceAccessBadges
+                    access={effectivePreview}
+                    resources={visibleResources}
+                  />
                 </div>
 
-                {selectedUser.id === currentUserId && matrix.users !== "write" && (
+                {selectedUser.id === currentUserId &&
+                  visibleResources.includes("users") &&
+                  matrix.users !== "write" && (
                   <p className="text-xs text-amber-700">
                     You cannot remove your own user management write access.
                   </p>
@@ -518,7 +533,9 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                     onClick={saveUser}
                     disabled={
                       saving ||
-                      (selectedUser.id === currentUserId && matrix.users !== "write")
+                      (selectedUser.id === currentUserId &&
+                        visibleResources.includes("users") &&
+                        matrix.users !== "write")
                     }
                     className="btn-primary w-full"
                   >

@@ -87,13 +87,68 @@ export const AGENT_RESOURCE_MAP: Record<string, Resource> = {
   "results-analysis": "results_analysis",
 };
 
-const ALL_WRITE: Record<Resource, AccessLevel> = {
+export const ALL_WRITE: Record<Resource, AccessLevel> = {
   script_review: "write",
   results_analysis: "write",
   integrations: "write",
   settings: "write",
   users: "write",
 };
+
+/** Resources admins may configure for other users (null/empty = all resources). */
+export function getConfigurableResources(
+  adminConfigurable: Resource[] | null | undefined,
+  isSuperAdmin: boolean
+): Resource[] {
+  if (isSuperAdmin) return [...RESOURCES];
+  if (!adminConfigurable || adminConfigurable.length === 0) return [...RESOURCES];
+  return RESOURCES.filter((resource) => adminConfigurable.includes(resource));
+}
+
+export function parseConfigurableResources(raw: unknown): Resource[] | null {
+  if (!Array.isArray(raw)) return null;
+  const resources = raw.filter(
+    (item): item is Resource =>
+      typeof item === "string" && RESOURCES.includes(item as Resource)
+  );
+  return resources.length > 0 ? resources : null;
+}
+
+/** Strip non-configurable resources from a matrix for admin API responses. */
+export function filterAccessMatrix(
+  matrix: Record<Resource, AccessLevel>,
+  configurable: Resource[]
+): Record<Resource, AccessLevel> {
+  const filtered = { ...matrix };
+  for (const resource of RESOURCES) {
+    if (!configurable.includes(resource)) {
+      delete filtered[resource];
+    }
+  }
+  return filtered;
+}
+
+/** Merge admin-edited resources into the user's full effective access. */
+export function mergeConfigurableAccess(
+  fullEffective: Record<Resource, AccessLevel>,
+  edited: Record<Resource, AccessLevel>,
+  configurable: Resource[]
+): Record<Resource, AccessLevel> {
+  const merged = { ...fullEffective };
+  for (const resource of configurable) {
+    if (edited[resource] !== undefined) {
+      merged[resource] = edited[resource];
+    }
+  }
+  return merged;
+}
+
+export function filterOverridesForConfigurable(
+  overrides: AccessOverride[],
+  configurable: Resource[]
+): AccessOverride[] {
+  return overrides.filter((override) => configurable.includes(override.resource));
+}
 
 export function isBuiltInRole(role: string | null | undefined): role is BuiltInRole {
   return role === "admin" || role === "performance_engineer" || role === "viewer";
@@ -165,9 +220,6 @@ export function getEffectiveAccess(
   roleDefaults?: RoleAccessDefaults | null,
   customRoles?: CustomRole[] | null
 ): Record<Resource, AccessLevel> {
-  if (isAdminRole(role)) {
-    return { ...ALL_WRITE };
-  }
   const access = getRoleBaseAccess(role, roleDefaults, customRoles);
   for (const { resource, access: level } of overrides) {
     if (RESOURCES.includes(resource)) {
@@ -175,6 +227,28 @@ export function getEffectiveAccess(
     }
   }
   return access;
+}
+
+/**
+ * Non-super-admin users with the built-in admin role only get app access to resources
+ * enabled in admin_configurable_resources (null/empty = all resources).
+ */
+export function applyAdminResourceScope(
+  access: Record<Resource, AccessLevel>,
+  role: AppRole,
+  isSuperAdmin: boolean,
+  adminConfigurable: Resource[] | null | undefined
+): Record<Resource, AccessLevel> {
+  if (isSuperAdmin || !isAdminRole(role)) return access;
+  const allowed =
+    adminConfigurable && adminConfigurable.length > 0 ? adminConfigurable : [...RESOURCES];
+  const scoped = { ...access };
+  for (const resource of RESOURCES) {
+    if (!allowed.includes(resource)) {
+      scoped[resource] = "none";
+    }
+  }
+  return scoped;
 }
 
 export function canRead(
@@ -232,9 +306,11 @@ export function buildAccessMatrix(
 }
 
 export function formatAccessSummary(
-  access: Record<Resource, AccessLevel>
+  access: Record<Resource, AccessLevel>,
+  configurable?: Resource[]
 ): string {
-  return RESOURCES.map((resource) => {
+  const resources = configurable ?? RESOURCES;
+  return resources.map((resource) => {
     const level = access[resource];
     const abbrev = level === "write" ? "W" : level === "read" ? "R" : "-";
     return `${RESOURCE_SHORT_LABELS[resource]}:${abbrev}`;

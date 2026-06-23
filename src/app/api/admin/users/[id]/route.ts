@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  isUserSuperAdmin,
   requireWrite,
   updateUserRole,
 } from "@/lib/supabase/get-auth-context";
@@ -12,6 +13,10 @@ export async function PATCH(
 ) {
   const { ctx, response } = await requireWrite("users");
   if (response) return response;
+
+  if (await isUserSuperAdmin(params.id)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const body = await request.json();
   const customRoles = await getCustomRoles();

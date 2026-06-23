@@ -12,6 +12,7 @@ import {
   Upload,
 } from "lucide-react";
 import { BlazeMeterIcon } from "@/components/integrations/BlazeMeterIcon";
+import { PermissionLink } from "@/components/permissions/PermissionLink";
 import { DEFAULT_TEST_CONTEXT } from "@/lib/results-analysis/defaults";
 import type { TestContext } from "@/lib/results-analysis/types";
 import { cn, formatBytes } from "@/lib/utils";
@@ -94,28 +95,35 @@ export function NewAnalysisForm({ blazemeterConfigured }: { blazemeterConfigured
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             BlazeMeter API is not configured. CSV upload can still be used to analyze your results.{" "}
-            <Link href="/integrations" className="font-medium underline">
+            <PermissionLink href="/integrations" resource="integrations" className="font-medium underline">
               Configure integration
-            </Link>
+            </PermissionLink>
           </div>
         </div>
       )}
 
       {blazemeterConfigured && (
         <div className="mb-6 grid gap-4 md:grid-cols-2">
-          <Link
+          <PermissionLink
             href="/agents/results-analysis/select-run"
+            resource="results_analysis"
+            requireWrite
             className="card block p-5 transition-shadow hover:shadow-md"
           >
             <h3 className="font-semibold text-slate-900">Connect with BlazeMeter API</h3>
             <p className="mt-1 text-sm text-slate-500">
               Recommended: select a test run or import by Master ID.
             </p>
-          </Link>
-          <Link href="/agents/results-analysis/new" className="card block p-5 transition-shadow hover:shadow-md">
+          </PermissionLink>
+          <PermissionLink
+            href="/agents/results-analysis/new"
+            resource="results_analysis"
+            requireWrite
+            className="card block p-5 transition-shadow hover:shadow-md"
+          >
             <h3 className="font-semibold text-slate-900">Upload BlazeMeter CSV</h3>
             <p className="mt-1 text-sm text-slate-500">Manual file upload for offline analysis.</p>
-          </Link>
+          </PermissionLink>
         </div>
       )}
 

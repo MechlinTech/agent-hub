@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { ScriptReviewNewLink } from "@/components/agents/ScriptReviewOverviewActions";
 import { createClient } from "@/lib/supabase/server";
 import { getFailurePatterns, getLatestCompletedReviewId } from "@/lib/analytics";
 import { CompareReviews } from "@/components/charts/CompareReviews";
@@ -69,12 +70,9 @@ export default async function ReviewHistoryPage() {
               Open Latest Review →
             </Link>
           ) : (
-            <Link
-              href="/agents/script-review/new"
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
-            >
+            <ScriptReviewNewLink className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white">
               Start First Review →
-            </Link>
+            </ScriptReviewNewLink>
           )}
         </div>
       </div>

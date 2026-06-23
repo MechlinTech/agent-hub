@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileCode } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { ScriptReviewNewLink } from "@/components/agents/ScriptReviewOverviewActions";
 import { createClient } from "@/lib/supabase/server";
 import { formatBytes, formatDate } from "@/lib/utils";
 import { TestAssetDownloadButton } from "@/components/test-assets/DownloadButton";
@@ -30,12 +31,9 @@ export default async function TestAssetsPage() {
             JMX scripts and attachments stored securely in Supabase Storage.
           </p>
         </div>
-        <Link
-          href="/agents/script-review/new"
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
+        <ScriptReviewNewLink className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
           Upload via New Review
-        </Link>
+        </ScriptReviewNewLink>
       </div>
 
       <div className="card overflow-x-auto">

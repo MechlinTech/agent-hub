@@ -11,8 +11,10 @@ import { canRead as checkRead, canWrite as checkWrite } from "@/lib/permissions"
 
 interface PermissionsContextValue {
   role: AppRole;
+  isSuperAdmin: boolean;
   overrides: AccessOverride[];
   access: Record<Resource, AccessLevel>;
+  configurableResources: Resource[];
   canRead: (resource: Resource) => boolean;
   canWrite: (resource: Resource) => boolean;
 }
@@ -21,13 +23,17 @@ const PermissionsContext = createContext<PermissionsContextValue | null>(null);
 
 export function PermissionsProvider({
   role,
+  isSuperAdmin,
   overrides,
   access,
+  configurableResources,
   children,
 }: {
   role: AppRole;
+  isSuperAdmin: boolean;
   overrides: AccessOverride[];
   access: Record<Resource, AccessLevel>;
+  configurableResources: Resource[];
   children: React.ReactNode;
 }) {
   const canReadFn = useCallback(
@@ -42,12 +48,14 @@ export function PermissionsProvider({
   const value = useMemo(
     () => ({
       role,
+      isSuperAdmin,
       overrides,
       access,
+      configurableResources,
       canRead: canReadFn,
       canWrite: canWriteFn,
     }),
-    [role, overrides, access, canReadFn, canWriteFn]
+    [role, isSuperAdmin, overrides, access, configurableResources, canReadFn, canWriteFn]
   );
 
   return (

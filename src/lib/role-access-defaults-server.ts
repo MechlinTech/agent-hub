@@ -16,6 +16,7 @@ import {
   getRoleBaseAccess,
   isBuiltInRole,
   parseAccessMatrix,
+  parseConfigurableResources,
   validateAccessMatrix,
 } from "@/lib/permissions";
 
@@ -86,20 +87,52 @@ export async function getCustomRoles(): Promise<CustomRole[]> {
 export async function getOrgRolesContext(): Promise<{
   roleDefaults: RoleAccessDefaults | null;
   customRoles: CustomRole[];
+  adminConfigurableResources: Resource[] | null;
 }> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("org_settings")
-    .select("role_access_defaults, custom_roles")
+    .select("role_access_defaults, custom_roles, admin_configurable_resources")
     .eq("id", "default")
     .maybeSingle();
   if (error || !data) {
-    return { roleDefaults: null, customRoles: [] };
+    return { roleDefaults: null, customRoles: [], adminConfigurableResources: null };
   }
   return {
     roleDefaults: parseRoleAccessDefaults(data.role_access_defaults),
     customRoles: parseCustomRoles(data.custom_roles),
+    adminConfigurableResources: parseConfigurableResources(
+      data.admin_configurable_resources
+    ),
   };
+}
+
+export async function getAdminConfigurableResources(): Promise<Resource[] | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("org_settings")
+    .select("admin_configurable_resources")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error || !data) return null;
+  return parseConfigurableResources(data.admin_configurable_resources);
+}
+
+export async function saveAdminConfigurableResources(resources: Resource[]): Promise<void> {
+  const unique = Array.from(new Set(resources)).filter((resource) =>
+    RESOURCES.includes(resource)
+  );
+  if (unique.length === 0) {
+    throw new Error("At least one resource must be configurable for admins");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("org_settings").upsert({
+    id: "default",
+    admin_configurable_resources: unique,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
 }
 
 export async function saveRoleAccessDefaults(defaults: RoleAccessDefaults): Promise<void> {
@@ -224,7 +257,8 @@ export async function deleteCustomRole(id: string): Promise<void> {
 
 export function mergeRoleDefaultsForApi(
   stored: RoleAccessDefaults | null,
-  customRoles: CustomRole[] = []
+  customRoles: CustomRole[] = [],
+  adminConfigurableResources: Resource[] | null = null
 ) {
   const effectiveBuiltIn = Object.fromEntries(
     BUILT_IN_ROLES.map((role) => [role, getRoleBaseAccess(role, stored, customRoles)])
@@ -235,6 +269,7 @@ export function mergeRoleDefaultsForApi(
     customRoles,
     effective: effectiveBuiltIn,
     builtIn: ROLE_ACCESS,
+    adminConfigurableResources,
     assignable: [
       ...BUILT_IN_ROLES.map((role) => ({ id: role, label: ROLE_LABELS[role] })),
       ...customRoles.map((role) => ({ id: role.id, label: role.name })),

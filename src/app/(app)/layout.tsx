@@ -25,8 +25,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={user}
       profile={profile}
       role={auth.role}
+      isSuperAdmin={auth.isSuperAdmin}
       overrides={auth.overrides}
       access={auth.access}
+      configurableResources={auth.configurableResources}
     >
       {children}
     </AppShell>

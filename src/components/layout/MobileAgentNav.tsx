@@ -8,10 +8,13 @@ import {
   getResultsAnalysisIdFromPath,
   isNavItemActive,
 } from "@/lib/agents/navigation";
+import { filterNavItemsByAccess } from "@/lib/navigation-access";
+import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
 
 export function MobileAgentNav() {
   const pathname = usePathname();
+  const { canRead, canWrite } = usePermissions();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -20,8 +23,10 @@ export function MobileAgentNav() {
 
   if (!activeAgent || pathname === "/agents") return null;
 
+  const visibleItems = filterNavItemsByAccess(activeAgent.items, canRead, canWrite);
+
   const tabs = [
-    ...activeAgent.items.map((item) => ({
+    ...visibleItems.map((item) => ({
       href: item.href,
       label: item.label,
       active: isNavItemActive(pathname, item),

@@ -13,6 +13,12 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
+CREATE TABLE public.super_admins (
+  user_id uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT super_admins_pkey PRIMARY KEY (user_id),
+  CONSTRAINT super_admins_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE
+);
 CREATE TABLE public.user_access_overrides (
   user_id uuid NOT NULL,
   resource text NOT NULL CHECK (resource IN (
@@ -198,6 +204,7 @@ CREATE TABLE public.org_settings (
   blazemeter_api_key_secret text,
   role_access_defaults jsonb,
   custom_roles jsonb DEFAULT '[]'::jsonb,
+  admin_configurable_resources jsonb,
   CONSTRAINT org_settings_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.sla_profiles (
@@ -270,6 +277,21 @@ INSERT INTO storage.buckets (id, name, public, file_size_limit)
 VALUES ('results-assets', 'results-assets', false, 200 * 1024 * 1024)
 ON CONFLICT (id) DO UPDATE SET public = false, file_size_limit = 200 * 1024 * 1024;
 
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.super_admins
+    WHERE user_id = auth.uid()
+  );
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_super_admin() TO authenticated;
+
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
 LANGUAGE sql
@@ -278,6 +300,9 @@ STABLE
 SET search_path = public
 AS $$
   SELECT EXISTS (
+    SELECT 1 FROM public.super_admins WHERE user_id = auth.uid()
+  )
+  OR EXISTS (
     SELECT 1 FROM public.profiles
     WHERE id = auth.uid() AND role = 'admin'
   );
@@ -359,6 +384,19 @@ FOR UPDATE
 TO authenticated
 USING (auth.uid() = id OR public.is_admin())
 WITH CHECK (auth.uid() = id OR public.is_admin());
+
+CREATE POLICY "Users can read own super admin row"
+ON public.super_admins
+FOR SELECT
+TO authenticated
+USING (user_id = auth.uid());
+
+CREATE POLICY "Super admins manage super_admins"
+ON public.super_admins
+FOR ALL
+TO authenticated
+USING (public.is_super_admin())
+WITH CHECK (public.is_super_admin());
 
 CREATE POLICY "Users can view own access overrides"
 ON public.user_access_overrides
@@ -590,6 +628,7 @@ ALTER TABLE public.review_findings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rule_packs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.script_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sla_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.test_assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_access_overrides ENABLE ROW LEVEL SECURITY;
