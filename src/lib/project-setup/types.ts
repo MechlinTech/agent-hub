@@ -1,0 +1,94 @@
+export type ProjectScope = "frontend_only" | "backend_only" | "full_stack";
+
+export type FrontendFramework = "nextjs" | "react";
+export type StylingOption = "tailwind" | "mui" | "shadcn";
+export type StateManagement = "redux" | "zustand" | "context";
+export type FrontendAuth = "none" | "jwt" | "google_oauth";
+
+export type BackendAuth = "jwt" | "google_oauth";
+export type DatabaseOption = "mongodb" | "postgresql";
+export type DeploymentTarget = "none" | "railway" | "render" | "vercel";
+
+export interface ProjectSetupConfig {
+  projectName: string;
+  description: string;
+  projectScope: ProjectScope;
+  locationPath: string;
+  frontendFramework: FrontendFramework;
+  styling: StylingOption;
+  stateManagement: StateManagement;
+  frontendAuth: FrontendAuth;
+  backendAuth: BackendAuth;
+  database: DatabaseOption;
+  swagger: boolean;
+  redis: boolean;
+  socketIo: boolean;
+  docker: boolean;
+  githubActions: boolean;
+  deploymentTarget: DeploymentTarget;
+}
+
+export interface ProjectSetupResult {
+  success: boolean;
+  projectName: string;
+  location: string;
+  generatedFiles: string[];
+  executedCommands: string[];
+  logs: string[];
+  duration: string;
+}
+
+export type ProjectSetupStatus = "draft" | "generating" | "completed" | "failed";
+
+export interface ProjectSetupLogEntry {
+  message: string;
+  level: "info" | "warn" | "error";
+  timestamp: string;
+}
+
+export interface ProjectSetupRecord {
+  id: string;
+  externalId: string;
+  projectName: string;
+  projectScope: ProjectScope;
+  locationPath: string;
+  config: ProjectSetupConfig;
+  status: ProjectSetupStatus;
+  progressPercent: number;
+  currentStep: string | null;
+  result: ProjectSetupResult | null;
+  logs: ProjectSetupLogEntry[];
+  errorMessage: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommandStep {
+  id: string;
+  label: string;
+  exe: string;
+  args: string[];
+  cwd?: string;
+  allowShell?: boolean;
+  timeoutMs?: number;
+  /** pre = before template files (scaffolding); post = after files (default). */
+  phase?: "pre" | "post";
+}
+
+export interface FileTemplate {
+  relativePath: string;
+  content: string;
+  /** pre = before post commands (default); post = after (e.g. fix tsconfig after shadcn init). */
+  writePhase?: "pre" | "post";
+}
+
+export interface PlanResult {
+  folderTree: string[];
+  files: FileTemplate[];
+  commands: CommandStep[];
+  checklist: string[];
+  dependencies: string[];
+  estimatedMinutes: number;
+}

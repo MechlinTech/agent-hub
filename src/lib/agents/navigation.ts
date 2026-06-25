@@ -42,6 +42,7 @@ export const GLOBAL_NAV: NavItem[] = [
 
 const SCRIPT_REVIEW_BASE = "/agents/script-review";
 const RESULTS_ANALYSIS_BASE = "/agents/results-analysis";
+const PROJECT_SETUP_BASE = "/agents/project-setup";
 
 export const AGENT_NAV: Record<string, AgentNavConfig> = {
   "script-review": {
@@ -136,6 +137,34 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
         href: `${RESULTS_ANALYSIS_BASE}/sla`,
         label: "Configure SLA",
         icon: SlidersHorizontal,
+      },
+    ],
+  },
+  "project-setup": {
+    id: "project-setup",
+    basePath: PROJECT_SETUP_BASE,
+    name: "Project Setup Agent",
+    scopedPaths: [],
+    items: [
+      {
+        href: PROJECT_SETUP_BASE,
+        label: "Overview",
+        icon: FolderOpen,
+        isActive: (pathname) =>
+          pathname === PROJECT_SETUP_BASE ||
+          (pathname.startsWith(`${PROJECT_SETUP_BASE}/`) &&
+            !pathname.startsWith(`${PROJECT_SETUP_BASE}/new`) &&
+            !pathname.startsWith(`${PROJECT_SETUP_BASE}/history`)),
+      },
+      {
+        href: `${PROJECT_SETUP_BASE}/new`,
+        label: "New Setup",
+        icon: Plus,
+      },
+      {
+        href: `${PROJECT_SETUP_BASE}/history`,
+        label: "History",
+        icon: History,
       },
     ],
   },

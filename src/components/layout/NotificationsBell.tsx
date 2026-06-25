@@ -157,13 +157,13 @@ export function NotificationsBell({ userId }: { userId: string }) {
           aria-label="Notifications"
           className={
             isDesktop
-              ? "fixed z-[110] max-h-80 w-[22rem] overflow-hidden rounded-2xl bg-white shadow-xl"
-              : "fixed inset-x-0 bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom))] z-[101] max-h-[72dvh] overflow-hidden rounded-t-[1.25rem] bg-white shadow-[0_-16px_48px_rgba(15,23,42,0.12)]"
+              ? "fixed z-[110] flex max-h-80 w-[22rem] flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+              : "fixed inset-x-0 bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom))] z-[101] flex max-h-[72dvh] flex-col overflow-hidden rounded-t-[1.25rem] bg-white shadow-[0_-16px_48px_rgba(15,23,42,0.12)]"
           }
           style={isDesktop ? desktopPanelStyle : undefined}
         >
-          {!isDesktop && <div className="sheet-handle mt-2" />}
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+          {!isDesktop && <div className="sheet-handle mt-2 shrink-0" />}
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-3.5">
             <span className="text-base font-bold text-slate-900">
               Notifications
             </span>
@@ -189,13 +189,7 @@ export function NotificationsBell({ userId }: { userId: string }) {
               )}
             </div>
           </div>
-          <ul
-            className={
-              isDesktop
-                ? "max-h-72 overflow-y-auto overscroll-y-contain"
-                : "max-h-[calc(72dvh-4.5rem)] overflow-y-auto overscroll-y-contain"
-            }
-          >
+          <ul className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-3">
             {items.length ? (
               items.map((n) => (
                 <li
