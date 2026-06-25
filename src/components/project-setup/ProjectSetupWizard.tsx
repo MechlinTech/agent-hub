@@ -14,6 +14,7 @@ import {
   fetchPairingToken,
   fetchPreview,
   pairExecutor,
+  pickProjectFolder,
   startGeneration,
   streamExecution,
   syncResult,
@@ -88,6 +89,11 @@ export function ProjectSetupWizard() {
       await refreshHealth();
     }
     return token;
+  }
+
+  async function pickLocationFolder(): Promise<string | null> {
+    const token = await ensureToken();
+    return pickProjectFolder(token);
   }
 
   async function loadPreview() {
@@ -263,6 +269,7 @@ export function ProjectSetupWizard() {
                 showFrontend={showFrontend(config.projectScope)}
                 showBackend={showBackend(config.projectScope)}
                 fieldErrors={fieldErrors}
+                onBrowseFolder={pickLocationFolder}
               />
             </>
           ) : null}

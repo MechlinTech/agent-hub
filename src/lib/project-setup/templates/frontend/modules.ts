@@ -252,9 +252,6 @@ export const shadcnFrontendModule: StackModule = {
       "--template",
       template,
     ];
-    if (config.frontendFramework === "nextjs") {
-      initArgs.push("--no-src-dir");
-    }
 
     const steps = [];
     if (config.frontendFramework === "react") {
@@ -356,7 +353,7 @@ export function Counter() {
   return (
     <div>
       <div>
-        <Button value" onClick={() => dispatch(increment())}>
+        <Button onClick={() => dispatch(increment())}>
           Increment
         </Button>
         <span>{count}</span>

@@ -38,7 +38,7 @@ Use PM2 with `ecosystem.config.js` to keep both processes running.
 | Variable | Default | Purpose |
 | -------- | ------- | ------- |
 | `PROJECT_SETUP_ENABLED` | enabled | Set `false` to disable agent |
-| `PROJECT_SETUP_ALLOWED_ROOTS` | `C:\Users,D:\Projects` (Windows) | Allowed project parent paths |
+| `PROJECT_SETUP_ALLOWED_ROOTS` | *(unset — any path)* | Optional comma-separated allowlist; set only to restrict where projects may be created |
 | `EXECUTOR_PORT` | `8787` | Local Executor port |
 | `EXECUTOR_CORS_ORIGINS` | — | Extra allowed browser origins |
 

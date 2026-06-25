@@ -117,7 +117,7 @@ export default function SettingsPage() {
     "Unknown";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto space-y-6">
       {!canEdit && (
         <div className="rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           You have read-only access to profile settings.
@@ -148,10 +148,10 @@ export default function SettingsPage() {
             />
           </div>
         </div>
-      </div>
 
-      <div className="card p-6">
-        <h2 className="font-semibold text-slate-900">AI Recommendation Mode</h2>
+        <h2 className="font-semibold text-slate-900 mt-4">
+          AI Recommendation Mode
+        </h2>
         <p className="mt-1 text-sm text-slate-500">
           Rules detect issues; AI enhances impact text and recommendations when
           enabled.

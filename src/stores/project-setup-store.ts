@@ -4,11 +4,14 @@ import { DEFAULT_PROJECT_SETUP_CONFIG } from "@/lib/project-setup/defaults";
 
 export type WizardStep = 1 | 2 | 3;
 
+export const PROJECT_SETUP_NEW_PATH = "/agents/project-setup/new";
+
 interface ProjectSetupState {
   currentStep: WizardStep;
   config: ProjectSetupConfig;
   plan: PlanResult | null;
   jobId: string | null;
+  wizardSessionId: number;
   setField: <K extends keyof ProjectSetupConfig>(key: K, value: ProjectSetupConfig[K]) => void;
   setConfig: (config: Partial<ProjectSetupConfig>) => void;
   setPlan: (plan: PlanResult | null) => void;
@@ -16,6 +19,7 @@ interface ProjectSetupState {
   nextStep: () => void;
   prevStep: () => void;
   reset: () => void;
+  startNewSetup: () => void;
 }
 
 export const useProjectSetupStore = create<ProjectSetupState>((set, get) => ({
@@ -23,6 +27,7 @@ export const useProjectSetupStore = create<ProjectSetupState>((set, get) => ({
   config: { ...DEFAULT_PROJECT_SETUP_CONFIG },
   plan: null,
   jobId: null,
+  wizardSessionId: 0,
   setField: (key, value) =>
     set({ config: { ...get().config, [key]: value }, plan: null }),
   setConfig: (partial) =>
@@ -40,7 +45,20 @@ export const useProjectSetupStore = create<ProjectSetupState>((set, get) => ({
       plan: null,
       jobId: null,
     }),
+  startNewSetup: () =>
+    set((state) => ({
+      currentStep: 1,
+      config: { ...DEFAULT_PROJECT_SETUP_CONFIG },
+      plan: null,
+      jobId: null,
+      wizardSessionId: state.wizardSessionId + 1,
+    })),
 }));
+
+/** Reset wizard when opening New Setup (sidebar, overview, or revisiting /new). */
+export function beginNewProjectSetup(): void {
+  useProjectSetupStore.getState().startNewSetup();
+}
 
 export function showFrontend(scope: ProjectSetupConfig["projectScope"]): boolean {
   return scope === "frontend_only" || scope === "full_stack";

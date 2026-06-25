@@ -1,5 +1,5 @@
-import { ProjectSetupWizard } from "@/components/project-setup/ProjectSetupWizard";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { NewProjectSetupView } from "@/components/project-setup/NewProjectSetupView";
 
 export default function ProjectSetupNewPage() {
   return (
@@ -12,7 +12,7 @@ export default function ProjectSetupNewPage() {
           { label: "New Setup" },
         ]}
       />
-      <ProjectSetupWizard />
+      <NewProjectSetupView />
     </div>
   );
 }

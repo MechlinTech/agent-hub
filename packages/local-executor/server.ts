@@ -17,6 +17,7 @@ import {
   previewPlan,
   runProjectGeneration,
 } from "./orchestrator";
+import { pickNativeFolder } from "./pick-folder";
 import type { ExecutionLogEvent } from "../../src/lib/execution/execution-service";
 import type { ProjectSetupConfig } from "../../src/lib/project-setup/types";
 
@@ -135,6 +136,21 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, { ok: true, paired: true }, origin);
     } catch (e) {
       sendJson(res, 400, { error: e instanceof Error ? e.message : "Pair failed" }, origin);
+    }
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/pick-folder") {
+    if (!(await requireAuth(req, res, origin))) return;
+    try {
+      const picked = await pickNativeFolder();
+      if (!picked) {
+        sendJson(res, 200, { cancelled: true }, origin);
+        return;
+      }
+      sendJson(res, 200, { path: picked }, origin);
+    } catch (e) {
+      sendJson(res, 400, { error: e instanceof Error ? e.message : "Pick folder failed" }, origin);
     }
     return;
   }

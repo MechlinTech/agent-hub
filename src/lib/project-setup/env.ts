@@ -4,14 +4,11 @@ export function isProjectSetupEnabled(): boolean {
   return true;
 }
 
+/** Empty = any absolute path the user chooses (Windows, macOS, Linux). Set env to restrict. */
 export function getAllowedRoots(): string[] {
-  const raw =
-    process.env.PROJECT_SETUP_ALLOWED_ROOTS ??
-    (process.platform === "win32" ? "C:\\Users,D:\\Projects" : "/home,/tmp");
-  return raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const raw = process.env.PROJECT_SETUP_ALLOWED_ROOTS?.trim();
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
 export function getExecutorPort(): number {

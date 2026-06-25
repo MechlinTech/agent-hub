@@ -1,35 +1,44 @@
 "use client";
 
-import { FolderOpen } from "lucide-react";
+import { useState } from "react";
+import { FolderOpen, Loader2 } from "lucide-react";
 
 export function FolderPicker({
   value,
   onChange,
   error,
+  onBrowse,
 }: {
   value: string;
   onChange: (path: string) => void;
   error?: string;
+  onBrowse?: () => Promise<string | null>;
 }) {
+  const [browsing, setBrowsing] = useState(false);
+  const [browseError, setBrowseError] = useState<string | null>(null);
+
   async function handleBrowse() {
-    if (typeof window === "undefined") return;
-    const picker = (
-      window as unknown as {
-        showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
-      }
-    ).showDirectoryPicker;
-    if (!picker) return;
+    if (!onBrowse) {
+      setBrowseError("Connect the Local Executor to browse folders.");
+      return;
+    }
+    setBrowseError(null);
+    setBrowsing(true);
     try {
-      await picker();
-      // Browsers do not expose full paths — user confirms in text field
-    } catch {
-      /* cancelled */
+      const picked = await onBrowse();
+      if (picked) onChange(picked);
+    } catch (e) {
+      setBrowseError(e instanceof Error ? e.message : "Could not pick folder");
+    } finally {
+      setBrowsing(false);
     }
   }
 
   return (
     <div>
-      <label className="text-sm font-medium text-slate-700">Project location</label>
+      <label className="text-sm font-medium text-slate-700">
+        Project location
+      </label>
       <div className="mt-1 flex gap-2">
         <input
           className="input min-w-0 flex-1"
@@ -37,14 +46,27 @@ export function FolderPicker({
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-        <button type="button" className="btn-secondary shrink-0" onClick={handleBrowse}>
-          <FolderOpen className="mr-1 inline h-4 w-4" />
+        <button
+          type="button"
+          className="btn-secondary inline-flex shrink-0 items-center gap-1"
+          onClick={handleBrowse}
+          disabled={browsing}
+        >
+          {browsing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FolderOpen className="h-4 w-4" />
+          )}
           Browse
         </button>
       </div>
       <p className="mt-1 text-xs text-slate-500">
-        Enter the absolute folder path where the project folder will be created.
+        Browse opens a folder picker on your PC via the Local Executor. You can
+        also type a path manually.
       </p>
+      {browseError ? (
+        <p className="mt-1 text-xs text-red-600">{browseError}</p>
+      ) : null}
       {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
     </div>
   );
@@ -71,12 +93,14 @@ export function ConfigSectionCards({
   showFrontend,
   showBackend,
   fieldErrors = {},
+  onBrowseFolder,
 }: {
   config: import("@/lib/project-setup/types").ProjectSetupConfig;
   onChange: (partial: Partial<typeof config>) => void;
   showFrontend: boolean;
   showBackend: boolean;
   fieldErrors?: Record<string, string>;
+  onBrowseFolder?: () => Promise<string | null>;
 }) {
   return (
     <div className="space-y-4">
@@ -91,7 +115,9 @@ export function ConfigSectionCards({
             aria-invalid={Boolean(fieldErrors.projectName)}
           />
           {fieldErrors.projectName ? (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.projectName}</p>
+            <p className="mt-1 text-xs text-red-600">
+              {fieldErrors.projectName}
+            </p>
           ) : null}
         </Field>
         <Field label="Description">
@@ -105,6 +131,7 @@ export function ConfigSectionCards({
           value={config.locationPath}
           onChange={(locationPath) => onChange({ locationPath })}
           error={fieldErrors.locationPath}
+          onBrowse={onBrowseFolder}
         />
       </div>
 
@@ -118,7 +145,8 @@ export function ConfigSectionCards({
                 value={config.frontendFramework}
                 onChange={(e) =>
                   onChange({
-                    frontendFramework: e.target.value as typeof config.frontendFramework,
+                    frontendFramework: e.target
+                      .value as typeof config.frontendFramework,
                   })
                 }
               >
@@ -145,7 +173,8 @@ export function ConfigSectionCards({
                 value={config.stateManagement}
                 onChange={(e) =>
                   onChange({
-                    stateManagement: e.target.value as typeof config.stateManagement,
+                    stateManagement: e.target
+                      .value as typeof config.stateManagement,
                   })
                 }
               >
@@ -159,7 +188,9 @@ export function ConfigSectionCards({
                 className="input w-full"
                 value={config.frontendAuth}
                 onChange={(e) =>
-                  onChange({ frontendAuth: e.target.value as typeof config.frontendAuth })
+                  onChange({
+                    frontendAuth: e.target.value as typeof config.frontendAuth,
+                  })
                 }
               >
                 <option value="none">None</option>
@@ -180,7 +211,9 @@ export function ConfigSectionCards({
                 className="input w-full"
                 value={config.backendAuth}
                 onChange={(e) =>
-                  onChange({ backendAuth: e.target.value as typeof config.backendAuth })
+                  onChange({
+                    backendAuth: e.target.value as typeof config.backendAuth,
+                  })
                 }
               >
                 <option value="jwt">JWT</option>
@@ -192,7 +225,9 @@ export function ConfigSectionCards({
                 className="input w-full"
                 value={config.database}
                 onChange={(e) =>
-                  onChange({ database: e.target.value as typeof config.database })
+                  onChange({
+                    database: e.target.value as typeof config.database,
+                  })
                 }
               >
                 <option value="mongodb">MongoDB</option>
@@ -247,7 +282,8 @@ export function ConfigSectionCards({
             value={config.deploymentTarget}
             onChange={(e) =>
               onChange({
-                deploymentTarget: e.target.value as typeof config.deploymentTarget,
+                deploymentTarget: e.target
+                  .value as typeof config.deploymentTarget,
               })
             }
           >

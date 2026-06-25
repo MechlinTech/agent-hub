@@ -11,6 +11,10 @@ import {
 import { filterNavItemsByAccess } from "@/lib/navigation-access";
 import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
+import {
+  beginNewProjectSetup,
+  PROJECT_SETUP_NEW_PATH,
+} from "@/stores/project-setup-store";
 
 export function MobileAgentNav() {
   const pathname = usePathname();
@@ -19,11 +23,17 @@ export function MobileAgentNav() {
   useEffect(() => setMounted(true), []);
 
   const activeAgent = getActiveAgentFromPath(pathname);
-  const resultsAnalysisId = mounted ? getResultsAnalysisIdFromPath(pathname) : null;
+  const resultsAnalysisId = mounted
+    ? getResultsAnalysisIdFromPath(pathname)
+    : null;
 
   if (!activeAgent || pathname === "/agents") return null;
 
-  const visibleItems = filterNavItemsByAccess(activeAgent.items, canRead, canWrite);
+  const visibleItems = filterNavItemsByAccess(
+    activeAgent.items,
+    canRead,
+    canWrite,
+  );
 
   const tabs = [
     ...visibleItems.map((item) => ({
@@ -49,9 +59,16 @@ export function MobileAgentNav() {
           <Link
             key={tab.href}
             href={tab.href}
+            onClick={
+              tab.href === PROJECT_SETUP_NEW_PATH
+                ? beginNewProjectSetup
+                : undefined
+            }
             className={cn(
               "relative shrink-0 px-4 py-3.5 text-sm font-semibold transition-colors duration-200",
-              tab.active ? "text-brand-600" : "text-slate-500 active:text-slate-700"
+              tab.active
+                ? "text-brand-600"
+                : "text-slate-500 active:text-slate-700",
             )}
           >
             {tab.label}

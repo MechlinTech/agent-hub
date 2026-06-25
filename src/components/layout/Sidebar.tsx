@@ -19,6 +19,10 @@ import {
   filterNavItemsByAccess,
 } from "@/lib/navigation-access";
 import { cn } from "@/lib/utils";
+import {
+  beginNewProjectSetup,
+  PROJECT_SETUP_NEW_PATH,
+} from "@/stores/project-setup-store";
 
 export function Sidebar({
   collapsed,
@@ -43,7 +47,7 @@ export function Sidebar({
     <aside
       className={cn(
         "hidden h-full shrink-0 flex-col border-r border-slate-200 bg-white lg:flex",
-        collapsed ? "w-16" : "w-56"
+        collapsed ? "w-16" : "w-56",
       )}
     >
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-4">
@@ -51,7 +55,9 @@ export function Sidebar({
           AH
         </div>
         {showLabels && (
-          <span className="text-sm font-semibold text-slate-800">Agent Hub</span>
+          <span className="text-sm font-semibold text-slate-800">
+            Agent Hub
+          </span>
         )}
       </div>
 
@@ -68,7 +74,7 @@ export function Sidebar({
                   "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   active
                     ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -77,7 +83,10 @@ export function Sidebar({
               {isSettings && showSettingsSections && (
                 <div className="ml-3 space-y-0.5 border-l-2 border-slate-100 pl-2">
                   {visibleSettingsNav.map((subItem) => {
-                    const subActive = isSettingsNavActive(pathname, subItem.href);
+                    const subActive = isSettingsNavActive(
+                      pathname,
+                      subItem.href,
+                    );
                     const SubIcon = subItem.icon;
                     return (
                       <Link
@@ -88,7 +97,7 @@ export function Sidebar({
                           "flex min-h-[38px] items-center gap-2.5 rounded-lg py-2 pl-2 pr-3 text-sm font-medium transition-colors",
                           subActive
                             ? "bg-brand-50 text-brand-700"
-                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                         )}
                       >
                         <SubIcon className="h-4 w-4 shrink-0" />
@@ -129,26 +138,32 @@ export function Sidebar({
                 </Link>
               </div>
             )}
-            {filterNavItemsByAccess(activeAgent.items, canRead, canWrite).map((item) => {
+            {filterNavItemsByAccess(activeAgent.items, canRead, canWrite).map(
+              (item) => {
                 const active = isNavItemActive(pathname, item);
                 const Icon = item.icon;
+                const isNewProjectSetup = item.href === PROJECT_SETUP_NEW_PATH;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     title={!showLabels ? item.label : undefined}
+                    onClick={
+                      isNewProjectSetup ? beginNewProjectSetup : undefined
+                    }
                     className={cn(
                       "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       active
                         ? "bg-brand-50 text-brand-700"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                     )}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
                     {showLabels && item.label}
                   </Link>
                 );
-              })}
+              },
+            )}
             {activeAgent.id === "results-analysis" && resultsAnalysisId && (
               <Link
                 href={`/agents/results-analysis/${resultsAnalysisId}/blazemeter`}
@@ -157,7 +172,7 @@ export function Sidebar({
                   "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   pathname.includes("/blazemeter")
                     ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                 )}
               >
                 <Cloud className="h-5 w-5 shrink-0" />

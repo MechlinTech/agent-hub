@@ -89,6 +89,20 @@ export async function pairExecutor(token: string): Promise<void> {
   }
 }
 
+export async function pickProjectFolder(token: string): Promise<string | null> {
+  const res = await fetch(`${EXECUTOR_BASE_URL}/pick-folder`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = (await res.json()) as { error?: string };
+    throw new Error(err.error ?? "Failed to pick folder");
+  }
+  const data = (await res.json()) as { path?: string; cancelled?: boolean };
+  if (data.cancelled || !data.path) return null;
+  return data.path;
+}
+
 export async function fetchPreview(
   config: ProjectSetupConfig,
   token: string
