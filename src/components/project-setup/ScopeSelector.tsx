@@ -50,11 +50,16 @@ export function ScopeSelector({
             className={cn(
               "card flex flex-col items-start gap-2 p-4 text-left transition",
               selected
-                ? "border-brand-300 ring-2 ring-brand-100"
-                : "hover:border-slate-300"
+                ? "border-brand-600 ring-2 ring-brand-600"
+                : "hover:border-slate-300",
             )}
           >
-            <Icon className={cn("h-5 w-5", selected ? "text-brand-600" : "text-slate-500")} />
+            <Icon
+              className={cn(
+                "h-5 w-5",
+                selected ? "text-brand-600" : "text-slate-500",
+              )}
+            />
             <span className="font-semibold text-slate-900">{scope.label}</span>
             <span className="text-xs text-slate-500">{scope.description}</span>
           </button>

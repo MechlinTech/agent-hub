@@ -1,9 +1,6 @@
 import { spawn } from "child_process";
 import path from "path";
-import { fileURLToPath } from "url";
 import { assertUnderAllowedRoots } from "../../src/lib/execution/sanitize";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function runCommand(
   exe: string,
@@ -28,18 +25,81 @@ function runCommand(
   });
 }
 
-async function pickWindowsFolder(): Promise<string | null> {
-  const scriptPath = path.join(__dirname, "scripts", "pick-folder-windows.ps1");
-  const { stdout, code } = await runCommand(
-    "powershell.exe",
-    ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", scriptPath],
-    { windowsHide: false }
-  );
-
+function parsePickerResult(
+  stdout: string,
+  code: number | null
+): string | null | "failed" {
   const picked = stdout.trim();
   if (code === 0 && picked) return picked;
   if (code === 1 && !picked) return null;
-  throw new Error("Folder picker failed");
+  return "failed";
+}
+
+/** .NET 8+ OpenFolderDialog via PowerShell 7 — full Explorer-style picker on Windows 11. */
+async function pickWindowsFolderViaPwsh(): Promise<string | null | "failed" | "unavailable"> {
+  const script = [
+    "$ErrorActionPreference = 'Stop'",
+    "Add-Type -AssemblyName PresentationFramework",
+    "$dialog = New-Object Microsoft.Win32.OpenFolderDialog",
+    "$dialog.Title = 'Select project location'",
+    "if ($dialog.ShowDialog()) {",
+    "  [Console]::Out.Write($dialog.FolderName)",
+    "  exit 0",
+    "}",
+    "exit 1",
+  ].join("; ");
+
+  try {
+    const { stdout, code } = await runCommand(
+      "pwsh.exe",
+      ["-NoProfile", "-STA", "-Command", script],
+      { windowsHide: false }
+    );
+    const result = parsePickerResult(stdout, code);
+    return result === "failed" ? "failed" : result;
+  } catch {
+    return "unavailable";
+  }
+}
+
+/**
+ * FolderBrowserDialog with AutoUpgradeEnabled uses IFileDialog (Vista+ Explorer UI),
+ * not the legacy SHBrowseForFolder tree. Inline -Command only — no .ps1 script file.
+ */
+async function pickWindowsFolderUpgraded(): Promise<string | null> {
+  const script = [
+    "Add-Type -AssemblyName System.Windows.Forms",
+    "[System.Windows.Forms.Application]::EnableVisualStyles()",
+    "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog",
+    "$dialog.AutoUpgradeEnabled = $true",
+    "$dialog.UseDescriptionForTitle = $true",
+    "$dialog.Description = 'Select project location'",
+    "$dialog.ShowNewFolderButton = $true",
+    "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {",
+    "  [Console]::Out.Write($dialog.SelectedPath)",
+    "  exit 0",
+    "}",
+    "exit 1",
+  ].join("; ");
+
+  const { stdout, code } = await runCommand(
+    "powershell.exe",
+    ["-NoProfile", "-STA", "-Command", script],
+    { windowsHide: false }
+  );
+
+  const result = parsePickerResult(stdout, code);
+  if (result === "failed") throw new Error("Folder picker failed");
+  return result;
+}
+
+async function pickWindowsFolder(): Promise<string | null> {
+  const pwshResult = await pickWindowsFolderViaPwsh();
+  if (pwshResult !== "unavailable" && pwshResult !== "failed") {
+    return pwshResult;
+  }
+
+  return pickWindowsFolderUpgraded();
 }
 
 async function pickMacFolder(): Promise<string | null> {

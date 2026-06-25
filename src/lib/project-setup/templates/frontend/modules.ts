@@ -164,7 +164,7 @@ function viteTailwindInstallCommand(
       "--typescript",
       "--eslint",
       "--app",
-      "--no-src-dir",
+      "--src-dir",
       "--import-alias",
       "@/*",
     ];
@@ -289,27 +289,9 @@ export const tailwindFrontendModule: StackModule = {
   ],
 };
 
-/** Redux Toolkit quick start for Vite — https://redux-toolkit.js.org/tutorials/quick-start */
-function reduxViteSourceFiles(rel: string): import("@/lib/project-setup/types").FileTemplate[] {
-  return [
-    {
-      relativePath: `${rel}src/app/store.ts`,
-      content: `import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "../features/counter/counterSlice";
-
-export const store = configureStore({
-  reducer: {
-    counter: counterReducer,
-  },
-});
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-`,
-    },
-    {
-      relativePath: `${rel}src/features/counter/counterSlice.ts`,
-      content: `import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+/** Shared counter slice for Redux demo stores. */
+function reduxCounterSliceContent(): string {
+  return `import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface CounterState {
   value: number;
@@ -337,7 +319,45 @@ export const counterSlice = createSlice({
 
 export const { increment, decrement, incrementByAmount } = counterSlice.actions;
 export default counterSlice.reducer;
+`;
+}
+
+function reduxInstallCommand(
+  config: ProjectSetupConfig,
+  root: string
+): import("@/lib/project-setup/types").CommandStep {
+  return {
+    id: "redux-install",
+    label: "Installing Redux Toolkit",
+    exe: "npm",
+    args: ["install", "@reduxjs/toolkit", "react-redux"],
+    cwd: frontendCwd(config, root),
+    timeoutMs: 300_000,
+    phase: "post",
+  };
+}
+
+/** Redux Toolkit quick start for Vite — https://redux-toolkit.js.org/tutorials/quick-start */
+function reduxViteSourceFiles(rel: string): import("@/lib/project-setup/types").FileTemplate[] {
+  return [
+    {
+      relativePath: `${rel}src/app/store.ts`,
+      content: `import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "../features/counter/counterSlice";
+
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 `,
+    },
+    {
+      relativePath: `${rel}src/features/counter/counterSlice.ts`,
+      content: reduxCounterSliceContent(),
     },
     {
       relativePath: `${rel}src/features/counter/Counter.tsx`,
@@ -423,15 +443,194 @@ export default function App() {
       },
     ];
   },
-  commands: (config, root) => [
+  commands: (config, root) => [reduxInstallCommand(config, root)],
+};
+
+/**
+ * Redux Toolkit for Next.js App Router — https://redux-toolkit.js.org/usage/nextjs
+ * Uses makeStore + StoreProvider (per-request safe, no global store).
+ */
+function reduxNextCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const shadcnImport =
+    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const ui =
+    styling === "shadcn"
+      ? `<div className="flex items-center gap-4">
+      <Button type="button" onClick={() => dispatch(increment())}>
+        Increment
+      </Button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <Button type="button" onClick={() => dispatch(decrement())}>
+        Decrement
+      </Button>
+    </div>`
+      : `<div className="flex items-center gap-4">
+      <button
+        type="button"
+        className="rounded-md border px-4 py-2"
+        onClick={() => dispatch(increment())}
+      >
+        Increment
+      </button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <button
+        type="button"
+        className="rounded-md border px-4 py-2"
+        onClick={() => dispatch(decrement())}
+      >
+        Decrement
+      </button>
+    </div>`;
+
+  return {
+    relativePath: `${rel}src/lib/features/counter/Counter.tsx`,
+    content: `"use client";
+
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { decrement, increment } from "./counterSlice";
+${shadcnImport}
+export function Counter() {
+  const count = useAppSelector((state) => state.counter.value);
+  const dispatch = useAppDispatch();
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
+function reduxNextSourceFiles(config: ProjectSetupConfig): import("@/lib/project-setup/types").FileTemplate[] {
+  const rel = frontendRelPrefix(config);
+
+  return [
     {
-      id: "redux-install",
-      label: "Installing Redux Toolkit",
-      exe: "npm",
-      args: ["install", "@reduxjs/toolkit", "react-redux"],
-      cwd: frontendCwd(config, root),
-      timeoutMs: 300_000,
-      phase: "post",
+      relativePath: `${rel}src/lib/store.ts`,
+      content: `import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./features/counter/counterSlice";
+
+export const makeStore = () => {
+  return configureStore({
+    reducer: {
+      counter: counterReducer,
     },
+  });
+};
+
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = AppStore["dispatch"];
+`,
+    },
+    {
+      relativePath: `${rel}src/lib/hooks.ts`,
+      content: `import { useDispatch, useSelector, useStore } from "react-redux";
+import type { AppDispatch, AppStore, RootState } from "./store";
+
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+export const useAppStore = useStore.withTypes<AppStore>();
+`,
+    },
+    {
+      relativePath: `${rel}src/lib/features/counter/counterSlice.ts`,
+      content: reduxCounterSliceContent(),
+    },
+    reduxNextCounterFile(rel, config.styling),
+    {
+      relativePath: `${rel}src/app/StoreProvider.tsx`,
+      content: `"use client";
+
+import { useRef } from "react";
+import { Provider } from "react-redux";
+import { makeStore, type AppStore } from "@/lib/store";
+
+export default function StoreProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const storeRef = useRef<AppStore | undefined>(undefined);
+  if (!storeRef.current) {
+    storeRef.current = makeStore();
+  }
+
+  return <Provider store={storeRef.current}>{children}</Provider>;
+}
+`,
+    },
+    {
+      relativePath: `${rel}src/app/layout.tsx`,
+      writePhase: "post",
+      content: `import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import StoreProvider from "./StoreProvider";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "${config.projectName}",
+  description: "Generated by AgentHub Project Setup Agent",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={\`\${geistSans.variable} \${geistMono.variable} antialiased\`}
+      >
+        <StoreProvider>{children}</StoreProvider>
+      </body>
+    </html>
+  );
+}
+`,
+    },
+    {
+      relativePath: `${rel}src/app/page.tsx`,
+      writePhase: "post",
+      content: `import { Counter } from "@/lib/features/counter/Counter";
+
+export default function Home() {
+  return (
+    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-8">
+      <h1 className="text-2xl font-semibold">${config.projectName}</h1>
+      <Counter />
+    </main>
+  );
+}
+`,
+    },
+  ];
+}
+
+export const reduxNextModule: StackModule = {
+  id: "state-redux-next",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) &&
+    c.frontendFramework === "nextjs" &&
+    c.stateManagement === "redux",
+  checklist: () => [
+    "Redux Toolkit makeStore, typed hooks, StoreProvider, and counter slice (App Router)",
   ],
+  dependencies: () => ["@reduxjs/toolkit", "react-redux"],
+  files: (config) => reduxNextSourceFiles(config),
+  commands: (config, root) => [reduxInstallCommand(config, root)],
 };
