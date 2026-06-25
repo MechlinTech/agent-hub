@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Shield, User, Users } from "lucide-react";
+import { Shield, Terminal, User, Users } from "lucide-react";
 import type { Resource } from "@/lib/permissions";
 
 export interface SettingsNavItem {
@@ -23,6 +23,14 @@ export const SETTINGS_NAV: SettingsNavItem[] = [
     icon: User,
     title: "Profile",
     subtitle: "Your name, team, and AI recommendation preferences.",
+    resource: "settings",
+  },
+  {
+    href: "/settings/local-executor",
+    label: "Local Executor",
+    icon: Terminal,
+    title: "Local Executor",
+    subtitle: "Install, pair, and manage the agent that runs projects on your machine.",
     resource: "settings",
   },
   {

@@ -8,7 +8,8 @@ export type AgentIconKey =
   | "play"
   | "line-chart"
   | "search"
-  | "file-bar-chart";
+  | "file-bar-chart"
+  | "folder-open";
 
 export interface AgentDefinition {
   id: string;
@@ -45,6 +46,18 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     iconKey: "line-chart",
     iconBg: "bg-rose-50",
     iconColor: "text-rose-600",
+  },
+  {
+    id: "project-setup",
+    name: "Project Setup Agent",
+    description:
+      "Configure a project stack and scaffold frontend, backend, DevOps files on your machine via the Local Executor.",
+    status: "active",
+    href: "/agents/project-setup",
+    iconKey: "folder-open",
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-600",
+    recommended: true,
   },
   {
     id: "workload-modeling",

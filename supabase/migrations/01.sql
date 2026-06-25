@@ -22,7 +22,7 @@ CREATE TABLE public.super_admins (
 CREATE TABLE public.user_access_overrides (
   user_id uuid NOT NULL,
   resource text NOT NULL CHECK (resource IN (
-    'script_review', 'results_analysis', 'integrations', 'settings', 'users'
+    'script_review', 'results_analysis', 'project_setup', 'integrations', 'settings', 'users'
   )),
   access_level text NOT NULL CHECK (access_level IN ('none', 'read', 'write')),
   updated_by uuid,
@@ -632,3 +632,55 @@ ALTER TABLE public.super_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.test_assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_access_overrides ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.project_setups (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  external_id text NOT NULL,
+  project_name text NOT NULL,
+  project_scope text NOT NULL,
+  location_path text NOT NULL,
+  config jsonb NOT NULL DEFAULT '{}'::jsonb,
+  status text NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft', 'generating', 'completed', 'failed')),
+  progress_percent integer NOT NULL DEFAULT 0,
+  current_step text,
+  result jsonb,
+  logs jsonb NOT NULL DEFAULT '[]'::jsonb,
+  error_message text,
+  started_at timestamptz,
+  completed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS project_setups_user_id_created_at_idx
+  ON public.project_setups (user_id, created_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS project_setups_external_id_idx
+  ON public.project_setups (external_id);
+
+ALTER TABLE public.project_setups ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users manage own project setups"
+ON public.project_setups
+FOR ALL
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.executor_pairing_tokens (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  token_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  rotated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.executor_pairing_tokens ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users manage own executor tokens"
+ON public.executor_pairing_tokens
+FOR ALL
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);

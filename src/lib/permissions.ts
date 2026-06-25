@@ -8,6 +8,7 @@ export type AccessLevel = "none" | "read" | "write";
 export type Resource =
   | "script_review"
   | "results_analysis"
+  | "project_setup"
   | "integrations"
   | "settings"
   | "users";
@@ -26,6 +27,7 @@ export const CUSTOM_ROLE_PREFIX = "custom_";
 export const RESOURCES: Resource[] = [
   "script_review",
   "results_analysis",
+  "project_setup",
   "integrations",
   "settings",
   "users",
@@ -45,6 +47,7 @@ export const ROLE_LABELS: Record<BuiltInRole, string> = {
 export const RESOURCE_LABELS: Record<Resource, string> = {
   script_review: "Script Review Agent",
   results_analysis: "Results Analysis Agent",
+  project_setup: "Project Setup Agent",
   integrations: "Integrations",
   settings: "Settings",
   users: "User Management",
@@ -53,6 +56,7 @@ export const RESOURCE_LABELS: Record<Resource, string> = {
 export const RESOURCE_SHORT_LABELS: Record<Resource, string> = {
   script_review: "SR",
   results_analysis: "RA",
+  project_setup: "PS",
   integrations: "INT",
   settings: "SET",
   users: "USR",
@@ -62,6 +66,7 @@ export const ROLE_ACCESS: Record<BuiltInRole, Record<Resource, AccessLevel>> = {
   admin: {
     script_review: "write",
     results_analysis: "write",
+    project_setup: "write",
     integrations: "write",
     settings: "write",
     users: "write",
@@ -69,6 +74,7 @@ export const ROLE_ACCESS: Record<BuiltInRole, Record<Resource, AccessLevel>> = {
   performance_engineer: {
     script_review: "write",
     results_analysis: "write",
+    project_setup: "write",
     integrations: "none",
     settings: "write",
     users: "none",
@@ -76,6 +82,7 @@ export const ROLE_ACCESS: Record<BuiltInRole, Record<Resource, AccessLevel>> = {
   viewer: {
     script_review: "read",
     results_analysis: "read",
+    project_setup: "read",
     integrations: "none",
     settings: "read",
     users: "none",
@@ -85,11 +92,13 @@ export const ROLE_ACCESS: Record<BuiltInRole, Record<Resource, AccessLevel>> = {
 export const AGENT_RESOURCE_MAP: Record<string, Resource> = {
   "script-review": "script_review",
   "results-analysis": "results_analysis",
+  "project-setup": "project_setup",
 };
 
 export const ALL_WRITE: Record<Resource, AccessLevel> = {
   script_review: "write",
   results_analysis: "write",
+  project_setup: "write",
   integrations: "write",
   settings: "write",
   users: "write",

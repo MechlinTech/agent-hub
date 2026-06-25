@@ -18,6 +18,7 @@ export const AGENT_NAV_ITEM_ACCESS: Partial<Record<string, NavAccessRule>> = {
   "/agents/results-analysis/new": { resource: "results_analysis", requireWrite: true },
   "/agents/results-analysis/select-run": { resource: "results_analysis", requireWrite: true },
   "/agents/results-analysis/sla": { resource: "results_analysis", requireWrite: true },
+  "/agents/project-setup/new": { resource: "project_setup", requireWrite: true },
 };
 
 export function canAccessNavHref(
