@@ -1,6 +1,10 @@
 import { spawn } from "child_process";
 import path from "path";
+import { fileURLToPath } from "url";
 import { assertUnderAllowedRoots } from "../../src/lib/execution/sanitize";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const WINDOWS_PICKER_SCRIPT = path.join(__dirname, "pick-folder-windows.ps1");
 
 function runCommand(
   exe: string,
@@ -35,71 +39,38 @@ function parsePickerResult(
   return "failed";
 }
 
-/** .NET 8+ OpenFolderDialog via PowerShell 7 — full Explorer-style picker on Windows 11. */
-async function pickWindowsFolderViaPwsh(): Promise<string | null | "failed" | "unavailable"> {
-  const script = [
-    "$ErrorActionPreference = 'Stop'",
-    "Add-Type -AssemblyName PresentationFramework",
-    "$dialog = New-Object Microsoft.Win32.OpenFolderDialog",
-    "$dialog.Title = 'Select project location'",
-    "if ($dialog.ShowDialog()) {",
-    "  [Console]::Out.Write($dialog.FolderName)",
-    "  exit 0",
-    "}",
-    "exit 1",
-  ].join("; ");
+export type PickNativeFolderOptions = {
+  /** Browser tab title — used to find the window that should own the picker. */
+  windowTitle?: string;
+};
 
-  try {
-    const { stdout, code } = await runCommand(
-      "pwsh.exe",
-      ["-NoProfile", "-STA", "-Command", script],
-      { windowsHide: false }
-    );
-    const result = parsePickerResult(stdout, code);
-    return result === "failed" ? "failed" : result;
-  } catch {
-    return "unavailable";
-  }
-}
-
-/**
- * FolderBrowserDialog with AutoUpgradeEnabled uses IFileDialog (Vista+ Explorer UI),
- * not the legacy SHBrowseForFolder tree. Inline -Command only — no .ps1 script file.
- */
-async function pickWindowsFolderUpgraded(): Promise<string | null> {
-  const script = [
-    "Add-Type -AssemblyName System.Windows.Forms",
-    "[System.Windows.Forms.Application]::EnableVisualStyles()",
-    "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog",
-    "$dialog.AutoUpgradeEnabled = $true",
-    "$dialog.UseDescriptionForTitle = $true",
-    "$dialog.Description = 'Select project location'",
-    "$dialog.ShowNewFolderButton = $true",
-    "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {",
-    "  [Console]::Out.Write($dialog.SelectedPath)",
-    "  exit 0",
-    "}",
-    "exit 1",
-  ].join("; ");
-
-  const { stdout, code } = await runCommand(
+async function pickWindowsFolder(
+  options: PickNativeFolderOptions = {}
+): Promise<string | null> {
+  const titleArg = options.windowTitle?.trim() || "Agent Hub";
+  const { stdout, code, stderr } = await runCommand(
     "powershell.exe",
-    ["-NoProfile", "-STA", "-Command", script],
-    { windowsHide: false }
+    [
+      "-NoProfile",
+      "-STA",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      WINDOWS_PICKER_SCRIPT,
+      "-WindowTitle",
+      titleArg,
+    ],
+    { windowsHide: true }
   );
 
   const result = parsePickerResult(stdout, code);
-  if (result === "failed") throw new Error("Folder picker failed");
-  return result;
-}
-
-async function pickWindowsFolder(): Promise<string | null> {
-  const pwshResult = await pickWindowsFolderViaPwsh();
-  if (pwshResult !== "unavailable" && pwshResult !== "failed") {
-    return pwshResult;
+  if (result === "failed") {
+    const detail = stderr.trim() || stdout.trim();
+    throw new Error(
+      detail ? `Folder picker failed: ${detail}` : "Folder picker failed"
+    );
   }
-
-  return pickWindowsFolderUpgraded();
+  return result;
 }
 
 async function pickMacFolder(): Promise<string | null> {
@@ -129,10 +100,12 @@ async function pickLinuxFolder(): Promise<string | null> {
   throw new Error("Native folder picker is not available on this system");
 }
 
-export async function pickNativeFolder(): Promise<string | null> {
+export async function pickNativeFolder(
+  options: PickNativeFolderOptions = {}
+): Promise<string | null> {
   let picked: string | null = null;
   if (process.platform === "win32") {
-    picked = await pickWindowsFolder();
+    picked = await pickWindowsFolder(options);
   } else if (process.platform === "darwin") {
     picked = await pickMacFolder();
   } else {

@@ -93,7 +93,7 @@ export function ProjectSetupWizard() {
 
   async function pickLocationFolder(): Promise<string | null> {
     const token = await ensureToken();
-    return pickProjectFolder(token);
+    return pickProjectFolder(token, document.title);
   }
 
   async function loadPreview() {

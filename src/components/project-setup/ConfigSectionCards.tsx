@@ -64,6 +64,11 @@ export function FolderPicker({
         Browse opens a folder picker on your PC via the Local Executor. You can
         also type a path manually.
       </p>
+      {browsing ? (
+        <p className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+          Opening folder picker on your PC…
+        </p>
+      ) : null}
       {browseError ? (
         <p className="mt-1 text-xs text-red-600">{browseError}</p>
       ) : null}

@@ -89,10 +89,19 @@ export async function pairExecutor(token: string): Promise<void> {
   }
 }
 
-export async function pickProjectFolder(token: string): Promise<string | null> {
+export async function pickProjectFolder(
+  token: string,
+  windowTitle?: string
+): Promise<string | null> {
   const res = await fetch(`${EXECUTOR_BASE_URL}/pick-folder`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      windowTitle: windowTitle ?? (typeof document !== "undefined" ? document.title : undefined),
+    }),
   });
   if (!res.ok) {
     const err = (await res.json()) as { error?: string };
