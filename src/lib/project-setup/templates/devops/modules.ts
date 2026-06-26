@@ -291,11 +291,6 @@ export const authStubModule: StackModule = {
     return items;
   },
   dependencies: () => [],
-  files: () => [
-    {
-      relativePath: ".env.example",
-      content: `# Auth\nJWT_SECRET=change-me\nGOOGLE_CLIENT_ID=\nGOOGLE_CLIENT_SECRET=\n`,
-    },
-  ],
+  files: () => [],
   commands: () => [],
 };

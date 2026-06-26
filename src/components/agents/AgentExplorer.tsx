@@ -17,7 +17,7 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
 ];
 
 export function AgentExplorer({
-  gridClassName = "grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4",
+  gridClassName = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3",
 }: {
   gridClassName?: string;
 }) {
@@ -70,10 +70,10 @@ export function AgentExplorer({
               type="button"
               onClick={() => setStatusFilter(option.value)}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
                 statusFilter === option.value
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200/80 hover:bg-slate-50"
+                  ? "bg-brand-600 text-white shadow-sm shadow-brand-600/25"
+                  : "bg-slate-50 text-slate-600 ring-1 ring-slate-200/80 hover:bg-white"
               )}
             >
               {option.label}

@@ -46,7 +46,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "hidden h-full shrink-0 flex-col border-r border-slate-200 bg-white lg:flex",
+        "hidden h-full shrink-0 flex-col border-r border-slate-200/60 bg-white/80 backdrop-blur-sm lg:hidden",
         collapsed ? "w-16" : "w-56",
       )}
     >
@@ -61,7 +61,7 @@ export function Sidebar({
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3 pb-4">
         {visibleGlobalNav.map((item) => {
           const active = isGlobalNavActive(pathname, item.href);
           const Icon = item.icon;

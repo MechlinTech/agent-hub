@@ -25,6 +25,7 @@ import {
   type ExecutiveKpiKey,
 } from "@/components/results-analysis/KpiDetailModal";
 import { ScriptLevelExecutiveSummary } from "@/components/results-analysis/ScriptLevelExecutiveSummary";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 import { AiExecutiveSummaryCard } from "@/components/results-analysis/AiExecutiveSummaryCard";
 import {
   GoNoGoRecommendationCard,
@@ -339,17 +340,15 @@ function TechnicalTab({ result }: { result: AnalysisResultPayload }) {
       <div className="card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
           <h3 className="font-semibold text-slate-900">Transaction metrics</h3>
-          <select
-            className="input text-sm"
+          <StyledSelect
+            className="w-auto min-w-[12rem]"
             value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
-            {result.transactions.map((tx) => (
-              <option key={tx.name} value={tx.name}>
-                {tx.name}
-              </option>
-            ))}
-          </select>
+            onChange={setSelected}
+            options={result.transactions.map((tx) => ({
+              value: tx.name,
+              label: tx.name,
+            }))}
+          />
         </div>
         <TransactionMetricsTable
           rows={result.transactions}

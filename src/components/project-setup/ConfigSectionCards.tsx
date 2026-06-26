@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { FolderOpen, Loader2 } from "lucide-react";
+import { StyledSelect } from "@/components/ui/StyledSelect";
+import { StyledCheckboxGroup } from "@/components/ui/StyledCheckbox";
+import type { ProjectSetupConfig } from "@/lib/project-setup/types";
 
 export function FolderPicker({
   value,
@@ -35,11 +38,9 @@ export function FolderPicker({
   }
 
   return (
-    <div>
-      <label className="text-sm font-medium text-slate-700">
-        Project location
-      </label>
-      <div className="mt-1 flex gap-2">
+    <div className="field-group">
+      <label className="field-label">Project location</label>
+      <div className="flex gap-2">
         <input
           className="input min-w-0 flex-1"
           placeholder="D:\Projects"
@@ -60,19 +61,19 @@ export function FolderPicker({
           Browse
         </button>
       </div>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="field-hint">
         Browse opens a folder picker on your PC via the Local Executor. You can
         also type a path manually.
       </p>
       {browsing ? (
-        <p className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+        <p className="rounded-xl border border-brand-200/80 bg-brand-50/80 px-3 py-2 text-xs text-brand-800 backdrop-blur-sm">
           Opening folder picker on your PC…
         </p>
       ) : null}
       {browseError ? (
-        <p className="mt-1 text-xs text-red-600">{browseError}</p>
+        <p className="text-xs text-red-600">{browseError}</p>
       ) : null}
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
     </div>
   );
 }
@@ -80,15 +81,40 @@ export function FolderPicker({
 function Field({
   label,
   children,
+  hint,
 }: {
   label: string;
   children: React.ReactNode;
+  hint?: string;
 }) {
   return (
-    <div>
-      <label className="text-sm font-medium text-slate-700">{label}</label>
-      <div className="mt-1">{children}</div>
+    <div className="field-group">
+      <label className="field-label">{label}</label>
+      {children}
+      {hint ? <p className="field-hint">{hint}</p> : null}
     </div>
+  );
+}
+
+function CheckboxGroup({
+  items,
+  config,
+  onChange,
+}: {
+  items: { key: keyof ProjectSetupConfig; label: string }[];
+  config: ProjectSetupConfig;
+  onChange: (partial: Partial<ProjectSetupConfig>) => void;
+}) {
+  const values = Object.fromEntries(
+    items.map(({ key }) => [key, Boolean(config[key])]),
+  ) as Record<(typeof items)[number]["key"], boolean>;
+
+  return (
+    <StyledCheckboxGroup
+      items={items}
+      values={values}
+      onChange={(key, checked) => onChange({ [key]: checked })}
+    />
   );
 }
 
@@ -100,7 +126,7 @@ export function ConfigSectionCards({
   fieldErrors = {},
   onBrowseFolder,
 }: {
-  config: import("@/lib/project-setup/types").ProjectSetupConfig;
+  config: ProjectSetupConfig;
   onChange: (partial: Partial<typeof config>) => void;
   showFrontend: boolean;
   showBackend: boolean;
@@ -108,9 +134,9 @@ export function ConfigSectionCards({
   onBrowseFolder?: () => Promise<string | null>;
 }) {
   return (
-    <div className="space-y-4">
-      <div className="card p-5 space-y-4">
-        <h3 className="font-semibold text-slate-900">Project details</h3>
+    <div className="space-y-5">
+      <div className="card space-y-5 p-5 sm:p-6">
+        <h3 className="section-card-title">Project details</h3>
         <Field label="Project name">
           <input
             className="input w-full"
@@ -120,16 +146,15 @@ export function ConfigSectionCards({
             aria-invalid={Boolean(fieldErrors.projectName)}
           />
           {fieldErrors.projectName ? (
-            <p className="mt-1 text-xs text-red-600">
-              {fieldErrors.projectName}
-            </p>
+            <p className="text-xs text-red-600">{fieldErrors.projectName}</p>
           ) : null}
         </Field>
         <Field label="Description">
           <textarea
-            className="input min-h-[80px] w-full"
+            className="input min-h-[88px] w-full resize-y"
             value={config.description}
             onChange={(e) => onChange({ description: e.target.value })}
+            placeholder="Brief description of your project…"
           />
         </Field>
         <FolderPicker
@@ -141,162 +166,121 @@ export function ConfigSectionCards({
       </div>
 
       {showFrontend ? (
-        <div className="card p-5 space-y-4">
-          <h3 className="font-semibold text-slate-900">Frontend</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <div className="card space-y-5 p-5 sm:p-6">
+          <h3 className="section-card-title">Frontend</h3>
+          <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Framework">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.frontendFramework}
-                onChange={(e) =>
-                  onChange({
-                    frontendFramework: e.target
-                      .value as typeof config.frontendFramework,
-                  })
-                }
-              >
-                <option value="nextjs">Next.js</option>
-                <option value="react">React (Vite)</option>
-              </select>
+                onChange={(frontendFramework) => onChange({ frontendFramework })}
+                options={[
+                  { value: "nextjs", label: "Next.js" },
+                  { value: "react", label: "React (Vite)" },
+                ]}
+              />
             </Field>
             <Field label="Styling">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.styling}
-                onChange={(e) =>
-                  onChange({ styling: e.target.value as typeof config.styling })
-                }
-              >
-                <option value="tailwind">Tailwind CSS</option>
-                <option value="mui">Material UI</option>
-                <option value="shadcn">ShadCN UI</option>
-              </select>
+                onChange={(styling) => onChange({ styling })}
+                options={[
+                  { value: "tailwind", label: "Tailwind CSS" },
+                  { value: "mui", label: "Material UI" },
+                  { value: "shadcn", label: "ShadCN UI" },
+                ]}
+              />
             </Field>
             <Field label="State management">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.stateManagement}
-                onChange={(e) =>
-                  onChange({
-                    stateManagement: e.target
-                      .value as typeof config.stateManagement,
-                  })
-                }
-              >
-                <option value="redux">Redux Toolkit</option>
-                <option value="zustand">Zustand</option>
-                <option value="context">Context API</option>
-              </select>
+                onChange={(stateManagement) => onChange({ stateManagement })}
+                options={[
+                  { value: "redux", label: "Redux Toolkit" },
+                  { value: "zustand", label: "Zustand" },
+                  { value: "context", label: "Context API" },
+                ]}
+              />
             </Field>
             <Field label="Authentication">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.frontendAuth}
-                onChange={(e) =>
-                  onChange({
-                    frontendAuth: e.target.value as typeof config.frontendAuth,
-                  })
-                }
-              >
-                <option value="none">None</option>
-                <option value="jwt">JWT</option>
-                <option value="google_oauth">Google OAuth</option>
-              </select>
+                onChange={(frontendAuth) => onChange({ frontendAuth })}
+                options={[
+                  { value: "none", label: "None" },
+                  { value: "jwt", label: "JWT" },
+                  { value: "google_oauth", label: "Google OAuth" },
+                ]}
+              />
             </Field>
           </div>
         </div>
       ) : null}
 
       {showBackend ? (
-        <div className="card p-5 space-y-4">
-          <h3 className="font-semibold text-slate-900">Backend & database</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <div className="card space-y-5 p-5 sm:p-6">
+          <h3 className="section-card-title">Backend & database</h3>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Framework">
+              <StyledSelect
+                value={config.backendFramework}
+                onChange={(backendFramework) => onChange({ backendFramework })}
+                options={[{ value: "express", label: "Express.js" }]}
+              />
+            </Field>
             <Field label="Authentication">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.backendAuth}
-                onChange={(e) =>
-                  onChange({
-                    backendAuth: e.target.value as typeof config.backendAuth,
-                  })
-                }
-              >
-                <option value="jwt">JWT</option>
-                <option value="google_oauth">Google OAuth</option>
-              </select>
+                onChange={(backendAuth) => onChange({ backendAuth })}
+                options={[
+                  { value: "jwt", label: "JWT" },
+                  { value: "google_oauth", label: "Google OAuth" },
+                ]}
+              />
             </Field>
             <Field label="Database">
-              <select
-                className="input w-full"
+              <StyledSelect
                 value={config.database}
-                onChange={(e) =>
-                  onChange({
-                    database: e.target.value as typeof config.database,
-                  })
-                }
-              >
-                <option value="mongodb">MongoDB</option>
-                <option value="postgresql">PostgreSQL</option>
-              </select>
+                onChange={(database) => onChange({ database })}
+                options={[
+                  { value: "mongodb", label: "MongoDB" },
+                  { value: "postgresql", label: "PostgreSQL" },
+                ]}
+              />
             </Field>
           </div>
-          <div className="flex flex-wrap gap-4 text-sm">
-            {(
-              [
-                ["swagger", "Swagger"],
-                ["redis", "Redis"],
-                ["socketIo", "Socket.IO"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={config[key]}
-                  onChange={(e) => onChange({ [key]: e.target.checked })}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
+          <CheckboxGroup
+            config={config}
+            onChange={onChange}
+            items={[
+              { key: "swagger", label: "Swagger" },
+              { key: "redis", label: "Redis" },
+              { key: "socketIo", label: "Socket.IO" },
+            ]}
+          />
         </div>
       ) : null}
 
-      <div className="card p-5 space-y-4">
-        <h3 className="font-semibold text-slate-900">DevOps</h3>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={config.docker}
-              onChange={(e) => onChange({ docker: e.target.checked })}
-            />
-            Docker
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={config.githubActions}
-              onChange={(e) => onChange({ githubActions: e.target.checked })}
-            />
-            GitHub Actions
-          </label>
-        </div>
+      <div className="card space-y-5 p-5 sm:p-6">
+        <h3 className="section-card-title">DevOps</h3>
+        <CheckboxGroup
+          config={config}
+          onChange={onChange}
+          items={[
+            { key: "docker", label: "Docker" },
+            { key: "githubActions", label: "GitHub Actions" },
+          ]}
+        />
         <Field label="Deployment target">
-          <select
-            className="input w-full"
+          <StyledSelect
             value={config.deploymentTarget}
-            onChange={(e) =>
-              onChange({
-                deploymentTarget: e.target
-                  .value as typeof config.deploymentTarget,
-              })
-            }
-          >
-            <option value="none">None</option>
-            <option value="railway">Railway</option>
-            <option value="render">Render</option>
-            <option value="vercel">Vercel</option>
-          </select>
+            onChange={(deploymentTarget) => onChange({ deploymentTarget })}
+            options={[
+              { value: "none", label: "None" },
+              { value: "railway", label: "Railway" },
+              { value: "render", label: "Render" },
+              { value: "vercel", label: "Vercel" },
+            ]}
+          />
         </Field>
       </div>
     </div>

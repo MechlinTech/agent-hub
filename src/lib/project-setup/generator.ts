@@ -10,12 +10,16 @@ export async function writeProjectFiles(
 ): Promise<string[]> {
   const projectRoot = resolveProjectRoot(config.locationPath, config.projectName);
   const written: string[] = [];
+  const seen = new Set<string>();
 
   for (const file of files) {
     const fullPath = path.join(projectRoot, file.relativePath);
     await fs.mkdir(path.dirname(fullPath), { recursive: true });
     await fs.writeFile(fullPath, file.content, "utf8");
-    written.push(fullPath);
+    if (!seen.has(fullPath)) {
+      seen.add(fullPath);
+      written.push(fullPath);
+    }
   }
 
   return written;

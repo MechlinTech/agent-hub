@@ -16,8 +16,8 @@ export function ProjectSetupResults({ result }: { result: ProjectSetupResult }) 
       <div>
         <h4 className="text-sm font-medium text-slate-800">Generated files</h4>
         <ul className="mt-2 max-h-32 overflow-y-auto font-mono text-xs text-slate-600">
-          {result.generatedFiles.slice(0, 20).map((f) => (
-            <li key={f}>{f}</li>
+          {result.generatedFiles.slice(0, 20).map((f, i) => (
+            <li key={`${f}-${i}`}>{f}</li>
           ))}
           {result.generatedFiles.length > 20 ? (
             <li>…and {result.generatedFiles.length - 20} more</li>

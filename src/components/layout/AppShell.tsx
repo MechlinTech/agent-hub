@@ -4,8 +4,9 @@ import { useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { AccessLevel, AccessOverride, AppRole, Resource } from "@/lib/permissions";
 import { PermissionsProvider } from "@/lib/permissions-context";
-import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { DesktopNavBar } from "./DesktopNavBar";
+import { DesktopSecondaryNav } from "./DesktopSecondaryNav";
 import { BottomNav } from "./BottomNav";
 import { MobileAgentNav } from "./MobileAgentNav";
 import { MobileSettingsNav } from "@/components/settings/MobileSettingsNav";
@@ -31,7 +32,6 @@ export function AppShell({
   access: Record<Resource, AccessLevel>;
   configurableResources: Resource[];
 }) {
-  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const showSettingsMobileNav = isSettingsPath(pathname);
 
@@ -44,12 +44,13 @@ export function AppShell({
       configurableResources={configurableResources}
     >
       <div className="flex h-[100dvh] overflow-hidden app-shell-bg">
-        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <DesktopNavBar user={user} profile={profile} role={role} />
           <TopBar user={user} profile={profile} role={role} />
+          <DesktopSecondaryNav />
           {showSettingsMobileNav ? <MobileSettingsNav /> : <MobileAgentNav />}
-          <main className="main-with-bottom-nav min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain page-padding lg:pb-safe-bottom">
-            {children}
+          <main className="main-with-bottom-nav min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 py-5 sm:p-6 lg:px-8 lg:pb-8 lg:pt-2">
+            <div className="mx-auto max-w-[1400px]">{children}</div>
           </main>
           <BottomNav />
         </div>

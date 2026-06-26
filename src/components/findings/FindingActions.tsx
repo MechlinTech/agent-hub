@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 const STATUSES = [
   { value: "open", label: "Open" },
@@ -50,18 +51,13 @@ export function FindingActions({
       </button>
       <div>
         <label className="text-xs text-slate-500">Status</label>
-        <select
+        <StyledSelect
+          className="mt-1"
           value={status}
           disabled={saving}
-          onChange={(e) => updateStatus(e.target.value)}
-          className="mt-1 w-full rounded-lg border px-2 py-1.5"
-        >
-          {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+          onChange={updateStatus}
+          options={STATUSES}
+        />
       </div>
       {nextFindingId && (
         <button

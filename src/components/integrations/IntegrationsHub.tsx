@@ -10,6 +10,7 @@ import {
   type IntegrationDefinition,
 } from "@/lib/integrations/catalog";
 import { cn } from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 export function IntegrationsHub() {
   const [selectedId, setSelectedId] = useState("blazemeter");
@@ -33,18 +34,17 @@ export function IntegrationsHub() {
         <label className="mb-2 block text-sm font-medium text-slate-700">
           Select integration
         </label>
-        <select
+        <StyledSelect
+          className="max-w-md"
           value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
-          className="input w-full max-w-md"
-        >
-          {INTEGRATION_CATALOG.map((integration) => (
-            <option key={integration.id} value={integration.id}>
-              {integration.name}
-              {integration.status === "coming_soon" ? " (Coming soon)" : ""}
-            </option>
-          ))}
-        </select>
+          onChange={setSelectedId}
+          options={INTEGRATION_CATALOG.map((integration) => ({
+            value: integration.id,
+            label: `${integration.name}${
+              integration.status === "coming_soon" ? " (Coming soon)" : ""
+            }`,
+          }))}
+        />
       </div>
 
       <div>

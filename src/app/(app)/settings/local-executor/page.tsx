@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Terminal } from "lucide-react";
-import { SettingsShell } from "@/components/settings/SettingsShell";
 import {
   checkExecutorHealth,
   fetchPairingToken,
@@ -63,68 +62,70 @@ export default function LocalExecutorSettingsPage() {
   }
 
   return (
-    <SettingsShell>
-      <div className="max-w-2xl space-y-6">
-        {status ? <ExecutorStatusBanner status={status} /> : null}
+    <div className="w-full space-y-5">
+      {status ? <ExecutorStatusBanner status={status} /> : null}
 
-        <div className="card p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <Terminal className="h-5 w-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">Local Executor</h2>
-          </div>
-          <p className="text-sm text-slate-600">
-            Run <code className="rounded bg-slate-100 px-1">npm run executor</code> on the same
-            machine as your browser. Projects are created locally — not on the AgentHub server.
-          </p>
-          <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
-            <li>Start the executor: <code>npm run executor</code></li>
-            <li>Generate a pairing token below</li>
-            <li>Click Pair executor</li>
-            <li>Use Project Setup Agent from the wizard</li>
-          </ol>
+      <div className="card space-y-4 p-5 sm:p-6">
+        <div className="flex items-center gap-2">
+          <Terminal className="h-5 w-5 text-slate-600" />
+          <h2 className="section-card-title border-0 pb-0">Local Executor</h2>
         </div>
-
-        {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
-        {message ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {message}
-          </div>
-        ) : null}
-
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            className="btn-primary inline-flex items-center gap-2"
-            disabled={loading}
-            onClick={generateToken}
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Generate pairing token
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={loading || !token}
-            onClick={handlePair}
-          >
-            Pair executor
-          </button>
-        </div>
-
-        {token ? (
-          <div className="card p-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Token (session only)</p>
-            <p className="mt-2 break-all font-mono text-sm text-slate-800">{token}</p>
-            <p className="mt-2 text-xs text-slate-500">
-              Not stored in localStorage. Regenerating invalidates the previous token.
-            </p>
-          </div>
-        ) : null}
+        <p className="text-sm text-slate-600">
+          Run <code className="rounded bg-slate-100 px-1">npm run executor</code> on the same
+          machine as your browser. Projects are created locally — not on the AgentHub server.
+        </p>
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
+          <li>
+            Start the executor: <code>npm run executor</code>
+          </li>
+          <li>Generate a pairing token below</li>
+          <li>Click Pair executor</li>
+          <li>Use Project Setup Agent from the wizard</li>
+        </ol>
       </div>
-    </SettingsShell>
+
+      {error ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
+      {message ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {message}
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          className="btn-primary inline-flex items-center gap-2"
+          disabled={loading}
+          onClick={generateToken}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          Generate pairing token
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={loading || !token}
+          onClick={handlePair}
+        >
+          Pair executor
+        </button>
+      </div>
+
+      {token ? (
+        <div className="card p-4 sm:p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Token (session only)
+          </p>
+          <p className="mt-2 break-all font-mono text-sm text-slate-800">{token}</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Not stored in localStorage. Regenerating invalidates the previous token.
+          </p>
+        </div>
+      ) : null}
+    </div>
   );
 }

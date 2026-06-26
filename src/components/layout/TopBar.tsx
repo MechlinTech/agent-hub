@@ -42,7 +42,7 @@ export function TopBar({
 
   return (
     <>
-      <header className="safe-top sticky top-0 z-20 shrink-0 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl backdrop-saturate-150">
+      <header className="safe-top sticky top-0 z-20 shrink-0 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl backdrop-saturate-150 lg:hidden">
         <div className="relative flex h-[var(--mobile-header-height)] items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-1 lg:gap-3">
             {backHref ? (
