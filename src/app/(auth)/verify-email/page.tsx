@@ -64,7 +64,7 @@ export default function VerifyEmailPage() {
           type="button"
           onClick={checkVerified}
           disabled={loading}
-          className="w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary w-full rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50"
         >
           I&apos;ve confirmed my email
         </button>

@@ -373,7 +373,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                         className={cn(
                           "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold",
                           isSelected
-                            ? "bg-brand-600 text-white"
+                            ? "brand-gradient text-white"
                             : "bg-gradient-to-br from-slate-100 to-slate-50 text-slate-600"
                         )}
                       >
@@ -420,7 +420,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
               <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">
+                    <div className="brand-gradient flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white">
                       {userInitials(selectedUser.full_name, selectedUser.email)}
                     </div>
                     <div className="min-w-0">

@@ -59,7 +59,7 @@ export default async function ReviewReportPage({
           <ExportButtons reviewId={id} scriptName={review.script_name} />
           <Link
             href={`/agents/script-review/${id}/results`}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm text-white"
+            className="btn-primary rounded-lg px-4 py-2 text-sm"
           >
             View Results
           </Link>

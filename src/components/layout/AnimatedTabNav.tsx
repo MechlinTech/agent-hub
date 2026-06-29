@@ -86,10 +86,10 @@ export function AnimatedTabNav({
   const indicatorClass = cn(
     "pointer-events-none absolute rounded-full",
     INDICATOR_TRANSITION,
-    variant === "dark" && "bg-brand-500 shadow-sm shadow-brand-500/30",
-    variant === "light" && "bg-brand-600 shadow-sm shadow-brand-600/25",
+    variant === "dark" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/30",
+    variant === "light" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/25",
     variant === "underline" &&
-      "top-auto bottom-0 h-0.5 rounded-full bg-brand-600 shadow-none",
+      "top-auto bottom-0 h-0.5 rounded-full bg-brand-500 shadow-none",
   );
 
   return (
@@ -138,11 +138,11 @@ export function AnimatedTabNav({
                 variant === "dark" &&
                   (tab.active
                     ? "text-white"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"),
+                    : "text-indigo-400 hover:bg-violet-100/60 hover:text-indigo-800"),
                 variant === "light" &&
                   (tab.active
                     ? "text-white"
-                    : "bg-white text-slate-600 shadow-card hover:bg-slate-50"),
+                    : "text-indigo-500 hover:text-indigo-800"),
                 variant === "underline" &&
                   (tab.active
                     ? "text-brand-600"

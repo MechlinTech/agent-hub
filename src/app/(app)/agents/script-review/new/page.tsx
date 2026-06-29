@@ -364,7 +364,7 @@ export default function NewReviewPage() {
           type="button"
           disabled={!file || starting}
           onClick={startReview}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
         >
           <Play className="h-4 w-4" />
           {starting ? "Starting..." : "Start Review"}

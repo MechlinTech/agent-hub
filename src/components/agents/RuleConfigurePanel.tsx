@@ -150,7 +150,7 @@ export function RuleConfigurePanel() {
                 type="button"
                 onClick={save}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 btn-primary rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 {saved ? "Saved!" : saving ? "Saving..." : "Save Configuration"}

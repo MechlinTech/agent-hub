@@ -33,7 +33,7 @@ export function BottomNav() {
               <span
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl transition-colors duration-200",
-                  active && "bg-brand-50 text-brand-600"
+                  active && "bg-brand-100 text-brand-700"
                 )}
               >
                 <Icon

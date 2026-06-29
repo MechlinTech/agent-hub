@@ -189,7 +189,7 @@ export function NotificationsBell({ userId }: { userId: string }) {
               )}
             </div>
           </div>
-          <ul className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-3">
+          <ul className="scrollbar-brand min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-3">
             {items.length ? (
               items.map((n) => (
                 <li

@@ -39,7 +39,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }]} />
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }]}
+      />
 
       <DashboardWelcome />
 
@@ -47,7 +49,10 @@ export default function DashboardPage() {
         {metricCards.map((m) => {
           const Icon = m.icon;
           return (
-            <div key={m.label} className="metric-card mobile-stat-card lg:min-w-0 lg:snap-none">
+            <div
+              key={m.label}
+              className="metric-card mobile-stat-card lg:min-w-0 lg:snap-none"
+            >
               <div className="mb-4 flex items-start justify-between">
                 <div className={cn("metric-card-icon", m.tone)}>
                   <Icon className="h-5 w-5" />
@@ -57,9 +62,13 @@ export default function DashboardPage() {
                 </span>
               </div>
               <p className="text-sm font-medium text-slate-500">{m.label}</p>
-              <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">{m.value}</p>
+              <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+                {m.value}
+              </p>
               <p className="mt-1 text-xs text-slate-500">{m.sub}</p>
-              <p className="mt-3 text-xs font-semibold text-brand-600">{m.trend}</p>
+              <p className="mt-3 text-xs font-semibold text-brand-600">
+                {m.trend}
+              </p>
             </div>
           );
         })}
@@ -74,7 +83,8 @@ export default function DashboardPage() {
             </div>
             <h2 className="section-title">Explore Agents</h2>
             <p className="section-subtitle mt-1">
-              Search by name or filter by status. Open an agent to access its tools and workflows.
+              Search by name or filter by status. Open an agent to access its
+              tools and workflows.
             </p>
           </div>
         </div>

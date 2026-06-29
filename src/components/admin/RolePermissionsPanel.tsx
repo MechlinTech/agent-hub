@@ -422,7 +422,7 @@ export function RolePermissionsPanel() {
             className={cn(
               "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               creating
-                ? "bg-brand-600 text-white"
+                ? "brand-gradient text-white"
                 : "text-brand-600 hover:bg-brand-50",
             )}
           >

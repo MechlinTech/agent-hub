@@ -36,12 +36,12 @@ export function DashboardWelcome() {
             "Welcome back"
           )}
         </h1> */}
-        <h6 className="text-md font-medium text-slate-500">
+        <h6 className="text-md font-medium text-indigo-600">
           Here&apos;s what&apos;s happening in your performance engineering
           workspace today.
         </h6>
       </div>
-      <div className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-float">
+      <div className="brand-gradient inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-white shadow-float">
         <Sparkles className="h-4 w-4" />
         AI Agents
       </div>

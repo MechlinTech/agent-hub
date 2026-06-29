@@ -65,12 +65,12 @@ export default async function ReviewHistoryPage() {
           {latestReviewId ? (
             <Link
               href={`/agents/script-review/${latestReviewId}/results`}
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
+              className="btn-primary rounded-lg px-4 py-2 text-sm font-medium"
             >
               Open Latest Review →
             </Link>
           ) : (
-            <ScriptReviewNewLink className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white">
+            <ScriptReviewNewLink className="btn-primary rounded-lg px-4 py-2 text-sm font-medium">
               Start First Review →
             </ScriptReviewNewLink>
           )}

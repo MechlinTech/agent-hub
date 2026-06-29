@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/client";
 import { NotificationsBell } from "./NotificationsBell";
 import { GlobalSearch } from "./GlobalSearch";
 import { AnimatedTabNav } from "@/components/layout/AnimatedTabNav";
+import { AgentHubLogo } from "@/components/brand/AgentHubMark";
 
 export function DesktopNavBar({
   user,
@@ -60,20 +61,18 @@ export function DesktopNavBar({
 
   return (
     <div className="hidden px-6 pt-5 pb-5 lg:block">
-      <div className="mx-auto flex max-w-[1400px] items-center gap-4 rounded-4xl bg-gradient-to-r from-brand-600 via-brand-600 to-brand-700 px-5 py-3 shadow-nav">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-4 rounded-4xl border border-white/70 bg-white/55 px-5 py-3 shadow-nav backdrop-blur-xl backdrop-saturate-150">
         <Link href="/dashboard" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-sm font-bold text-white ring-1 ring-white/20 backdrop-blur-sm">
-            AH
-          </div>
-          <span className="text-base font-bold tracking-tight text-white">
+          <AgentHubLogo size="md" />
+          <span className="text-base font-bold tracking-tight text-indigo-950">
             Agent Hub
           </span>
         </Link>
 
         <AnimatedTabNav
-          variant="dark"
+          variant="light"
           ariaLabel="Main navigation"
-          className="mx-auto min-w-0 rounded-full bg-slate-900/75 p-1.5 ring-1 ring-white/10 backdrop-blur-md"
+          className="mx-auto min-w-0 rounded-full bg-violet-100/50 p-1 ring-1 ring-violet-200/50"
           tabs={visibleNav.map((item) => ({
             href: item.href,
             label: item.label,
@@ -83,31 +82,18 @@ export function DesktopNavBar({
         />
 
         <div className="flex shrink-0 items-center gap-2">
-          {/* <div className="hidden xl:block">
-            <GlobalSearch variant="nav" />
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
-            }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/90 ring-1 ring-white/15 transition-colors hover:bg-white/15 xl:hidden"
-            aria-label="Search"
-          >
-            <Search className="h-4 w-4" />
-          </button> */}
-          <div className="[&_button]:rounded-full [&_button]:bg-white/10 [&_button]:text-white [&_button]:ring-1 [&_button]:ring-white/15 [&_button]:hover:bg-white/15">
+          <div className="[&_button]:rounded-full [&_button]:text-indigo-500 [&_button]:hover:bg-violet-100/80 [&_button]:hover:text-indigo-900">
             <NotificationsBell userId={user.id} />
           </div>
-          <div className="flex items-center gap-2 rounded-full bg-white/10 py-1 pl-1 pr-3 ring-1 ring-white/15">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-brand-700">
+          <div className="flex items-center gap-2 rounded-full bg-violet-100/60 py-1 pl-1 pr-3 ring-1 ring-violet-200/50">
+            <div className="brand-gradient flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white">
               {name.charAt(0).toUpperCase()}
             </div>
             <div className="hidden min-w-0 text-left md:block">
-              <p className="max-w-[100px] truncate text-xs font-semibold text-white lg:max-w-[120px]">
+              <p className="max-w-[100px] truncate text-xs font-semibold text-indigo-950 lg:max-w-[120px]">
                 {name}
               </p>
-              <p className="max-w-[100px] truncate text-[10px] text-white/70 lg:max-w-[120px]">
+              <p className="max-w-[100px] truncate text-[10px] text-indigo-400 lg:max-w-[120px]">
                 {role ? getRoleLabel(role) : team}
               </p>
             </div>
@@ -117,7 +103,7 @@ export function DesktopNavBar({
             onClick={() => setConfirmOpen(true)}
             title="Sign out"
             aria-haspopup="dialog"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 ring-1 ring-white/15 transition-colors hover:bg-white/15 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-indigo-400 transition-colors hover:bg-violet-100/80 hover:text-indigo-800"
           >
             <LogOut className="h-4 w-4" />
           </button>

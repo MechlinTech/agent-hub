@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "JMeter Script Review - performance engineering workspace",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#f8fafc",
-    theme_color: "#2563eb",
+    theme_color: "#7c3aed",
+    background_color: "#f6f5fb",
     orientation: "portrait-primary",
     categories: ["productivity", "utilities"],
     icons: [

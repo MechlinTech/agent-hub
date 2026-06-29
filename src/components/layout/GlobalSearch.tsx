@@ -101,7 +101,7 @@ export function GlobalSearch({ variant = "default" }: { variant?: "default" | "n
             <X className="h-4 w-4 text-slate-400" />
           </button>
         </div>
-        <ul className="max-h-72 overflow-y-auto py-2">
+        <ul className="scrollbar-brand max-h-72 overflow-y-auto py-2">
           {visibleResults.map((r) => (
             <li key={`${r.type}-${r.id}`}>
               <button

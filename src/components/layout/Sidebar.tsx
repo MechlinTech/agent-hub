@@ -23,6 +23,7 @@ import {
   beginNewProjectSetup,
   PROJECT_SETUP_NEW_PATH,
 } from "@/stores/project-setup-store";
+import { AgentHubLogo } from "@/components/brand/AgentHubMark";
 
 export function Sidebar({
   collapsed,
@@ -51,9 +52,7 @@ export function Sidebar({
       )}
     >
       <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-          AH
-        </div>
+        <AgentHubLogo size="sm" className="rounded-lg" />
         {showLabels && (
           <span className="text-sm font-semibold text-slate-800">
             Agent Hub
@@ -61,7 +60,7 @@ export function Sidebar({
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3 pb-4">
+      <nav className="scrollbar-brand flex-1 space-y-1 overflow-y-auto p-3 pb-4">
         {visibleGlobalNav.map((item) => {
           const active = isGlobalNavActive(pathname, item.href);
           const Icon = item.icon;
