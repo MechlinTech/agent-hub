@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
+  buildDraftPreviewConfig,
   formatProjectSetupValidationError,
   projectSetupConfigSchema,
   projectSetupFieldErrors,
@@ -57,7 +58,9 @@ export function ProjectSetupWizard() {
   const sessionToken = useExecutorSessionStore((s) => s.token);
   const setSessionToken = useExecutorSessionStore((s) => s.setToken);
 
-  const [executorStatus, setExecutorStatus] = useState<ExecutorStatus | null>(null);
+  const [executorStatus, setExecutorStatus] = useState<ExecutorStatus | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
@@ -77,6 +80,38 @@ export function ProjectSetupWizard() {
     return () => clearInterval(t);
   }, [refreshHealth]);
 
+  const executorReady = Boolean(
+    executorStatus?.connected && executorStatus?.paired,
+  );
+
+  useEffect(() => {
+    if (currentStep !== 1 || !executorReady) return;
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const previewConfig = buildDraftPreviewConfig(config);
+        let token = sessionToken;
+        if (!token) {
+          token = await fetchPairingToken();
+          setSessionToken(token);
+        }
+        const preview = await fetchPreview(previewConfig, token);
+        setPlan(preview);
+      } catch {
+        setPlan(null);
+      }
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    config,
+    currentStep,
+    executorReady,
+    sessionToken,
+    setPlan,
+    setSessionToken,
+  ]);
+
   async function ensureToken(): Promise<string> {
     let token = sessionToken;
     if (!token) {
@@ -93,7 +128,7 @@ export function ProjectSetupWizard() {
 
   async function pickLocationFolder(): Promise<string | null> {
     const token = await ensureToken();
-    return pickProjectFolder(token);
+    return pickProjectFolder(token, document.title);
   }
 
   async function loadPreview() {
@@ -149,7 +184,8 @@ export function ProjectSetupWizard() {
           body: JSON.stringify({ config }),
         });
         const createData = await createRes.json();
-        if (!createRes.ok) throw new Error(createData.error || "Failed to save setup");
+        if (!createRes.ok)
+          throw new Error(createData.error || "Failed to save setup");
         id = createData.id as string;
         setJobId(id);
       }
@@ -203,7 +239,9 @@ export function ProjectSetupWizard() {
       const msg = e instanceof Error ? e.message : "Generation failed";
       setError(msg);
       if (jobId) {
-        await syncResult(jobId, { status: "failed", errorMessage: msg }).catch(() => {});
+        await syncResult(jobId, { status: "failed", errorMessage: msg }).catch(
+          () => {},
+        );
       }
     } finally {
       setRunning(false);
@@ -217,10 +255,12 @@ export function ProjectSetupWizard() {
     currentStep >= 2;
 
   return (
-    <div>
+    <div className="pb-20">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">New project setup</h1>
-        <p className="mt-1 text-sm text-slate-500">Configure, review, and generate on your machine.</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Configure, review, and generate on your machine.
+        </p>
       </div>
 
       {executorStatus ? <ExecutorStatusBanner status={executorStatus} /> : null}
@@ -236,8 +276,10 @@ export function ProjectSetupWizard() {
               className={cn(
                 "flex-1 rounded-lg border px-3 py-2 text-center text-xs font-medium sm:text-sm",
                 active && "border-brand-300 bg-brand-50 text-brand-800",
-                done && !active && "border-slate-200 bg-slate-50 text-slate-600",
-                !active && !done && "border-slate-100 text-slate-400"
+                done &&
+                  !active &&
+                  "border-slate-200 bg-slate-50 text-slate-600",
+                !active && !done && "border-slate-100 text-slate-400",
               )}
             >
               {i + 1}. {label}
@@ -286,7 +328,11 @@ export function ProjectSetupWizard() {
               {result ? (
                 <ProjectSetupResults result={result} />
               ) : (
-                <GenerationProgress events={events} logLines={logLines} running={running} />
+                <GenerationProgress
+                  events={events}
+                  logLines={logLines}
+                  running={running}
+                />
               )}
             </div>
           ) : null}
@@ -294,16 +340,16 @@ export function ProjectSetupWizard() {
 
         <div className="space-y-4">
           <ProjectSummaryCard config={config} />
-          {currentStep >= 2 ? <ArchitecturePreviewCard plan={plan} /> : null}
-          {currentStep >= 2 ? <CommandPreviewCard plan={plan} /> : null}
+          <ArchitecturePreviewCard plan={plan} />
+          <CommandPreviewCard plan={plan} executorReady={executorReady} />
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur lg:left-56">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+      <div className="wizard-action-bar">
+        <div className="wizard-action-bar-inner">
           <button
             type="button"
-            className="btn-secondary"
+            className="btn-secondary px-5 py-2"
             disabled={currentStep === 1 || running}
             onClick={prevStep}
           >
@@ -313,7 +359,7 @@ export function ProjectSetupWizard() {
             {currentStep < 3 ? (
               <button
                 type="button"
-                className="btn-primary inline-flex items-center gap-2"
+                className="btn-primary inline-flex items-center gap-2 px-5 py-2"
                 disabled={loading}
                 onClick={handleNext}
               >
@@ -324,7 +370,7 @@ export function ProjectSetupWizard() {
             {currentStep >= 2 && !result ? (
               <button
                 type="button"
-                className="btn-primary inline-flex items-center gap-2"
+                className="btn-primary inline-flex items-center gap-2 px-5 py-2"
                 disabled={!canRun}
                 onClick={handleRunAgent}
               >

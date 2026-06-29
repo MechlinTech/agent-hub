@@ -14,6 +14,7 @@ import {
 
 import type { AppRole } from "@/lib/permissions";
 import { getRoleLabel } from "@/lib/permissions";
+import { AgentHubLogo } from "@/components/brand/AgentHubMark";
 
 export function TopBar({
   user,
@@ -42,7 +43,7 @@ export function TopBar({
 
   return (
     <>
-      <header className="safe-top sticky top-0 z-20 shrink-0 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl backdrop-saturate-150">
+      <header className="safe-top sticky top-0 z-20 shrink-0 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl backdrop-saturate-150 lg:hidden">
         <div className="relative flex h-[var(--mobile-header-height)] items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-1 lg:gap-3">
             {backHref ? (
@@ -56,9 +57,7 @@ export function TopBar({
               </button>
             ) : isRootTab ? (
               <div className="flex items-center gap-2.5 lg:hidden">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 text-xs font-bold text-white shadow-sm">
-                  AH
-                </div>
+                <AgentHubLogo size="sm" />
                 <span className="text-[17px] font-bold tracking-tight text-slate-900">
                   Agent Hub
                 </span>
@@ -68,9 +67,7 @@ export function TopBar({
             )}
 
             <div className="hidden min-w-0 items-center gap-2 lg:flex">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 text-sm font-bold text-white shadow-sm">
-                AH
-              </div>
+              <AgentHubLogo size="sm" />
               <span className="text-sm font-semibold text-slate-800">Agent Hub</span>
             </div>
           </div>

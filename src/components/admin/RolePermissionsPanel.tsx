@@ -24,6 +24,7 @@ import {
   isCustomRole,
 } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
+import { StyledCheckbox } from "@/components/ui/StyledCheckbox";
 import { usePermissions } from "@/lib/permissions-context";
 
 const EDITABLE_BUILT_IN: BuiltInRole[] = ["performance_engineer", "viewer"];
@@ -332,7 +333,7 @@ export function RolePermissionsPanel() {
   const editableResources = isSuperAdmin ? RESOURCES : visibleResources;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="w-full space-y-5">
       {isSuperAdmin && (
         <div className="card overflow-hidden">
           <div className="border-b border-slate-100 bg-violet-50/50 px-5 py-4">
@@ -346,20 +347,14 @@ export function RolePermissionsPanel() {
             {RESOURCES.map((resource) => {
               const enabled = adminVisibility.includes(resource);
               return (
-                <label
+                <StyledCheckbox
                   key={resource}
-                  className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/40 px-3 py-3"
-                >
-                  <span className="text-sm font-medium text-slate-800">
-                    {RESOURCE_LABELS[resource]}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={enabled}
-                    onChange={() => toggleAdminVisibility(resource)}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                  />
-                </label>
+                  variant="row"
+                  className="rounded-xl border border-slate-200/80 bg-slate-50/40 px-3 py-2.5"
+                  label={RESOURCE_LABELS[resource]}
+                  checked={enabled}
+                  onChange={() => toggleAdminVisibility(resource)}
+                />
               );
             })}
             <button
@@ -427,7 +422,7 @@ export function RolePermissionsPanel() {
             className={cn(
               "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               creating
-                ? "bg-brand-600 text-white"
+                ? "brand-gradient text-white"
                 : "text-brand-600 hover:bg-brand-50",
             )}
           >

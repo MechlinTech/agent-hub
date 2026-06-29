@@ -81,7 +81,7 @@ app.listen(port, () => console.log(\`API listening on \${port}\`));
 
 export const expressBaseModule: StackModule = {
   id: "backend-express",
-  appliesTo: (c) => scopeIncludesBackend(c),
+  appliesTo: (c) => scopeIncludesBackend(c) && c.backendFramework === "express",
   checklist: () => ["Express.js API server"],
   dependencies: () => ["express", "cors", "dotenv"],
   files: (config) => {

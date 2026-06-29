@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { AgentHubLogo } from "@/components/brand/AgentHubMark";
 
 function LoginForm() {
   const router = useRouter();
@@ -32,9 +33,7 @@ function LoginForm() {
   return (
     <div className="card p-8">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white">
-          AH
-        </div>
+        <AgentHubLogo size="lg" className="mx-auto mb-3" />
         <h1 className="text-xl font-bold text-slate-900">Agent Hub</h1>
         <p className="mt-1 text-sm text-slate-500">Sign in to your performance workspace</p>
       </div>
@@ -64,7 +63,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary w-full rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>

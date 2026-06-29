@@ -11,6 +11,8 @@ import type {
 } from "@/lib/blazemeter/types";
 import { hasBlazeMeterWorkspaceConfig } from "@/lib/blazemeter/types";
 import { buildBlazeMeterSavePayload } from "@/lib/blazemeter/types";
+import { StyledSelect } from "@/components/ui/StyledSelect";
+import { StyledCheckbox } from "@/components/ui/StyledCheckbox";
 
 interface PerformanceTestOption extends BlazeMeterNamedEntity {
   filename: string | null;
@@ -685,15 +687,12 @@ function ConfigurationForm({
         </div>
       </div>
 
-      <label className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={config.enabled}
-          onChange={(e) => onUpdate({ enabled: e.target.checked })}
-          className="h-4 w-4 rounded border-slate-300"
-        />
-        <span className="text-sm font-medium text-slate-800">Enable BlazeMeter integration</span>
-      </label>
+      <StyledCheckbox
+        variant="chip"
+        label="Enable BlazeMeter integration"
+        checked={config.enabled}
+        onChange={(enabled) => onUpdate({ enabled })}
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
@@ -714,10 +713,11 @@ function ConfigurationForm({
               Load accounts
             </button>
           </div>
-          <select
-            value={config.accountId ?? ""}
-            onChange={(e) => {
-              const accountId = e.target.value ? Number(e.target.value) : null;
+          <StyledSelect
+            value={config.accountId != null ? String(config.accountId) : ""}
+            disabled={!canUseCredentials}
+            onChange={(next) => {
+              const accountId = next ? Number(next) : null;
               const selected = accounts.find((a) => a.id === accountId);
               onUpdate({
                 accountId,
@@ -734,21 +734,22 @@ function ConfigurationForm({
               onClearTests();
               if (accountId) onLoadWorkspaces();
             }}
-            disabled={!canUseCredentials}
-            className="input w-full disabled:bg-slate-50"
-          >
-            <option value="">Select account</option>
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name} ({a.id})
-              </option>
-            ))}
-            {config.accountId && !accounts.some((a) => a.id === config.accountId) && (
-              <option value={config.accountId}>
-                {config.accountName || `Account ${config.accountId}`} ({config.accountId})
-              </option>
-            )}
-          </select>
+            options={[
+              { value: "", label: "Select account" },
+              ...accounts.map((a) => ({
+                value: String(a.id),
+                label: `${a.name} (${a.id})`,
+              })),
+              ...(config.accountId && !accounts.some((a) => a.id === config.accountId)
+                ? [
+                    {
+                      value: String(config.accountId),
+                      label: `${config.accountName || `Account ${config.accountId}`} (${config.accountId})`,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
 
         <label className="block text-sm">
@@ -781,10 +782,10 @@ function ConfigurationForm({
               Load
             </button>
           </div>
-          <select
-            value={config.workspaceId ?? ""}
-            onChange={(e) => {
-              const workspaceId = e.target.value ? Number(e.target.value) : null;
+          <StyledSelect
+            value={config.workspaceId != null ? String(config.workspaceId) : ""}
+            onChange={(next) => {
+              const workspaceId = next ? Number(next) : null;
               const selected = workspaces.find((w) => w.id === workspaceId);
               onUpdate({
                 workspaceId,
@@ -798,20 +799,22 @@ function ConfigurationForm({
               onClearTests();
               if (workspaceId) onLoadProjects(workspaceId);
             }}
-            className="input w-full"
-          >
-            <option value="">Select workspace</option>
-            {workspaces.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name} ({w.id})
-              </option>
-            ))}
-            {config.workspaceId && !workspaces.some((w) => w.id === config.workspaceId) && (
-              <option value={config.workspaceId}>
-                {config.workspaceName || `Workspace ${config.workspaceId}`} ({config.workspaceId})
-              </option>
-            )}
-          </select>
+            options={[
+              { value: "", label: "Select workspace" },
+              ...workspaces.map((w) => ({
+                value: String(w.id),
+                label: `${w.name} (${w.id})`,
+              })),
+              ...(config.workspaceId && !workspaces.some((w) => w.id === config.workspaceId)
+                ? [
+                    {
+                      value: String(config.workspaceId),
+                      label: `${config.workspaceName || `Workspace ${config.workspaceId}`} (${config.workspaceId})`,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
 
         <div>
@@ -833,10 +836,11 @@ function ConfigurationForm({
               </button>
             ) : null}
           </div>
-          <select
-            value={config.projectId ?? ""}
-            onChange={(e) => {
-              const projectId = e.target.value ? Number(e.target.value) : null;
+          <StyledSelect
+            value={config.projectId != null ? String(config.projectId) : ""}
+            disabled={!config.workspaceId}
+            onChange={(next) => {
+              const projectId = next ? Number(next) : null;
               const selected = projects.find((p) => p.id === projectId);
               onUpdate({
                 projectId,
@@ -849,21 +853,22 @@ function ConfigurationForm({
                 onLoadTests(projectId, config.workspaceId);
               }
             }}
-            disabled={!config.workspaceId}
-            className="input w-full disabled:bg-slate-50"
-          >
-            <option value="">Select project</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} ({p.id})
-              </option>
-            ))}
-            {config.projectId && !projects.some((p) => p.id === config.projectId) && (
-              <option value={config.projectId}>
-                {config.projectName || `Project ${config.projectId}`} ({config.projectId})
-              </option>
-            )}
-          </select>
+            options={[
+              { value: "", label: "Select project" },
+              ...projects.map((p) => ({
+                value: String(p.id),
+                label: `${p.name} (${p.id})`,
+              })),
+              ...(config.projectId && !projects.some((p) => p.id === config.projectId)
+                ? [
+                    {
+                      value: String(config.projectId),
+                      label: `${config.projectName || `Project ${config.projectId}`} (${config.projectId})`,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
       </div>
 
@@ -938,26 +943,24 @@ function ConfigurationForm({
               </button>
             ) : null}
           </div>
-          <select
-            value={config.reuseTestId ?? ""}
-            onChange={(e) => {
-              const selected = tests.find((t) => t.id === Number(e.target.value));
+          <StyledSelect
+            value={config.reuseTestId != null ? String(config.reuseTestId) : ""}
+            disabled={!config.projectId || !config.workspaceId}
+            onChange={(next) => {
+              const selected = tests.find((t) => t.id === Number(next));
               onUpdate({
-                reuseTestId: e.target.value ? Number(e.target.value) : null,
+                reuseTestId: next ? Number(next) : null,
                 reuseTestName: selected?.name ?? null,
               });
             }}
-            disabled={!config.projectId || !config.workspaceId}
-            className="input w-full disabled:bg-slate-50"
-          >
-            <option value="">Select performance test</option>
-            {tests.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} ({t.id})
-                {t.filename ? `: ${t.filename}` : ""}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Select performance test" },
+              ...tests.map((t) => ({
+                value: String(t.id),
+                label: `${t.name} (${t.id})${t.filename ? `: ${t.filename}` : ""}`,
+              })),
+            ]}
+          />
         </div>
       )}
     </>

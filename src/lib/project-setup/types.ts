@@ -6,6 +6,7 @@ export type StateManagement = "redux" | "zustand" | "context";
 export type FrontendAuth = "none" | "jwt" | "google_oauth";
 
 export type BackendAuth = "jwt" | "google_oauth";
+export type BackendFramework = "express";
 export type DatabaseOption = "mongodb" | "postgresql";
 export type DeploymentTarget = "none" | "railway" | "render" | "vercel";
 
@@ -18,6 +19,7 @@ export interface ProjectSetupConfig {
   styling: StylingOption;
   stateManagement: StateManagement;
   frontendAuth: FrontendAuth;
+  backendFramework: BackendFramework;
   backendAuth: BackendAuth;
   database: DatabaseOption;
   swagger: boolean;

@@ -1,5 +1,5 @@
 import path from "path";
-import type { ProjectSetupConfig, PlanResult } from "@/lib/project-setup/types";
+import type { ProjectSetupConfig, PlanResult, FileTemplate } from "@/lib/project-setup/types";
 import { ensureTemplatesRegistered } from "@/lib/project-setup/templates/index";
 import { getApplicableModules } from "@/lib/project-setup/templates/registry";
 import {
@@ -15,11 +15,11 @@ export function buildPlan(config: ProjectSetupConfig): PlanResult {
   const projectRoot = resolveProjectRoot(config.locationPath, config.projectName);
   const modules = getApplicableModules(config);
 
-  const files = [
+  const files = dedupeFilesByPath([
     { relativePath: "README.md", content: readmeContent(config) },
     { relativePath: ".env.example", content: envExampleContent(config) },
     ...modules.flatMap((m) => m.files(config, projectRoot)),
-  ];
+  ]);
 
   const commands = modules.flatMap((m) => m.commands(config, projectRoot));
 
@@ -55,4 +55,13 @@ function buildFolderTree(config: ProjectSetupConfig, filePaths: string[]): strin
     }
   }
   return Array.from(dirs).sort();
+}
+
+/** Keep the last template when multiple modules emit the same relative path. */
+function dedupeFilesByPath(files: FileTemplate[]): FileTemplate[] {
+  const byPath = new Map<string, FileTemplate>();
+  for (const file of files) {
+    byPath.set(file.relativePath, file);
+  }
+  return Array.from(byPath.values());
 }

@@ -48,7 +48,9 @@ export function ProjectSummaryCard({
     items.push(`Frontend: ${config.frontendFramework} + ${config.styling}`);
   }
   if (config.projectScope !== "frontend_only") {
-    items.push(`Backend: Express + ${config.database}`);
+    const frameworkLabel =
+      config.backendFramework === "express" ? "Express.js" : config.backendFramework;
+    items.push(`Backend: ${frameworkLabel} + ${config.database}`);
   }
   if (config.docker) items.push("Docker");
   if (config.githubActions) items.push("GitHub Actions");

@@ -9,6 +9,7 @@ export const DEFAULT_PROJECT_SETUP_CONFIG: ProjectSetupConfig = {
   styling: "tailwind",
   stateManagement: "zustand",
   frontendAuth: "none",
+  backendFramework: "express",
   backendAuth: "jwt",
   database: "postgresql",
   swagger: false,

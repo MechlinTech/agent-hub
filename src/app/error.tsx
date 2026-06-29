@@ -24,7 +24,7 @@ export default function Error({
         <button
           type="button"
           onClick={reset}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
+          className="btn-primary rounded-lg px-4 py-2 text-sm font-medium"
         >
           Try again
         </button>

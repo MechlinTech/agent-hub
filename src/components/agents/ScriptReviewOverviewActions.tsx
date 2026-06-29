@@ -11,7 +11,7 @@ export function ScriptReviewOverviewHeaderActions() {
       <WriteGate resource="script_review">
         <Link
           href="/agents/script-review/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          className="inline-flex items-center gap-2 btn-primary rounded-lg px-4 py-2 text-sm font-medium"
         >
           <Plus className="h-4 w-4" /> New Review
         </Link>

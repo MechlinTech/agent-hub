@@ -7,7 +7,7 @@ export default function NotFound() {
       <p className="mt-2 text-slate-500">The page you requested does not exist.</p>
       <Link
         href="/dashboard"
-        className="mt-6 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
+        className="btn-primary mt-6 rounded-lg px-4 py-2 text-sm font-medium"
       >
         Go to Dashboard
       </Link>

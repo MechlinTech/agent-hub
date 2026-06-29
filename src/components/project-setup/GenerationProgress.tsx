@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeTerminalLine } from "@/lib/utils";
 import type { LogEvent } from "@/lib/execution-client";
 
 export function GenerationProgress({
@@ -13,8 +14,9 @@ export function GenerationProgress({
   logLines: string[];
   running: boolean;
 }) {
+  const logRef = useRef<HTMLDivElement>(null);
   const steps = events.filter(
-    (e) => e.type === "step_start" || e.type === "step_done" || e.type === "step_error"
+    (e) => e.type === "step_start" || e.type === "step_done" || e.type === "step_error",
   );
   const stepLabels = new Map<string, { label: string; done: boolean; error: boolean }>();
 
@@ -31,8 +33,14 @@ export function GenerationProgress({
     }
   }
 
+  useEffect(() => {
+    const el = logRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [logLines.length]);
+
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <ul className="space-y-2">
         {Array.from(stepLabels.entries()).map(([id, step]) => (
           <li key={id} className="flex items-center gap-2 text-sm">
@@ -49,12 +57,25 @@ export function GenerationProgress({
           </li>
         ))}
       </ul>
-      <div className="card max-h-64 overflow-y-auto p-4 font-mono text-xs text-slate-600">
-        {logLines.length === 0 ? (
-          <p className="text-slate-400">{running ? "Waiting for output…" : "No logs yet."}</p>
-        ) : (
-          logLines.map((line, i) => <div key={i}>{line}</div>)
-        )}
+      <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-800/15 bg-slate-950 shadow-inner">
+        <div
+          ref={logRef}
+          className="max-h-72 overflow-auto overscroll-contain p-4 font-mono text-[11px] leading-5 text-slate-300"
+        >
+          {logLines.length === 0 ? (
+            <p className="text-slate-500">{running ? "Waiting for output…" : "No logs yet."}</p>
+          ) : (
+            logLines.map((line, i) => {
+              const text = sanitizeTerminalLine(line);
+              if (!text) return null;
+              return (
+                <div key={i} className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                  {text}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

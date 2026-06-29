@@ -19,6 +19,7 @@ import {
   resolveRole,
 } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 interface AdminUserRow {
   id: string;
@@ -299,7 +300,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="w-full space-y-5">
       <div className="flex justify-end">
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
@@ -372,7 +373,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
                         className={cn(
                           "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold",
                           isSelected
-                            ? "bg-brand-600 text-white"
+                            ? "brand-gradient text-white"
                             : "bg-gradient-to-br from-slate-100 to-slate-50 text-slate-600"
                         )}
                       >
@@ -419,7 +420,7 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
               <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-sm font-bold text-white">
+                    <div className="brand-gradient flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white">
                       {userInitials(selectedUser.full_name, selectedUser.email)}
                     </div>
                     <div className="min-w-0">
@@ -443,22 +444,19 @@ export function UsersAdminPanel({ currentUserId }: { currentUserId: string }) {
               <div className="space-y-5 p-5">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-slate-700">Role</label>
-                  <select
+                  <StyledSelect
                     value={editRole}
                     disabled={!canEdit}
-                    onChange={(e) => {
-                      const role = resolveRole(e.target.value, customRoles);
+                    onChange={(roleId) => {
+                      const role = resolveRole(roleId, customRoles);
                       setEditRole(role);
                       setMatrix({ ...getRoleBaseAccess(role, roleDefaults, customRoles) });
                     }}
-                    className="input w-full disabled:bg-slate-50"
-                  >
-                    {assignableRoles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.label}
-                      </option>
-                    ))}
-                  </select>
+                    options={assignableRoles.map((role) => ({
+                      value: role.id,
+                      label: role.label,
+                    }))}
+                  />
                   <p className="mt-2 text-xs text-slate-500">
                     Role sets default permissions. Customize individual resources below.
                   </p>

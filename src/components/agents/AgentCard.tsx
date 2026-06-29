@@ -15,7 +15,7 @@ function AgentCardContent({ agent }: { agent: AgentDefinition }) {
       <div className="mb-3 flex items-start justify-between gap-2">
         <div
           className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm sm:h-12 sm:w-12 sm:rounded-2xl",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:scale-105",
             agent.iconBg,
             agent.iconColor
           )}
@@ -54,7 +54,7 @@ function AgentCardContent({ agent }: { agent: AgentDefinition }) {
 export function AgentCard({ agent }: { agent: AgentDefinition }) {
   const isActive = agent.status === "active";
   const cardClass = cn(
-    "mobile-card flex h-full flex-col p-4 transition-all duration-200 sm:p-5 lg:card lg:hover:shadow-md",
+    "mobile-card group flex h-full flex-col rounded-3xl p-4 transition-all duration-300 sm:p-5 lg:card lg:hover:-translate-y-0.5 lg:hover:shadow-card-hover",
     agent.recommended && isActive && "ring-2 ring-brand-500/20",
     isActive && agent.href && "active:scale-[0.99]"
   );

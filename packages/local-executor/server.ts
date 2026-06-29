@@ -143,7 +143,13 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "POST" && pathname === "/pick-folder") {
     if (!(await requireAuth(req, res, origin))) return;
     try {
-      const picked = await pickNativeFolder();
+      let windowTitle: string | undefined;
+      const rawBody = await readBody(req);
+      if (rawBody.trim()) {
+        const body = JSON.parse(rawBody) as { windowTitle?: string };
+        windowTitle = body.windowTitle?.trim() || undefined;
+      }
+      const picked = await pickNativeFolder({ windowTitle });
       if (!picked) {
         sendJson(res, 200, { cancelled: true }, origin);
         return;

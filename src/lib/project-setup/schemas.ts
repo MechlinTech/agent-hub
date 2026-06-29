@@ -24,6 +24,7 @@ export const projectSetupConfigSchema = z
     styling: z.enum(["tailwind", "mui", "shadcn"]),
     stateManagement: z.enum(["redux", "zustand", "context"]),
     frontendAuth: z.enum(["none", "jwt", "google_oauth"]),
+    backendFramework: z.enum(["express"]).default("express"),
     backendAuth: z.enum(["jwt", "google_oauth"]),
     database: z.enum(["mongodb", "postgresql"]),
     swagger: z.boolean(),
@@ -60,6 +61,28 @@ export const projectSetupConfigSchema = z
   });
 
 export type ProjectSetupFormValues = z.infer<typeof projectSetupConfigSchema>;
+
+/** Fill in valid defaults so preview works before project name/location are set. */
+export function buildDraftPreviewConfig(
+  config: z.input<typeof projectSetupConfigSchema>,
+): z.infer<typeof projectSetupConfigSchema> {
+  const name =
+    typeof config.projectName === "string" &&
+    /^[a-zA-Z0-9-_]+$/.test(config.projectName.trim())
+      ? config.projectName.trim()
+      : "MyApp";
+  const locationPath =
+    typeof config.locationPath === "string" &&
+    (/^[a-zA-Z]:\\/.test(config.locationPath) || config.locationPath.startsWith("/"))
+      ? config.locationPath
+      : "D:\\Projects";
+
+  return projectSetupConfigSchema.parse({
+    ...config,
+    projectName: name,
+    locationPath,
+  });
+}
 
 export function formatProjectSetupValidationError(error: unknown): string {
   if (error instanceof z.ZodError) {

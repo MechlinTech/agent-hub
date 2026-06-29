@@ -91,7 +91,16 @@ export function envExampleContent(config: ProjectSetupConfig): string {
       lines.push("MONGODB_URI=mongodb://localhost:27017/mydb");
     }
   }
-  return lines.join("\n") + "\n";
+  if (config.frontendAuth !== "none" || scopeIncludesBackend(config)) {
+    lines.push("", "# Auth");
+    if (config.frontendAuth === "jwt" || config.backendAuth === "jwt") {
+      lines.push("JWT_SECRET=change-me");
+    }
+    if (config.frontendAuth === "google_oauth" || config.backendAuth === "google_oauth") {
+      lines.push("GOOGLE_CLIENT_ID=", "GOOGLE_CLIENT_SECRET=");
+    }
+  }
+  return `${lines.join("\n")}\n`;
 }
 
 /**
