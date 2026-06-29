@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft, LogOut } from "lucide-react";
 import { NotificationsBell } from "./NotificationsBell";
@@ -15,6 +15,7 @@ import {
 import type { AppRole } from "@/lib/permissions";
 import { getRoleLabel } from "@/lib/permissions";
 import { AgentHubLogo } from "@/components/brand/AgentHubMark";
+import { createPortal } from "react-dom";
 
 export function TopBar({
   user,
@@ -22,19 +23,42 @@ export function TopBar({
   role,
 }: {
   user: User;
-  profile?: { full_name?: string; team_name?: string; avatar_url?: string } | null;
+  profile?: {
+    full_name?: string;
+    team_name?: string;
+    avatar_url?: string;
+  } | null;
   role?: AppRole;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const name = profile?.full_name ?? user.email?.split("@")[0] ?? "User";
   const team = profile?.team_name ?? "Performance Team";
   const title = getMobilePageTitle(pathname);
   const backHref = getMobileBackHref(pathname);
   const isRootTab = isMobileRootTab(pathname);
 
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!confirmOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && !signingOut) {
+        setConfirmOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [confirmOpen]);
+
   async function signOut() {
+    setSigningOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
@@ -68,7 +92,9 @@ export function TopBar({
 
             <div className="hidden min-w-0 items-center gap-2 lg:flex">
               <AgentHubLogo size="sm" />
-              <span className="text-sm font-semibold text-slate-800">Agent Hub</span>
+              <span className="text-sm font-semibold text-slate-800">
+                Agent Hub
+              </span>
             </div>
           </div>
 
@@ -103,7 +129,7 @@ export function TopBar({
               </div>
               <button
                 type="button"
-                onClick={signOut}
+                onClick={() => setConfirmOpen(true)}
                 title="Sign out"
                 className="touch-target rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
               >
@@ -129,7 +155,9 @@ export function TopBar({
                   {name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-base font-bold text-slate-900">{name}</p>
+                  <p className="truncate text-base font-bold text-slate-900">
+                    {name}
+                  </p>
                   <p className="truncate text-sm text-slate-500">{team}</p>
                 </div>
               </div>
@@ -139,7 +167,7 @@ export function TopBar({
                   setProfileOpen(false);
                   signOut();
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 py-3.5 text-sm font-semibold text-slate-800 active:bg-slate-200"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 py-3.5 text-sm font-semibold text-slate-800 active:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out
@@ -148,6 +176,60 @@ export function TopBar({
           </div>
         </>
       )}
+
+      {mounted && confirmOpen
+        ? createPortal(
+            <div className="glass-dialog-overlay fixed inset-0 z-[120] flex items-center justify-center p-4">
+              <button
+                type="button"
+                className="absolute inset-0"
+                aria-label="Close sign out dialog"
+                disabled={signingOut}
+                onClick={() => setConfirmOpen(false)}
+              />
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="sign-out-title"
+                className="glass-dialog relative z-10 w-full max-w-[22rem]"
+              >
+                <div className="px-6 pb-2 pt-6">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-white text-brand-600 ring-1 ring-brand-100/80">
+                    <LogOut className="h-5 w-5" />
+                  </div>
+                  <h2
+                    id="sign-out-title"
+                    className="text-lg font-bold tracking-tight text-slate-900"
+                  >
+                    Sign out?
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                    You will need to sign in again to access Agent Hub.
+                  </p>
+                </div>
+                <div className="flex gap-2.5 px-6 pb-6 pt-4">
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    onClick={() => setConfirmOpen(false)}
+                    className="btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    onClick={signOut}
+                    className="btn-primary flex-1"
+                  >
+                    {signingOut ? "Signing out…" : "Sign out"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

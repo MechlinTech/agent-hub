@@ -45,14 +45,11 @@ export default function DashboardPage() {
 
       <DashboardWelcome />
 
-      <div className="mobile-stat-scroll mb-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
         {metricCards.map((m) => {
           const Icon = m.icon;
           return (
-            <div
-              key={m.label}
-              className="metric-card mobile-stat-card lg:min-w-0 lg:snap-none"
-            >
+            <div key={m.label} className="metric-card min-w-0">
               <div className="mb-4 flex items-start justify-between">
                 <div className={cn("metric-card-icon", m.tone)}>
                   <Icon className="h-5 w-5" />
