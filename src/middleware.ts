@@ -10,6 +10,13 @@ const publicRoutes = [
 ];
 
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // PKCE code verifier cookie must survive until /auth/callback exchanges the code.
+  if (path.startsWith("/auth/callback")) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
@@ -35,7 +42,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isPublic = publicRoutes.some((r) => path.startsWith(r));
 
   if (!user && !isPublic && path !== "/") {
@@ -73,5 +79,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|json|webmanifest|css|woff2?)$).*)",
+  ],
 };
