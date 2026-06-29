@@ -17,7 +17,7 @@ export default function DashboardPage() {
       sub: `${getActiveAgentCount()} deployed & ready`,
       trend: "Live in your workspace",
       icon: Bot,
-      tone: "bg-brand-50 text-brand-600",
+      tone: "bg-violet-100 text-violet-600",
     },
     {
       label: "Total Agents",
@@ -25,7 +25,7 @@ export default function DashboardPage() {
       sub: "Available in catalog",
       trend: "Full agent library",
       icon: Layers,
-      tone: "bg-violet-50 text-violet-600",
+      tone: "bg-violet-100 text-violet-600",
     },
     {
       label: "Coming Soon",
@@ -33,7 +33,7 @@ export default function DashboardPage() {
       sub: "In development",
       trend: "On the roadmap",
       icon: Clock,
-      tone: "bg-amber-50 text-amber-600",
+      tone: "bg-violet-100 text-violet-600",
     },
   ];
 
