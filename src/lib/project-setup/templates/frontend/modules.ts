@@ -337,8 +337,74 @@ function reduxInstallCommand(
   };
 }
 
+function reduxViteCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const shadcnImport =
+    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
+
+  const ui =
+    styling === "shadcn"
+      ? `<div className="flex items-center gap-4">
+      <Button onClick={() => dispatch(increment())}>Increment</Button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <Button onClick={() => dispatch(decrement())}>Decrement</Button>
+    </div>`
+      : styling === "mui"
+        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Button variant="contained" onClick={() => dispatch(increment())}>
+        Increment
+      </Button>
+      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
+        {count}
+      </span>
+      <Button variant="contained" onClick={() => dispatch(decrement())}>
+        Decrement
+      </Button>
+    </div>`
+        : `<div className="flex items-center gap-4">
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={() => dispatch(increment())}
+      >
+        Increment
+      </button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={() => dispatch(decrement())}
+      >
+        Decrement
+      </button>
+    </div>`;
+
+  return {
+    relativePath: `${rel}src/features/counter/Counter.tsx`,
+    content: `import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "../../app/store";
+import { decrement, increment } from "./counterSlice";
+${shadcnImport}${muiImport}
+export function Counter() {
+  const count = useSelector((state: RootState) => state.counter.value);
+  const dispatch = useDispatch();
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
 /** Redux Toolkit quick start for Vite — https://redux-toolkit.js.org/tutorials/quick-start */
-function reduxViteSourceFiles(rel: string): import("@/lib/project-setup/types").FileTemplate[] {
+function reduxViteSourceFiles(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate[] {
   return [
     {
       relativePath: `${rel}src/app/store.ts`,
@@ -359,33 +425,7 @@ export type AppDispatch = typeof store.dispatch;
       relativePath: `${rel}src/features/counter/counterSlice.ts`,
       content: reduxCounterSliceContent(),
     },
-    {
-      relativePath: `${rel}src/features/counter/Counter.tsx`,
-      content: `import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../../app/store";
-import { decrement, increment } from "./counterSlice";
-import { Button } from "@/components/ui/button";
-
-export function Counter() {
-  const count = useSelector((state: RootState) => state.counter.value);
-  const dispatch = useDispatch();
-
-  return (
-    <div>
-      <div>
-        <Button onClick={() => dispatch(increment())}>
-          Increment
-        </Button>
-        <span>{count}</span>
-        <Button onClick={() => dispatch(decrement())}>
-          Decrement
-        </Button>
-      </div>
-    </div>
-  );
-}
-`,
-    },
+    reduxViteCounterFile(rel, styling),
   ];
 }
 
@@ -400,7 +440,7 @@ export const reduxViteModule: StackModule = {
   files: (config) => {
     const rel = frontendRelPrefix(config);
     return [
-      ...reduxViteSourceFiles(rel),
+      ...reduxViteSourceFiles(rel, config.styling),
       {
         relativePath: `${rel}src/main.tsx`,
         writePhase: "post",
