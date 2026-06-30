@@ -29,20 +29,24 @@ export default async function ResultsAnalysisOverviewPage() {
 
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50">
             <BlazeMeterIcon className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">BlazeMeter Results Analysis Agent</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              BlazeMeter Results Analysis Agent
+            </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Intelligently analyze BlazeMeter results to identify performance issues, risks, and
-              optimization opportunities.
+              Intelligently analyze BlazeMeter results to identify performance
+              issues, risks, and optimization opportunities.
             </p>
           </div>
         </div>
       </div>
 
-      <ResultsAnalysisOverviewActions blazemeterConfigured={blazemeterConfigured} />
+      <ResultsAnalysisOverviewActions
+        blazemeterConfigured={blazemeterConfigured}
+      />
 
       {!blazemeterConfigured && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -56,7 +60,10 @@ export default async function ResultsAnalysisOverviewPage() {
       <div className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <h2 className="font-semibold text-slate-900">Recent Analyses</h2>
-          <Link href="/agents/results-analysis/history" className="text-sm text-brand-600 hover:underline">
+          <Link
+            href="/agents/results-analysis/history"
+            className="text-sm text-brand-600 hover:underline"
+          >
             View all
           </Link>
         </div>
@@ -97,13 +104,15 @@ export default async function ResultsAnalysisOverviewPage() {
                               : a.overallStatus === "warning"
                                 ? "bg-amber-100 text-amber-800 border-amber-200"
                                 : "bg-green-100 text-green-800 border-green-200"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200",
                         )}
                       >
                         {a.status === "completed" ? "Completed" : a.status}
                       </span>
                     </td>
-                    <td className={`px-4 py-3 font-semibold ${scoreColor(a.performanceScore ?? 0)}`}>
+                    <td
+                      className={`px-4 py-3 font-semibold ${scoreColor(a.performanceScore ?? 0)}`}
+                    >
                       {a.performanceScore ?? "-"}/100
                     </td>
                     <td className="px-4 py-3">

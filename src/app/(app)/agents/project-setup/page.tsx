@@ -20,14 +20,17 @@ export default async function ProjectSetupOverviewPage() {
 
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50">
-            <FolderOpen className="h-6 w-6 text-teal-600" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100">
+            <FolderOpen className="h-6 w-6 text-brand-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Project Setup Agent</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Project Setup Agent
+            </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Configure your stack and scaffold projects on your machine. Requires the Local Executor
-              running on the same PC as your browser.
+              Configure your stack and scaffold projects on your machine.
+              Requires the Local Executor running on the same PC as your
+              browser.
             </p>
           </div>
         </div>
@@ -43,7 +46,9 @@ export default async function ProjectSetupOverviewPage() {
           <Plus className="mt-0.5 h-5 w-5 text-brand-600" />
           <div>
             <p className="font-semibold text-slate-900">New Setup</p>
-            <p className="mt-1 text-sm text-slate-500">Start the 3-step wizard</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Start the 3-step wizard
+            </p>
           </div>
         </PermissionLink>
         <Link
@@ -53,7 +58,9 @@ export default async function ProjectSetupOverviewPage() {
           <Terminal className="mt-0.5 h-5 w-5 text-slate-600" />
           <div>
             <p className="font-semibold text-slate-900">Local Executor</p>
-            <p className="mt-1 text-sm text-slate-500">Install, pair, and check connection</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Install, pair, and check connection
+            </p>
           </div>
         </Link>
       </div>
@@ -66,7 +73,9 @@ export default async function ProjectSetupOverviewPage() {
           <li>Run the Local Executor on your PC (`npm run executor`).</li>
           <li>Pair it with your AgentHub account in Settings.</li>
           <li>Configure scope, stack, and target folder in the wizard.</li>
-          <li>Run Agent — files and commands execute locally via the executor.</li>
+          <li>
+            Run Agent — files and commands execute locally via the executor.
+          </li>
         </ol>
       </details>
 
@@ -106,12 +115,18 @@ export default async function ProjectSetupOverviewPage() {
               <tbody className="divide-y divide-slate-100">
                 {setups.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/50">
-                    <td className="px-4 py-3 font-medium text-slate-900">{s.projectName}</td>
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      {s.projectName}
+                    </td>
                     <td className="px-4 py-3 capitalize text-slate-600">
                       {s.projectScope.replace(/_/g, " ")}
                     </td>
-                    <td className="px-4 py-3 capitalize text-slate-600">{s.status}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(s.createdAt)}</td>
+                    <td className="px-4 py-3 capitalize text-slate-600">
+                      {s.status}
+                    </td>
+                    <td className="px-4 py-3 text-slate-500">
+                      {formatDate(s.createdAt)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
