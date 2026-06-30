@@ -49,7 +49,10 @@ export function AppShell({
           <TopBar user={user} profile={profile} role={role} />
           <DesktopSecondaryNav />
           {showSettingsMobileNav ? <MobileSettingsNav /> : <MobileAgentNav />}
-          <main className="scrollbar-brand main-with-bottom-nav min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 py-5 sm:p-6 lg:px-8 lg:pb-8 lg:pt-2">
+          <main
+            data-app-scroll
+            className="scrollbar-brand main-with-bottom-nav min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 py-5 sm:p-6 lg:px-8 lg:pb-8 lg:pt-2"
+          >
             <div className="mx-auto max-w-[1400px]">{children}</div>
           </main>
           <BottomNav />

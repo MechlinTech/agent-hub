@@ -1,10 +1,17 @@
 import { create } from "zustand";
 import type { PlanResult, ProjectSetupConfig } from "@/lib/project-setup/types";
 import { DEFAULT_PROJECT_SETUP_CONFIG } from "@/lib/project-setup/defaults";
+import { scrollAppToTop } from "@/lib/utils";
 
 export type WizardStep = 1 | 2 | 3;
 
 export const PROJECT_SETUP_NEW_PATH = "/agents/project-setup/new";
+
+function scrollAfterStepChange() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(scrollAppToTop);
+  });
+}
 
 interface ProjectSetupState {
   currentStep: WizardStep;
@@ -34,10 +41,18 @@ export const useProjectSetupStore = create<ProjectSetupState>((set, get) => ({
     set({ config: { ...get().config, ...partial }, plan: null }),
   setPlan: (plan) => set({ plan }),
   setJobId: (jobId) => set({ jobId }),
-  nextStep: () =>
-    set({ currentStep: Math.min(3, get().currentStep + 1) as WizardStep }),
-  prevStep: () =>
-    set({ currentStep: Math.max(1, get().currentStep - 1) as WizardStep }),
+  nextStep: () => {
+    const step = Math.min(3, get().currentStep + 1) as WizardStep;
+    if (step === get().currentStep) return;
+    set({ currentStep: step });
+    scrollAfterStepChange();
+  },
+  prevStep: () => {
+    const step = Math.max(1, get().currentStep - 1) as WizardStep;
+    if (step === get().currentStep) return;
+    set({ currentStep: step });
+    scrollAfterStepChange();
+  },
   reset: () =>
     set({
       currentStep: 1,
