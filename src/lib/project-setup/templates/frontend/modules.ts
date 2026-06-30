@@ -499,6 +499,7 @@ function reduxNextCounterFile(
 ): import("@/lib/project-setup/types").FileTemplate {
   const shadcnImport =
     styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
   const ui =
     styling === "shadcn"
       ? `<div className="flex items-center gap-4">
@@ -510,7 +511,19 @@ function reduxNextCounterFile(
         Decrement
       </Button>
     </div>`
-      : `<div className="flex items-center gap-4">
+      : styling === "mui"
+        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Button variant="contained" onClick={() => dispatch(increment())}>
+        Increment
+      </Button>
+      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
+        {count}
+      </span>
+      <Button variant="contained" onClick={() => dispatch(decrement())}>
+        Decrement
+      </Button>
+    </div>`
+        : `<div className="flex items-center gap-4">
       <button
         type="button"
         className="rounded-md border px-4 py-2"
@@ -534,7 +547,7 @@ function reduxNextCounterFile(
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { decrement, increment } from "./counterSlice";
-${shadcnImport}
+${shadcnImport}${muiImport}
 export function Counter() {
   const count = useAppSelector((state) => state.counter.value);
   const dispatch = useAppDispatch();
@@ -654,7 +667,6 @@ export default function RootLayout({
 export default function Home() {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-8">
-      <h1 className="text-2xl font-semibold">${config.projectName}</h1>
       <Counter />
     </main>
   );
