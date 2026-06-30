@@ -689,3 +689,585 @@ export const reduxNextModule: StackModule = {
   files: (config) => reduxNextSourceFiles(config),
   commands: (config, root) => [reduxInstallCommand(config, root)],
 };
+
+/** Zustand counter store — https://zustand.docs.pmnd.rs/learn/getting-started/introduction */
+function zustandCounterStoreContent(): string {
+  return `import { create } from "zustand";
+
+interface CounterState {
+  count: number;
+  increment: () => void;
+  decrement: () => void;
+}
+
+export const useCounterStore = create<CounterState>((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  decrement: () => set((state) => ({ count: state.count - 1 })),
+}));
+`;
+}
+
+function zustandInstallCommand(
+  config: ProjectSetupConfig,
+  root: string
+): import("@/lib/project-setup/types").CommandStep {
+  return {
+    id: "zustand-install",
+    label: "Installing Zustand",
+    exe: "npm",
+    args: ["install", "zustand"],
+    cwd: frontendCwd(config, root),
+    timeoutMs: 300_000,
+    phase: "post",
+  };
+}
+
+function zustandCounterUi(styling: ProjectSetupConfig["styling"]): {
+  shadcnImport: string;
+  muiImport: string;
+  ui: string;
+} {
+  const shadcnImport =
+    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
+
+  const ui =
+    styling === "shadcn"
+      ? `<div className="flex items-center gap-4">
+      <Button type="button" onClick={increment}>
+        Increment
+      </Button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <Button type="button" onClick={decrement}>
+        Decrement
+      </Button>
+    </div>`
+      : styling === "mui"
+        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Button variant="contained" onClick={increment}>
+        Increment
+      </Button>
+      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
+        {count}
+      </span>
+      <Button variant="contained" onClick={decrement}>
+        Decrement
+      </Button>
+    </div>`
+        : `<div className="flex items-center gap-4">
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={increment}
+      >
+        Increment
+      </button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={decrement}
+      >
+        Decrement
+      </button>
+    </div>`;
+
+  return { shadcnImport, muiImport, ui };
+}
+
+function zustandViteCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const { shadcnImport, muiImport, ui } = zustandCounterUi(styling);
+
+  return {
+    relativePath: `${rel}src/features/counter/Counter.tsx`,
+    content: `import { useCounterStore } from "../../stores/useCounterStore";
+${shadcnImport}${muiImport}
+export function Counter() {
+  const count = useCounterStore((state) => state.count);
+  const increment = useCounterStore((state) => state.increment);
+  const decrement = useCounterStore((state) => state.decrement);
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
+function zustandViteSourceFiles(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate[] {
+  return [
+    {
+      relativePath: `${rel}src/stores/useCounterStore.ts`,
+      content: zustandCounterStoreContent(),
+    },
+    zustandViteCounterFile(rel, styling),
+  ];
+}
+
+export const zustandViteModule: StackModule = {
+  id: "state-zustand-vite",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) &&
+    c.frontendFramework === "react" &&
+    c.stateManagement === "zustand",
+  checklist: () => ["Zustand counter store and demo Counter component wired in"],
+  dependencies: () => ["zustand"],
+  files: (config) => {
+    const rel = frontendRelPrefix(config);
+    return [
+      ...zustandViteSourceFiles(rel, config.styling),
+      {
+        relativePath: `${rel}src/main.tsx`,
+        writePhase: "post",
+        content: `import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
+
+const container = document.getElementById("root");
+if (!container) {
+  throw new Error(
+    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
+  );
+}
+
+createRoot(container).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
+`,
+      },
+      {
+        relativePath: `${rel}src/App.tsx`,
+        writePhase: "post",
+        content: `import { Counter } from "./features/counter/Counter";
+
+export default function App() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <Counter />
+    </main>
+  );
+}
+`,
+      },
+    ];
+  },
+  commands: (config, root) => [zustandInstallCommand(config, root)],
+};
+
+function zustandNextCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const { shadcnImport, muiImport, ui } = zustandCounterUi(styling);
+
+  return {
+    relativePath: `${rel}src/lib/features/counter/Counter.tsx`,
+    content: `"use client";
+
+import { useCounterStore } from "@/lib/stores/useCounterStore";
+${shadcnImport}${muiImport}
+export function Counter() {
+  const count = useCounterStore((state) => state.count);
+  const increment = useCounterStore((state) => state.increment);
+  const decrement = useCounterStore((state) => state.decrement);
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
+function zustandNextSourceFiles(config: ProjectSetupConfig): import("@/lib/project-setup/types").FileTemplate[] {
+  const rel = frontendRelPrefix(config);
+
+  return [
+    {
+      relativePath: `${rel}src/lib/stores/useCounterStore.ts`,
+      content: zustandCounterStoreContent(),
+    },
+    zustandNextCounterFile(rel, config.styling),
+    {
+      relativePath: `${rel}src/app/page.tsx`,
+      writePhase: "post",
+      content: `import { Counter } from "@/lib/features/counter/Counter";
+
+export default function Home() {
+  return (
+    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-8">
+      <Counter />
+    </main>
+  );
+}
+`,
+    },
+  ];
+}
+
+export const zustandNextModule: StackModule = {
+  id: "state-zustand-next",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) &&
+    c.frontendFramework === "nextjs" &&
+    c.stateManagement === "zustand",
+  checklist: () => ["Zustand counter store and demo Counter component (App Router)"],
+  dependencies: () => ["zustand"],
+  files: (config) => zustandNextSourceFiles(config),
+  commands: (config, root) => [zustandInstallCommand(config, root)],
+};
+
+/**
+ * React Context + useReducer — https://react.dev/learn/scaling-up-with-reducer-and-context
+ * Separate state/dispatch contexts so dispatch-only consumers avoid re-renders.
+ */
+function contextCounterReducerContent(): string {
+  return `export type CounterState = {
+  count: number;
+};
+
+export type CounterAction =
+  | { type: "incremented" }
+  | { type: "decremented" };
+
+export const initialCounterState: CounterState = {
+  count: 0,
+};
+
+export function counterReducer(state: CounterState, action: CounterAction): CounterState {
+  switch (action.type) {
+    case "incremented":
+      return { count: state.count + 1 };
+    case "decremented":
+      return { count: state.count - 1 };
+    default:
+      throw new Error("Unknown action");
+  }
+}
+`;
+}
+
+function contextProviderContent(): string {
+  return `import {
+  createContext,
+  useContext,
+  useReducer,
+  type Dispatch,
+  type ReactNode,
+} from "react";
+import {
+  counterReducer,
+  initialCounterState,
+  type CounterAction,
+  type CounterState,
+} from "./counterReducer";
+
+const CounterStateContext = createContext<CounterState | null>(null);
+const CounterDispatchContext = createContext<Dispatch<CounterAction> | null>(null);
+
+export function CounterProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(counterReducer, initialCounterState);
+
+  return (
+    <CounterStateContext.Provider value={state}>
+      <CounterDispatchContext.Provider value={dispatch}>
+        {children}
+      </CounterDispatchContext.Provider>
+    </CounterStateContext.Provider>
+  );
+}
+
+export function useCounterState() {
+  const context = useContext(CounterStateContext);
+  if (context === null) {
+    throw new Error("useCounterState must be used within a CounterProvider");
+  }
+  return context;
+}
+
+export function useCounterDispatch() {
+  const context = useContext(CounterDispatchContext);
+  if (context === null) {
+    throw new Error("useCounterDispatch must be used within a CounterProvider");
+  }
+  return context;
+}
+`;
+}
+
+function contextCounterUi(styling: ProjectSetupConfig["styling"]): {
+  shadcnImport: string;
+  muiImport: string;
+  ui: string;
+} {
+  const shadcnImport =
+    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
+
+  const ui =
+    styling === "shadcn"
+      ? `<div className="flex items-center gap-4">
+      <Button type="button" onClick={() => dispatch({ type: "incremented" })}>
+        Increment
+      </Button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <Button type="button" onClick={() => dispatch({ type: "decremented" })}>
+        Decrement
+      </Button>
+    </div>`
+      : styling === "mui"
+        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Button variant="contained" onClick={() => dispatch({ type: "incremented" })}>
+        Increment
+      </Button>
+      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
+        {count}
+      </span>
+      <Button variant="contained" onClick={() => dispatch({ type: "decremented" })}>
+        Decrement
+      </Button>
+    </div>`
+        : `<div className="flex items-center gap-4">
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={() => dispatch({ type: "incremented" })}
+      >
+        Increment
+      </button>
+      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
+      <button
+        type="button"
+        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
+        onClick={() => dispatch({ type: "decremented" })}
+      >
+        Decrement
+      </button>
+    </div>`;
+
+  return { shadcnImport, muiImport, ui };
+}
+
+function contextViteCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const { shadcnImport, muiImport, ui } = contextCounterUi(styling);
+
+  return {
+    relativePath: `${rel}src/features/counter/Counter.tsx`,
+    content: `import {
+  useCounterDispatch,
+  useCounterState,
+} from "../../context/counter/CounterContext";
+${shadcnImport}${muiImport}
+export function Counter() {
+  const { count } = useCounterState();
+  const dispatch = useCounterDispatch();
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
+function contextViteSourceFiles(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate[] {
+  return [
+    {
+      relativePath: `${rel}src/context/counter/counterReducer.ts`,
+      content: contextCounterReducerContent(),
+    },
+    {
+      relativePath: `${rel}src/context/counter/CounterContext.tsx`,
+      content: contextProviderContent(),
+    },
+    contextViteCounterFile(rel, styling),
+  ];
+}
+
+export const contextViteModule: StackModule = {
+  id: "state-context-vite",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) &&
+    c.frontendFramework === "react" &&
+    c.stateManagement === "context",
+  checklist: () => [
+    "React Context + useReducer provider, typed hooks, and counter demo wired in",
+  ],
+  dependencies: () => [],
+  files: (config) => {
+    const rel = frontendRelPrefix(config);
+    return [
+      ...contextViteSourceFiles(rel, config.styling),
+      {
+        relativePath: `${rel}src/main.tsx`,
+        writePhase: "post",
+        content: `import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { CounterProvider } from "./context/counter/CounterContext";
+import "./index.css";
+import App from "./App.tsx";
+
+const container = document.getElementById("root");
+if (!container) {
+  throw new Error(
+    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
+  );
+}
+
+createRoot(container).render(
+  <StrictMode>
+    <CounterProvider>
+      <App />
+    </CounterProvider>
+  </StrictMode>,
+);
+`,
+      },
+      {
+        relativePath: `${rel}src/App.tsx`,
+        writePhase: "post",
+        content: `import { Counter } from "./features/counter/Counter";
+
+export default function App() {
+  return (
+    <main className="flex min-h-svh items-center justify-center">
+      <Counter />
+    </main>
+  );
+}
+`,
+      },
+    ];
+  },
+  commands: () => [],
+};
+
+function contextNextCounterFile(
+  rel: string,
+  styling: ProjectSetupConfig["styling"]
+): import("@/lib/project-setup/types").FileTemplate {
+  const { shadcnImport, muiImport, ui } = contextCounterUi(styling);
+
+  return {
+    relativePath: `${rel}src/lib/features/counter/Counter.tsx`,
+    content: `"use client";
+
+import {
+  useCounterDispatch,
+  useCounterState,
+} from "@/lib/context/counter/CounterProvider";
+${shadcnImport}${muiImport}
+export function Counter() {
+  const { count } = useCounterState();
+  const dispatch = useCounterDispatch();
+
+  return (
+    ${ui}
+  );
+}
+`,
+  };
+}
+
+function contextNextSourceFiles(config: ProjectSetupConfig): import("@/lib/project-setup/types").FileTemplate[] {
+  const rel = frontendRelPrefix(config);
+
+  return [
+    {
+      relativePath: `${rel}src/lib/context/counter/counterReducer.ts`,
+      content: contextCounterReducerContent(),
+    },
+    {
+      relativePath: `${rel}src/lib/context/counter/CounterProvider.tsx`,
+      content: `"use client";
+
+${contextProviderContent()}`,
+    },
+    contextNextCounterFile(rel, config.styling),
+    {
+      relativePath: `${rel}src/app/layout.tsx`,
+      writePhase: "post",
+      content: `import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { CounterProvider } from "@/lib/context/counter/CounterProvider";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "${config.projectName}",
+  description: "Generated by AgentHub Project Setup Agent",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={\`\${geistSans.variable} \${geistMono.variable} antialiased\`}
+      >
+        <CounterProvider>{children}</CounterProvider>
+      </body>
+    </html>
+  );
+}
+`,
+    },
+    {
+      relativePath: `${rel}src/app/page.tsx`,
+      writePhase: "post",
+      content: `import { Counter } from "@/lib/features/counter/Counter";
+
+export default function Home() {
+  return (
+    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-8">
+      <Counter />
+    </main>
+  );
+}
+`,
+    },
+  ];
+}
+
+export const contextNextModule: StackModule = {
+  id: "state-context-next",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) &&
+    c.frontendFramework === "nextjs" &&
+    c.stateManagement === "context",
+  checklist: () => [
+    "React Context + useReducer CounterProvider, typed hooks, and counter demo (App Router)",
+  ],
+  dependencies: () => [],
+  files: (config) => contextNextSourceFiles(config),
+  commands: () => [],
+};

@@ -4,6 +4,10 @@ import {
   reactViteModule,
   reduxNextModule,
   reduxViteModule,
+  zustandNextModule,
+  zustandViteModule,
+  contextNextModule,
+  contextViteModule,
   shadcnFrontendModule,
   tailwindFrontendModule,
 } from "@/lib/project-setup/templates/frontend/modules";
@@ -20,7 +24,6 @@ import {
   deployStubModule,
   dockerModule,
   githubActionsModule,
-  stateStubModule,
   stylingStubModule,
 } from "@/lib/project-setup/templates/devops/modules";
 
@@ -34,6 +37,10 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(shadcnFrontendModule);
   registerStackModule(reduxViteModule);
   registerStackModule(reduxNextModule);
+  registerStackModule(zustandViteModule);
+  registerStackModule(zustandNextModule);
+  registerStackModule(contextViteModule);
+  registerStackModule(contextNextModule);
   registerStackModule(expressBaseModule);
   registerStackModule(prismaModule);
   registerStackModule(mongooseModule);
@@ -44,7 +51,6 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(githubActionsModule);
   registerStackModule(deployStubModule);
   registerStackModule(stylingStubModule);
-  registerStackModule(stateStubModule);
   registerStackModule(authStubModule);
   registered = true;
 }

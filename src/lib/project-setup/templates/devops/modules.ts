@@ -243,7 +243,7 @@ export const stateStubModule: StackModule = {
   id: "state-management",
   appliesTo: (c) => {
     if (!scopeIncludesFrontend(c) || c.stateManagement === "context") return false;
-    if (c.stateManagement === "redux") return false;
+    if (c.stateManagement === "redux" || c.stateManagement === "zustand") return false;
     return true;
   },
   checklist: (c) => [`State: ${c.stateManagement}`],
