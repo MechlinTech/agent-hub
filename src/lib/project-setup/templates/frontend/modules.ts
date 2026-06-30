@@ -10,8 +10,15 @@ function usesTailwindCna(config: ProjectSetupConfig): boolean {
   return config.styling === "tailwind" || config.styling === "shadcn";
 }
 
-/** TS 6–compatible @/* aliases (no deprecated baseUrl). */
+/**
+ * @/* path aliases for Vite + shadcn.
+ * Must be written in the pre phase (before `shadcn init`): the CLI reads root
+ * tsconfig.json via tsconfig-paths and does not follow project references.
+ * TS 6 deprecates baseUrl — use fully-qualified paths entries instead.
+ */
 function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTemplate[] {
+  const paths = { "@/*": ["./src/*"] };
+
   return [
     {
       relativePath: `${rel}tsconfig.json`,
@@ -23,9 +30,7 @@ function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTe
             { path: "./tsconfig.app.json" },
             { path: "./tsconfig.node.json" },
           ],
-          compilerOptions: {
-            paths: { "@/*": ["./src/*"] },
-          },
+          compilerOptions: { paths },
         },
         null,
         2
@@ -37,11 +42,13 @@ function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTe
       content: `${JSON.stringify(
         {
           compilerOptions: {
+            paths,
             tsBuildInfoFile: "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-            target: "ES2022",
-            useDefineForClassFields: true,
-            lib: ["ES2022", "DOM", "DOM.Iterable"],
+            target: "ES2023",
+            lib: ["ES2023", "DOM"],
             module: "ESNext",
+            types: ["vite/client"],
+            allowArbitraryExtensions: true,
             skipLibCheck: true,
             moduleResolution: "bundler",
             allowImportingTsExtensions: true,
@@ -49,13 +56,10 @@ function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTe
             moduleDetection: "force",
             noEmit: true,
             jsx: "react-jsx",
-            strict: true,
             noUnusedLocals: true,
             noUnusedParameters: true,
+            erasableSyntaxOnly: true,
             noFallthroughCasesInSwitch: true,
-            noUncheckedSideEffectImports: true,
-            types: ["vite/client"],
-            paths: { "@/*": ["./src/*"] },
           },
           include: ["src"],
         },
@@ -235,10 +239,9 @@ export const shadcnFrontendModule: StackModule = {
   files: (config) => {
     if (config.frontendFramework !== "react") return [];
     const rel = frontendRelPrefix(config);
-    return [
-      ...viteTailwindPrepFiles(rel, true, "pre"),
-      ...viteTsconfigAliasFiles(rel, "post"),
-    ];
+    // Aliases must land in the pre phase (see viteTsconfigAliasFiles). A post-phase
+    // duplicate would dedupe over pre and run shadcn init before aliases exist.
+    return viteTailwindPrepFiles(rel, true, "pre");
   },
   commands: (config, root) => {
     const cwd = frontendCwd(config, root);
