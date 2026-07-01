@@ -13,6 +13,7 @@ import {
 } from "@/lib/project-setup/templates/frontend/modules";
 import {
   expressBaseModule,
+  nestBaseModule,
   mongooseModule,
   prismaModule,
   redisModule,
@@ -42,6 +43,7 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(contextViteModule);
   registerStackModule(contextNextModule);
   registerStackModule(expressBaseModule);
+  registerStackModule(nestBaseModule);
   registerStackModule(prismaModule);
   registerStackModule(mongooseModule);
   registerStackModule(swaggerModule);

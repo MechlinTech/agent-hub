@@ -6,7 +6,7 @@ export type StateManagement = "redux" | "zustand" | "context";
 export type FrontendAuth = "none" | "jwt" | "google_oauth";
 
 export type BackendAuth = "jwt" | "google_oauth";
-export type BackendFramework = "express";
+export type BackendFramework = "express" | "nestjs";
 export type DatabaseOption = "mongodb" | "postgresql";
 export type DeploymentTarget = "none" | "railway" | "render" | "vercel";
 
@@ -28,6 +28,12 @@ export interface ProjectSetupConfig {
   docker: boolean;
   githubActions: boolean;
   deploymentTarget: DeploymentTarget;
+  /** Optional — written to .env when PostgreSQL is selected. */
+  databaseUrl: string;
+  /** When true and DATABASE_URL is set, runs prisma migrate dev during setup. */
+  runMigrations: boolean;
+  /** Optional — written to .env when JWT auth is selected. */
+  jwtSecret: string;
 }
 
 export interface ProjectSetupResult {
@@ -77,6 +83,8 @@ export interface CommandStep {
   timeoutMs?: number;
   /** pre = before template files (scaffolding); post = after files (default). */
   phase?: "pre" | "post";
+  /** Optional env vars passed to child processes (e.g. DATABASE_URL for prisma migrate dev). */
+  env?: Record<string, string>;
 }
 
 export interface FileTemplate {

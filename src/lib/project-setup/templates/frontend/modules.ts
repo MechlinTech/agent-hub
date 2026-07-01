@@ -1,5 +1,6 @@
 import type { StackModule } from "@/lib/project-setup/templates/registry";
 import type { FileTemplate, ProjectSetupConfig } from "@/lib/project-setup/types";
+import { installLatestArgs, installLatestDevArgs } from "@/lib/project-setup/templates/package-latest";
 import { scopeIncludesFrontend, frontendRelPrefix } from "@/lib/project-setup/templates/shared";
 
 function frontendCwd(config: ProjectSetupConfig, root: string): string {
@@ -134,7 +135,7 @@ function viteTailwindInstallCommand(
     id,
     label,
     exe: "npm",
-    args: ["install", "-D", ...pkgs],
+    args: installLatestDevArgs(...pkgs),
     cwd,
     timeoutMs: 300_000,
     phase: "post" as const,
@@ -333,7 +334,7 @@ function reduxInstallCommand(
     id: "redux-install",
     label: "Installing Redux Toolkit",
     exe: "npm",
-    args: ["install", "@reduxjs/toolkit", "react-redux"],
+    args: installLatestArgs("@reduxjs/toolkit", "react-redux"),
     cwd: frontendCwd(config, root),
     timeoutMs: 300_000,
     phase: "post",
@@ -716,7 +717,7 @@ function zustandInstallCommand(
     id: "zustand-install",
     label: "Installing Zustand",
     exe: "npm",
-    args: ["install", "zustand"],
+    args: installLatestArgs("zustand"),
     cwd: frontendCwd(config, root),
     timeoutMs: 300_000,
     phase: "post",

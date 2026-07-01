@@ -1,5 +1,6 @@
 import type { StackModule } from "@/lib/project-setup/templates/registry";
 import type { ProjectSetupConfig } from "@/lib/project-setup/types";
+import { installLatestArgs } from "@/lib/project-setup/templates/package-latest";
 import { scopeIncludesFrontend } from "@/lib/project-setup/templates/shared";
 
 function dbServiceBlock(config: ProjectSetupConfig): string {
@@ -230,7 +231,7 @@ export const stylingStubModule: StackModule = {
         id: "styling-install",
         label: "Installing MUI dependencies",
         exe: "npm",
-        args: ["install", "@mui/material", "@emotion/react", "@emotion/styled"],
+        args: installLatestArgs("@mui/material", "@emotion/react", "@emotion/styled"),
         cwd,
         timeoutMs: 300_000,
         phase: "post",
@@ -270,7 +271,7 @@ export const stateStubModule: StackModule = {
         id: "state-install",
         label: `Installing ${config.stateManagement}`,
         exe: "npm",
-        args: ["install", ...pkgs],
+        args: installLatestArgs(...pkgs),
         cwd,
         timeoutMs: 300_000,
         phase: "post",
@@ -281,13 +282,10 @@ export const stateStubModule: StackModule = {
 
 export const authStubModule: StackModule = {
   id: "auth-stubs",
-  appliesTo: (c) =>
-    c.frontendAuth !== "none" ||
-    (c.projectScope !== "frontend_only" && c.backendAuth !== "jwt"),
+  appliesTo: (c) => c.frontendAuth !== "none",
   checklist: (c) => {
     const items: string[] = [];
     if (c.frontendAuth !== "none") items.push(`Frontend auth: ${c.frontendAuth}`);
-    if (c.projectScope !== "frontend_only") items.push(`Backend auth: ${c.backendAuth}`);
     return items;
   },
   dependencies: () => [],
