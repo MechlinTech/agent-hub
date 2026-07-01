@@ -3,7 +3,7 @@ import type { ProjectSetupConfig, CommandStep } from "@/lib/project-setup/types"
 import {
   installLatestArgs,
 } from "@/lib/project-setup/templates/package-latest";
-import { scopeIncludesBackend, slugify, usesPrismaBackend } from "@/lib/project-setup/templates/shared";
+import { scopeIncludesBackend, slugify, shouldRunPrismaMigrate, usesPrismaBackend } from "@/lib/project-setup/templates/shared";
 import {
   expressLayeredFiles,
   expressPackageJson,
@@ -115,8 +115,8 @@ export const prismaModule: StackModule = {
     c.database === "postgresql",
   checklist: (config) => {
     const items = ["Prisma schema and src/config/db.ts"];
-    if (!config.databaseUrl?.trim()) {
-      items.push("Initial migration skipped — provide DATABASE_URL to run migrate dev during setup");
+    if (!shouldRunPrismaMigrate(config)) {
+      items.push("Initial migration skipped — enable “Run migration during setup” and provide DATABASE_URL");
     }
     return items;
   },
@@ -141,7 +141,7 @@ export const prismaModule: StackModule = {
   commands: (config, root) => {
     const cwd = backendDir(config, root);
     const commands = [prismaGenerateStep(cwd)];
-    if (config.databaseUrl?.trim()) {
+    if (shouldRunPrismaMigrate(config)) {
       commands.push(prismaMigrateDevStep(cwd, config.databaseUrl.trim()));
     }
     return commands;
@@ -277,7 +277,7 @@ export const nestBaseModule: StackModule = {
 
     if (usesPrismaBackend(config)) {
       commands.push(prismaGenerateStep(cwd));
-      if (config.databaseUrl?.trim()) {
+      if (shouldRunPrismaMigrate(config)) {
         commands.push(prismaMigrateDevStep(cwd, config.databaseUrl.trim()));
       }
     }

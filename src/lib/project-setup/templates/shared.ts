@@ -16,6 +16,14 @@ export function usesJwtAuth(config: ProjectSetupConfig): boolean {
   return config.backendAuth === "jwt" || config.frontendAuth === "jwt";
 }
 
+export function shouldRunPrismaMigrate(config: ProjectSetupConfig): boolean {
+  return (
+    usesPrismaBackend(config) &&
+    config.runMigrations &&
+    Boolean(config.databaseUrl?.trim())
+  );
+}
+
 export function backendEnvRel(config: ProjectSetupConfig): string {
   return config.projectScope === "backend_only" ? ".env" : "backend/.env";
 }
@@ -94,7 +102,7 @@ export function readmeContent(config: ProjectSetupConfig): string {
       "### Database setup",
       "",
       "1. Set `DATABASE_URL` in `.env` (copy from `.env.example`).",
-      "2. If DATABASE_URL was not provided during setup, run `npx prisma migrate dev` once the database is ready.",
+      "2. Run `npx prisma migrate dev` when you are ready to apply migrations (or enable it during setup in the wizard).",
       ""
     );
   }
@@ -108,7 +116,7 @@ export function envExampleContent(config: ProjectSetupConfig): string {
     lines.push("PORT=4000");
     if (config.database === "postgresql") {
       lines.push(
-        `DATABASE_URL=${config.databaseUrl?.trim() || "postgresql://user:pass@localhost:5432/mydb"}`,
+        `DATABASE_URL="postgresql://user:pass@localhost:5432/mydb"`,
       );
     }
     if (config.database === "mongodb") {
@@ -118,7 +126,7 @@ export function envExampleContent(config: ProjectSetupConfig): string {
   if (config.frontendAuth !== "none" || scopeIncludesBackend(config)) {
     lines.push("", "# Auth");
     if (usesJwtAuth(config)) {
-      lines.push(`JWT_SECRET=${config.jwtSecret?.trim() || "change-me"}`);
+      lines.push(`JWT_SECRET="change-me"`);
     }
     if (config.frontendAuth === "google_oauth" || config.backendAuth === "google_oauth") {
       lines.push("GOOGLE_CLIENT_ID=", "GOOGLE_CLIENT_SECRET=");

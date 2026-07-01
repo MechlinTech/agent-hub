@@ -25,6 +25,7 @@ export function nestPackageJson(config: ProjectSetupConfig, slug: string) {
     "@nestjs/common",
     "@nestjs/core",
     "@nestjs/platform-express",
+    "dotenv",
     "reflect-metadata",
     "rxjs",
   );
@@ -54,7 +55,7 @@ export function nestPackageJson(config: ProjectSetupConfig, slug: string) {
   }
 
   if (usesPrismaBackend(config)) {
-    Object.assign(deps, latestDeps("@prisma/client", "@prisma/adapter-pg", "pg", "dotenv"));
+    Object.assign(deps, latestDeps("@prisma/client", "@prisma/adapter-pg", "pg"));
     Object.assign(devDeps, latestDeps("prisma"));
   }
 
@@ -95,7 +96,6 @@ export function nestTsconfig() {
       target: "ES2021",
       sourceMap: true,
       outDir: "./dist",
-      baseUrl: "./",
       incremental: true,
       skipLibCheck: true,
       strictNullChecks: true,
@@ -126,7 +126,8 @@ export function nestCliJson() {
 }
 
 function mainSource(): string {
-  return `import { NestFactory } from "@nestjs/core";
+  return `import "dotenv/config";
+import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 
@@ -436,9 +437,17 @@ import { UsersModule } from "../users/users.module";
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: "7d" },
+    JwtModule.registerAsync({
+      useFactory: () => {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+          throw new Error("JWT_SECRET is not set");
+        }
+        return {
+          secret,
+          signOptions: { expiresIn: "7d" },
+        };
+      },
     }),
   ],
   controllers: [AuthController],
@@ -540,10 +549,15 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error("JWT_SECRET is not set");
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: secret,
     });
   }
 

@@ -34,6 +34,7 @@ export const projectSetupConfigSchema = z
     githubActions: z.boolean(),
     deploymentTarget: z.enum(["none", "railway", "render", "vercel"]),
     databaseUrl: z.string().optional().default(""),
+    runMigrations: z.boolean().default(false),
     jwtSecret: z.string().optional().default(""),
   })
   .superRefine((data, ctx) => {
@@ -71,6 +72,14 @@ export const projectSetupConfigSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "DATABASE_URL must start with postgresql:// or postgres://",
+        path: ["databaseUrl"],
+      });
+    }
+
+    if (needsPostgres && data.runMigrations && !data.databaseUrl?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "DATABASE_URL is required when running migrations during setup",
         path: ["databaseUrl"],
       });
     }

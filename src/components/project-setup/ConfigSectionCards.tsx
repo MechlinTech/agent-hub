@@ -172,7 +172,9 @@ export function ConfigSectionCards({
             <Field label="Framework">
               <StyledSelect
                 value={config.frontendFramework}
-                onChange={(frontendFramework) => onChange({ frontendFramework })}
+                onChange={(frontendFramework) =>
+                  onChange({ frontendFramework })
+                }
                 options={[
                   { value: "nextjs", label: "Next.js" },
                   { value: "react", label: "React (Vite)" },
@@ -267,21 +269,35 @@ export function ConfigSectionCards({
             </Field>
           </div>
           {config.database === "postgresql" ? (
-            <Field
-              label="DATABASE_URL (optional)"
-              hint="Used during setup to create and apply the initial Prisma migration. Skip if your database is not ready yet."
-            >
-              <input
-                className="input w-full font-mono text-sm"
-                value={config.databaseUrl}
-                onChange={(e) => onChange({ databaseUrl: e.target.value })}
-                placeholder="postgresql://postgres:password@localhost:5432/mydb"
-                aria-invalid={Boolean(fieldErrors.databaseUrl)}
+            <>
+              <Field
+                label="DATABASE_URL (optional)"
+                hint="Written to .env when provided. Required if you run migrations during setup."
+              >
+                <input
+                  className="input w-full font-mono text-sm"
+                  value={config.databaseUrl}
+                  onChange={(e) => onChange({ databaseUrl: e.target.value })}
+                  placeholder="postgresql://postgres:password@localhost:5432/mydb"
+                  aria-invalid={Boolean(fieldErrors.databaseUrl)}
+                />
+                {fieldErrors.databaseUrl ? (
+                  <p className="text-xs text-red-600">
+                    {fieldErrors.databaseUrl}
+                  </p>
+                ) : null}
+              </Field>
+              <CheckboxGroup
+                config={config}
+                onChange={onChange}
+                items={[
+                  {
+                    key: "runMigrations",
+                    label: "Run migration during setup",
+                  },
+                ]}
               />
-              {fieldErrors.databaseUrl ? (
-                <p className="text-xs text-red-600">{fieldErrors.databaseUrl}</p>
-              ) : null}
-            </Field>
+            </>
           ) : null}
           {config.backendAuth === "jwt" ? (
             <Field
@@ -309,9 +325,9 @@ export function ConfigSectionCards({
           />
           {config.backendFramework === "nestjs" ? (
             <p className="text-xs text-slate-500">
-              Swagger, Redis, and Socket.IO scaffolding is currently available for
-              Express.js projects only. NestJS includes modular auth, users, and database
-              layers when JWT and a database are selected.
+              Swagger, Redis, and Socket.IO scaffolding is currently available
+              for Express.js projects only. NestJS includes modular auth, users,
+              and database layers when JWT and a database are selected.
             </p>
           ) : null}
         </div>

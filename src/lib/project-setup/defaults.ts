@@ -19,6 +19,7 @@ export const DEFAULT_PROJECT_SETUP_CONFIG: ProjectSetupConfig = {
   githubActions: false,
   deploymentTarget: "none",
   databaseUrl: "",
+  runMigrations: false,
   jwtSecret: "",
 };
 
