@@ -212,6 +212,21 @@ export function ConfigSectionCards({
                 ]}
               />
             </Field>
+            {config.frontendAuth === "jwt" && !showBackend ? (
+              <Field
+                label="JWT secret (optional)"
+                hint="Used by the frontend for auth. Same value as the backend JWT secret in full-stack apps."
+              >
+                <input
+                  className="input w-full font-mono text-sm"
+                  type="password"
+                  value={config.jwtSecret}
+                  onChange={(e) => onChange({ jwtSecret: e.target.value })}
+                  placeholder="Leave blank to set manually after setup"
+                  autoComplete="new-password"
+                />
+              </Field>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -224,7 +239,10 @@ export function ConfigSectionCards({
               <StyledSelect
                 value={config.backendFramework}
                 onChange={(backendFramework) => onChange({ backendFramework })}
-                options={[{ value: "express", label: "Express.js" }]}
+                options={[
+                  { value: "express", label: "Express.js" },
+                  { value: "nestjs", label: "NestJS" },
+                ]}
               />
             </Field>
             <Field label="Authentication">
@@ -248,6 +266,38 @@ export function ConfigSectionCards({
               />
             </Field>
           </div>
+          {config.database === "postgresql" ? (
+            <Field
+              label="DATABASE_URL (optional)"
+              hint="Used during setup to create and apply the initial Prisma migration. Skip if your database is not ready yet."
+            >
+              <input
+                className="input w-full font-mono text-sm"
+                value={config.databaseUrl}
+                onChange={(e) => onChange({ databaseUrl: e.target.value })}
+                placeholder="postgresql://postgres:password@localhost:5432/mydb"
+                aria-invalid={Boolean(fieldErrors.databaseUrl)}
+              />
+              {fieldErrors.databaseUrl ? (
+                <p className="text-xs text-red-600">{fieldErrors.databaseUrl}</p>
+              ) : null}
+            </Field>
+          ) : null}
+          {config.backendAuth === "jwt" ? (
+            <Field
+              label="JWT secret (optional)"
+              hint="Written to .env for the backend. Generate a long random string for production."
+            >
+              <input
+                className="input w-full font-mono text-sm"
+                type="password"
+                value={config.jwtSecret}
+                onChange={(e) => onChange({ jwtSecret: e.target.value })}
+                placeholder="Leave blank to set manually after setup"
+                autoComplete="new-password"
+              />
+            </Field>
+          ) : null}
           <CheckboxGroup
             config={config}
             onChange={onChange}
@@ -257,6 +307,13 @@ export function ConfigSectionCards({
               { key: "socketIo", label: "Socket.IO" },
             ]}
           />
+          {config.backendFramework === "nestjs" ? (
+            <p className="text-xs text-slate-500">
+              Swagger, Redis, and Socket.IO scaffolding is currently available for
+              Express.js projects only. NestJS includes modular auth, users, and database
+              layers when JWT and a database are selected.
+            </p>
+          ) : null}
         </div>
       ) : null}
 

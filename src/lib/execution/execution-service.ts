@@ -20,7 +20,11 @@ function formatShellCommand(exe: string, args: string[]): string {
 }
 
 function spawnStepProcess(step: CommandStep, cwd: string): ChildProcess {
-  const options = { cwd, windowsHide: true, env: process.env };
+  const options = {
+    cwd,
+    windowsHide: true,
+    env: step.env ? { ...process.env, ...step.env } : process.env,
+  };
   const useShell = Boolean(step.allowShell);
   const winPackageManager = isWindowsCmdWrapper(step.exe);
 

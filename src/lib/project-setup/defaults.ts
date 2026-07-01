@@ -18,6 +18,8 @@ export const DEFAULT_PROJECT_SETUP_CONFIG: ProjectSetupConfig = {
   docker: false,
   githubActions: false,
   deploymentTarget: "none",
+  databaseUrl: "",
+  jwtSecret: "",
 };
 
 export const EXECUTOR_LATEST_VERSION = "1.0.0";

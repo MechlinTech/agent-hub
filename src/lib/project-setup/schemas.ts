@@ -24,7 +24,7 @@ export const projectSetupConfigSchema = z
     styling: z.enum(["tailwind", "mui", "shadcn"]),
     stateManagement: z.enum(["redux", "zustand", "context"]),
     frontendAuth: z.enum(["none", "jwt", "google_oauth"]),
-    backendFramework: z.enum(["express"]).default("express"),
+    backendFramework: z.enum(["express", "nestjs"]).default("express"),
     backendAuth: z.enum(["jwt", "google_oauth"]),
     database: z.enum(["mongodb", "postgresql"]),
     swagger: z.boolean(),
@@ -33,6 +33,8 @@ export const projectSetupConfigSchema = z
     docker: z.boolean(),
     githubActions: z.boolean(),
     deploymentTarget: z.enum(["none", "railway", "render", "vercel"]),
+    databaseUrl: z.string().optional().default(""),
+    jwtSecret: z.string().optional().default(""),
   })
   .superRefine((data, ctx) => {
     const needsFrontend =
@@ -58,6 +60,20 @@ export const projectSetupConfigSchema = z
 
     void needsFrontend;
     void needsBackend;
+
+    const needsPostgres =
+      needsBackend && data.database === "postgresql";
+    if (
+      needsPostgres &&
+      data.databaseUrl?.trim() &&
+      !/^postgres(ql)?:\/\//i.test(data.databaseUrl.trim())
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "DATABASE_URL must start with postgresql:// or postgres://",
+        path: ["databaseUrl"],
+      });
+    }
   });
 
 export type ProjectSetupFormValues = z.infer<typeof projectSetupConfigSchema>;

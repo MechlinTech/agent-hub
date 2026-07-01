@@ -4,6 +4,9 @@ import { ensureTemplatesRegistered } from "@/lib/project-setup/templates/index";
 import { getApplicableModules } from "@/lib/project-setup/templates/registry";
 import {
   envExampleContent,
+  envFileContent,
+  backendEnvRel,
+  hasBackendEnvValues,
   readmeContent,
   scopeIncludesBackend,
   scopeIncludesFrontend,
@@ -18,6 +21,9 @@ export function buildPlan(config: ProjectSetupConfig): PlanResult {
   const files = dedupeFilesByPath([
     { relativePath: "README.md", content: readmeContent(config) },
     { relativePath: ".env.example", content: envExampleContent(config) },
+    ...(scopeIncludesBackend(config) && hasBackendEnvValues(config)
+      ? [{ relativePath: backendEnvRel(config), content: envFileContent(config) }]
+      : []),
     ...modules.flatMap((m) => m.files(config, projectRoot)),
   ]);
 

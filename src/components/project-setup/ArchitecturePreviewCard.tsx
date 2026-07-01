@@ -49,7 +49,11 @@ export function ProjectSummaryCard({
   }
   if (config.projectScope !== "frontend_only") {
     const frameworkLabel =
-      config.backendFramework === "express" ? "Express.js" : config.backendFramework;
+      config.backendFramework === "express"
+        ? "Express.js"
+        : config.backendFramework === "nestjs"
+          ? "NestJS"
+          : config.backendFramework;
     items.push(`Backend: ${frameworkLabel} + ${config.database}`);
   }
   if (config.docker) items.push("Docker");
