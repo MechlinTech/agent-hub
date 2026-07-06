@@ -74,7 +74,7 @@ export function ExecutorStatusBanner({
 
         <span>
           Local Executor connected
-          {status.version ? ` (v${status.version})` : ""}
+          {status.version ? ` (v ${status.version})` : ""}
         </span>
       </div>
     );

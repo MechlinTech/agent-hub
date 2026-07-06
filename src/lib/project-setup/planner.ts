@@ -8,8 +8,10 @@ import {
   envFileContent,
   backendEnvRel,
   frontendEnvExampleContent,
+  frontendEnvFileContent,
   frontendEnvRel,
   hasBackendEnvValues,
+  hasFrontendEnvValues,
   readmeContent,
   scopeIncludesBackend,
   scopeIncludesFrontend,
@@ -44,6 +46,12 @@ export function buildPlan(config: ProjectSetupConfig): PlanResult {
         relativePath: `${frontendEnvRel(config).replace(/\.env$/, ".env.example")}`,
         content: feExample,
       });
+      if (hasFrontendEnvValues(config)) {
+        envFiles.push({
+          relativePath: frontendEnvRel(config),
+          content: frontendEnvFileContent(config),
+        });
+      }
     }
   }
 
