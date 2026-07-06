@@ -5,6 +5,7 @@ import {
   hasAuthMethod,
   usesOAuth,
 } from "@/lib/project-setup/templates/shared";
+import { nestOAuthSwaggerDecorators } from "@/lib/project-setup/templates/backend/swagger-nest";
 
 function oauthServiceNestSource(config: ProjectSetupConfig): string {
   return `import { Injectable, UnauthorizedException } from "@nestjs/common";
@@ -172,12 +173,12 @@ function authControllerOAuthMethods(config: ProjectSetupConfig): string {
   const methods: string[] = [];
   if (hasAuthMethod(config, "google_oauth")) {
     methods.push(`
-  @Get("google")
+${nestOAuthSwaggerDecorators(config, "google", "start")}  @Get("google")
   googleStart(@Res() res: Response) {
     return res.redirect(this.oauthService.googleAuthorizeUrl());
   }
 
-  @Get("google/callback")
+${nestOAuthSwaggerDecorators(config, "google", "callback")}  @Get("google/callback")
   async googleCallback(@Query("code") code: string, @Res() res: Response) {
     const result = await this.oauthService.handleGoogleCallback(code);
     return res.redirect(this.oauthService.redirectWithToken(result.token));
@@ -185,12 +186,12 @@ function authControllerOAuthMethods(config: ProjectSetupConfig): string {
   }
   if (hasAuthMethod(config, "azure_oauth")) {
     methods.push(`
-  @Get("azure")
+${nestOAuthSwaggerDecorators(config, "azure", "start")}  @Get("azure")
   azureStart(@Res() res: Response) {
     return res.redirect(this.oauthService.azureAuthorizeUrl());
   }
 
-  @Get("azure/callback")
+${nestOAuthSwaggerDecorators(config, "azure", "callback")}  @Get("azure/callback")
   async azureCallback(@Query("code") code: string, @Res() res: Response) {
     const result = await this.oauthService.handleAzureCallback(code);
     return res.redirect(this.oauthService.redirectWithToken(result.token));

@@ -24,6 +24,7 @@ import {
   prismaMigrateDevStep,
   prismaSchemaContent,
 } from "@/lib/project-setup/templates/backend/prisma-shared";
+import { swaggerExpressFiles } from "@/lib/project-setup/templates/backend/swagger-express";
 
 function backendDir(config: ProjectSetupConfig, root: string): string {
   return config.projectScope === "backend_only" ? root : `${root}/backend`;
@@ -172,20 +173,22 @@ export const mongooseModule: StackModule = {
 
 export const swaggerModule: StackModule = {
   id: "backend-swagger",
-  appliesTo: (c) => scopeIncludesBackend(c) && c.backendFramework === "express" && c.swagger,
-  checklist: () => ["Swagger API docs"],
-  dependencies: () => ["swagger-ui-express", "swagger-jsdoc"],
-  files: () => [],
-  commands: (config, root) => [
-    {
-      id: "swagger-install",
-      label: "Installing Swagger",
-      exe: "npm",
-      args: installLatestArgs("swagger-ui-express", "swagger-jsdoc"),
-      cwd: backendDir(config, root),
-      timeoutMs: 300_000,
-    },
-  ],
+  appliesTo: (c) => scopeIncludesBackend(c) && c.swagger,
+  checklist: (config) =>
+    config.backendFramework === "nestjs"
+      ? [
+          "@nestjs/swagger on controllers and DTOs",
+          "Swagger UI at /api-docs",
+        ]
+      : [
+          "OpenAPI spec in src/config/swagger.ts",
+          "Swagger UI at /api-docs",
+        ],
+  dependencies: (config) =>
+    config.backendFramework === "nestjs" ? ["@nestjs/swagger"] : ["swagger-ui-express"],
+  files: (config) =>
+    config.backendFramework === "express" ? swaggerExpressFiles(config) : [],
+  commands: () => [],
 };
 
 export const redisModule: StackModule = {

@@ -12,6 +12,26 @@ import {
   nestOAuthControllerMethods,
   nestOAuthFiles,
 } from "@/lib/project-setup/templates/backend/oauth-nest";
+import {
+  nestSwaggerAuthClassDecorator,
+  nestSwaggerAuthImports,
+  nestSwaggerLoginDecorator,
+  nestSwaggerMainImports,
+  nestSwaggerMainSetup,
+  nestSwaggerMeDecorator,
+  nestSwaggerRegisterDecorator,
+  nestSwaggerStartupLog,
+  nestSwaggerDtoImport,
+  nestSwaggerEmailProperty,
+  nestSwaggerPasswordProperty,
+  nestSwaggerHealthClassDecorator,
+  nestSwaggerHealthImports,
+  nestSwaggerHealthMethodDecorator,
+  nestSwaggerUsersClassDecorator,
+  nestSwaggerUsersGetDecorator,
+  nestSwaggerUsersImports,
+  nestSwaggerUsersListDecorator,
+} from "@/lib/project-setup/templates/backend/swagger-nest";
 
 function relPrefix(config: ProjectSetupConfig): string {
   return config.projectScope === "backend_only" ? "" : "backend/";
@@ -62,6 +82,10 @@ export function nestPackageJson(config: ProjectSetupConfig, slug: string) {
   if (usesPrismaBackend(config)) {
     Object.assign(deps, latestDeps("@prisma/client", "@prisma/adapter-pg", "pg"));
     Object.assign(devDeps, latestDeps("prisma"));
+  }
+
+  if (config.swagger) {
+    Object.assign(deps, latestDeps("@nestjs/swagger"));
   }
 
   const base = {
@@ -130,17 +154,18 @@ export function nestCliJson() {
   };
 }
 
-function mainSource(): string {
+function mainSource(config: ProjectSetupConfig): string {
   return `import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
+${nestSwaggerMainImports(config)}import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix("api");
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(process.env.PORT ?? 4000);
+${nestSwaggerMainSetup(config)}  const port = Number(process.env.PORT ?? 4000);
+  await app.listen(port);${nestSwaggerStartupLog(config)}
 }
 
 bootstrap();
@@ -236,16 +261,16 @@ export class HealthModule {}
 `;
 }
 
-function healthControllerSource(): string {
-  return `import { Controller, Get } from "@nestjs/common";
+function healthControllerSource(config: ProjectSetupConfig): string {
+  return `${nestSwaggerHealthImports(config)}import { Controller, Get } from "@nestjs/common";
 import { HealthService } from "./health.service";
 
-@Controller("health")
+${nestSwaggerHealthClassDecorator(config)}@Controller("health")
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get()
-  getHealth() {
+${nestSwaggerHealthMethodDecorator(config)}  getHealth() {
     return this.healthService.getHealth();
   }
 }
@@ -303,20 +328,20 @@ function usersControllerSource(config: ProjectSetupConfig): string {
     ? `import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";\n`
     : "";
 
-  return `import { Controller, Get, Param${usesJwt(config) ? ", UseGuards" : ""} } from "@nestjs/common";
+  return `${nestSwaggerUsersImports(config)}import { Controller, Get, Param${usesJwt(config) ? ", UseGuards" : ""} } from "@nestjs/common";
 ${guardImport}import { UsersService } from "./users.service";
 
-@Controller("users")
+${nestSwaggerUsersClassDecorator(config)}@Controller("users")
 ${guard}export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  listUsers() {
+${nestSwaggerUsersListDecorator(config)}  listUsers() {
     return this.usersService.listUsers();
   }
 
   @Get(":id")
-  getUser(@Param("id") id: string) {
+${nestSwaggerUsersGetDecorator(config)}  getUser(@Param("id") id: string) {
     return this.usersService.findById(id);
   }
 }
@@ -522,26 +547,26 @@ export class AuthModule {}
 function authControllerSource(config: ProjectSetupConfig): string {
   const jwtRoutes = usesJwtLogin(config)
     ? `
-  @Post("register")
+${nestSwaggerRegisterDecorator(config)}  @Post("register")
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto.email, dto.password);
   }
 
-  @Post("login")
+${nestSwaggerLoginDecorator(config)}  @Post("login")
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
   }
 `
     : "";
 
-  return `import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+  return `${nestSwaggerAuthImports(config)}import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { Response } from "express";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 ${usesOAuth(config) ? 'import { OAuthService } from "./oauth.service";\n' : ""}
-@Controller("auth")
+${nestSwaggerAuthClassDecorator(config)}@Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService${nestOAuthControllerInject(config)}
@@ -549,7 +574,7 @@ export class AuthController {
 ${jwtRoutes}
   @UseGuards(JwtAuthGuard)
   @Get("me")
-  me(@Req() req: { user: { id: string; email: string } }) {
+${nestSwaggerMeDecorator(config)}  me(@Req() req: { user: { id: string; email: string } }) {
     return { user: req.user };
   }
 ${nestOAuthControllerMethods(config)}
@@ -647,18 +672,18 @@ export class JwtAuthGuard extends AuthGuard("jwt") {}
 `;
 }
 
-function loginDtoSource(): string {
-  return `export class LoginDto {
-  email!: string;
-  password!: string;
+function loginDtoSource(config: ProjectSetupConfig): string {
+  return `${nestSwaggerDtoImport(config)}export class LoginDto {
+${nestSwaggerEmailProperty(config)}  email!: string;
+${nestSwaggerPasswordProperty(config)}  password!: string;
 }
 `;
 }
 
-function registerDtoSource(): string {
-  return `export class RegisterDto {
-  email!: string;
-  password!: string;
+function registerDtoSource(config: ProjectSetupConfig): string {
+  return `${nestSwaggerDtoImport(config)}export class RegisterDto {
+${nestSwaggerEmailProperty(config)}  email!: string;
+${nestSwaggerPasswordProperty(config, 8)}  password!: string;
 }
 `;
 }
@@ -668,7 +693,7 @@ export function nestLayeredFiles(config: ProjectSetupConfig): FileTemplate[] {
   const slug = slugify(config.projectName);
 
   const files: FileTemplate[] = [
-    { relativePath: `${rel}src/main.ts`, content: mainSource() },
+    { relativePath: `${rel}src/main.ts`, content: mainSource(config) },
     { relativePath: `${rel}src/app.module.ts`, content: appModuleSource(config) },
     {
       relativePath: `${rel}src/common/filters/http-exception.filter.ts`,
@@ -680,7 +705,7 @@ export function nestLayeredFiles(config: ProjectSetupConfig): FileTemplate[] {
     },
     {
       relativePath: `${rel}src/modules/health/health.controller.ts`,
-      content: healthControllerSource(),
+      content: healthControllerSource(config),
     },
     {
       relativePath: `${rel}src/modules/health/health.service.ts`,
@@ -738,8 +763,8 @@ export function nestLayeredFiles(config: ProjectSetupConfig): FileTemplate[] {
         relativePath: `${rel}src/modules/auth/strategies/jwt.strategy.ts`,
         content: jwtStrategySource(),
       },
-      { relativePath: `${rel}src/modules/auth/dto/login.dto.ts`, content: loginDtoSource() },
-      { relativePath: `${rel}src/modules/auth/dto/register.dto.ts`, content: registerDtoSource() },
+      { relativePath: `${rel}src/modules/auth/dto/login.dto.ts`, content: loginDtoSource(config) },
+      { relativePath: `${rel}src/modules/auth/dto/register.dto.ts`, content: registerDtoSource(config) },
       {
         relativePath: `${rel}src/common/guards/jwt-auth.guard.ts`,
         content: jwtAuthGuardSource(),

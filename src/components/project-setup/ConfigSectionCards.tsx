@@ -457,9 +457,9 @@ export function ConfigSectionCards({
           />
           {config.backendFramework === "nestjs" ? (
             <p className="text-xs text-slate-500">
-              Swagger, Redis, and Socket.IO scaffolding is currently available
-              for Express.js projects only. NestJS includes modular auth, users,
-              and database layers when auth and a database are selected.
+              Redis and Socket.IO scaffolding is currently available for Express.js
+              projects only. NestJS includes modular auth, users, database layers, and
+              Swagger when those options are selected.
             </p>
           ) : null}
         </div>

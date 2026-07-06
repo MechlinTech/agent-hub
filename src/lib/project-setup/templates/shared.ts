@@ -314,6 +314,26 @@ export function readmeBackendSection(config: ProjectSetupConfig): string[] {
     lines.push("| `MONGODB_URI` | Yes | MongoDB connection string |");
   }
 
+  if (config.swagger) {
+    if (config.backendFramework === "express") {
+      lines.push(
+        "### API documentation",
+        "",
+        "Swagger UI is available at `/api-docs` when the server is running.",
+        "The OpenAPI spec lives in `src/config/swagger.ts`.",
+        "",
+      );
+    } else {
+      lines.push(
+        "### API documentation",
+        "",
+        "Swagger UI is available at `/api-docs` when the server is running.",
+        "Controllers and DTOs include `@nestjs/swagger` decorators; setup is in `src/main.ts`.",
+        "",
+      );
+    }
+  }
+
   lines.push("");
   return lines;
 }

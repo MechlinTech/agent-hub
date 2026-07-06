@@ -14,6 +14,11 @@ import {
   usesOAuth,
   usesPrismaBackend,
 } from "@/lib/project-setup/templates/shared";
+import {
+  swaggerAppImport,
+  swaggerAppSetup,
+  swaggerServerLog,
+} from "@/lib/project-setup/templates/backend/swagger-express";
 
 function relPrefix(config: ProjectSetupConfig): string {
   return config.projectScope === "backend_only" ? "" : "backend/";
@@ -53,6 +58,10 @@ export function expressPackageJson(config: ProjectSetupConfig, slug: string) {
   if (usesPrismaBackend(config)) {
     Object.assign(deps, latestDeps("@prisma/client", "@prisma/adapter-pg", "pg"));
     Object.assign(devDeps, latestDeps("prisma"));
+  }
+
+  if (config.swagger) {
+    Object.assign(deps, latestDeps("swagger-ui-express"));
   }
 
   const base = {
@@ -117,12 +126,12 @@ function appSource(config: ProjectSetupConfig): string {
 import cors from "cors";
 import routes from "./routes/index${e}";
 import { errorMiddleware } from "./middlewares/error.middleware${e}";
-
+${swaggerAppImport(config)}
 export function createApp() {
   const app = express();
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json());${swaggerAppSetup(config)}
   app.use("/api", routes);
   app.use(errorMiddleware);
 
@@ -144,7 +153,7 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 4000);
 
   app.listen(port, () => {
-    console.log(\`API listening on \${port}\`);
+    console.log(\`API listening on \${port}\`);${swaggerServerLog(config)}
   });
 }
 
@@ -165,7 +174,7 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 4000);
 
   app.listen(port, () => {
-    console.log(\`API listening on \${port}\`);
+    console.log(\`API listening on \${port}\`);${swaggerServerLog(config)}
   });
 }
 
