@@ -76,7 +76,7 @@ export function ProjectSetupWizard() {
 
   useEffect(() => {
     refreshHealth();
-    const t = setInterval(refreshHealth, 5000);
+    const t = setInterval(refreshHealth, 10000);
     return () => clearInterval(t);
   }, [refreshHealth]);
 
@@ -92,7 +92,7 @@ export function ProjectSetupWizard() {
         const previewConfig = buildDraftPreviewConfig(config);
         let token = sessionToken;
         if (!token) {
-          token = await fetchPairingToken();
+          token = await fetchPairingToken({ version: executorStatus?.version });
           setSessionToken(token);
         }
         const preview = await fetchPreview(previewConfig, token);
@@ -113,16 +113,12 @@ export function ProjectSetupWizard() {
   ]);
 
   async function ensureToken(): Promise<string> {
-    let token = sessionToken;
-    if (!token) {
-      token = await fetchPairingToken();
-      setSessionToken(token);
-    }
-    const health = await checkExecutorHealth();
-    if (!health.paired) {
-      await pairExecutor(token);
-      await refreshHealth();
-    }
+    const token =
+      sessionToken ??
+      (await fetchPairingToken({ version: executorStatus?.version }));
+    setSessionToken(token);
+    await pairExecutor(token);
+    await refreshHealth();
     return token;
   }
 

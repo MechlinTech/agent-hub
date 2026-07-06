@@ -1,10 +1,16 @@
 import { spawn } from "child_process";
 import path from "path";
-import { fileURLToPath } from "url";
 import { assertUnderAllowedRoots } from "../../src/lib/execution/sanitize";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WINDOWS_PICKER_SCRIPT = path.join(__dirname, "pick-folder-windows.ps1");
+// CJS bundle (desktop) and tsx (dev) both provide __filename.
+const moduleDir = path.dirname(__filename);
+
+function resolveWindowsPickerScript(): string {
+  if (process.env.AGENTHUB_PICKER_SCRIPT?.trim()) {
+    return process.env.AGENTHUB_PICKER_SCRIPT.trim();
+  }
+  return path.join(moduleDir, "pick-folder-windows.ps1");
+}
 
 function runCommand(
   exe: string,
@@ -56,7 +62,7 @@ async function pickWindowsFolder(
       "-ExecutionPolicy",
       "Bypass",
       "-File",
-      WINDOWS_PICKER_SCRIPT,
+      resolveWindowsPickerScript(),
       "-WindowTitle",
       titleArg,
     ],

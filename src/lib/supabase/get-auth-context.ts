@@ -101,6 +101,15 @@ export async function requireSuperAdmin() {
   return { ctx, response: null };
 }
 
+export async function requireAdminOrSuperAdmin() {
+  const ctx = await getAuthContext();
+  if (!ctx) return { ctx: null, response: unauthorizedResponse() };
+  if (!ctx.isSuperAdmin && ctx.role !== "admin") {
+    return { ctx: null, response: forbiddenResponse() };
+  }
+  return { ctx, response: null };
+}
+
 export async function requireRead(resource: Resource) {
   const ctx = await getAuthContext();
   if (!ctx) return { ctx: null, response: unauthorizedResponse() };

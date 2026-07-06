@@ -3,13 +3,17 @@ import type { ProjectSetupConfig, PlanResult, FileTemplate } from "@/lib/project
 import { ensureTemplatesRegistered } from "@/lib/project-setup/templates/index";
 import { getApplicableModules } from "@/lib/project-setup/templates/registry";
 import {
+  backendEnvExampleContent,
   envExampleContent,
   envFileContent,
   backendEnvRel,
+  frontendEnvExampleContent,
+  frontendEnvRel,
   hasBackendEnvValues,
   readmeContent,
   scopeIncludesBackend,
   scopeIncludesFrontend,
+  usesFrontendAuth,
 } from "@/lib/project-setup/templates/shared";
 import { resolveProjectRoot } from "@/lib/execution/sanitize";
 
@@ -18,12 +22,33 @@ export function buildPlan(config: ProjectSetupConfig): PlanResult {
   const projectRoot = resolveProjectRoot(config.locationPath, config.projectName);
   const modules = getApplicableModules(config);
 
-  const files = dedupeFilesByPath([
+  const envFiles: FileTemplate[] = [
     { relativePath: "README.md", content: readmeContent(config) },
     { relativePath: ".env.example", content: envExampleContent(config) },
-    ...(scopeIncludesBackend(config) && hasBackendEnvValues(config)
-      ? [{ relativePath: backendEnvRel(config), content: envFileContent(config) }]
-      : []),
+  ];
+
+  if (scopeIncludesBackend(config)) {
+    envFiles.push({
+      relativePath: `${backendEnvRel(config).replace(/\.env$/, ".env.example")}`,
+      content: backendEnvExampleContent(config),
+    });
+    if (hasBackendEnvValues(config)) {
+      envFiles.push({ relativePath: backendEnvRel(config), content: envFileContent(config) });
+    }
+  }
+
+  if (scopeIncludesFrontend(config) && usesFrontendAuth(config)) {
+    const feExample = frontendEnvExampleContent(config);
+    if (feExample) {
+      envFiles.push({
+        relativePath: `${frontendEnvRel(config).replace(/\.env$/, ".env.example")}`,
+        content: feExample,
+      });
+    }
+  }
+
+  const files = dedupeFilesByPath([
+    ...envFiles,
     ...modules.flatMap((m) => m.files(config, projectRoot)),
   ]);
 

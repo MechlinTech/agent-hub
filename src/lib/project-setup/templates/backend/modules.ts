@@ -3,7 +3,7 @@ import type { ProjectSetupConfig, CommandStep } from "@/lib/project-setup/types"
 import {
   installLatestArgs,
 } from "@/lib/project-setup/templates/package-latest";
-import { scopeIncludesBackend, slugify, shouldRunPrismaMigrate, usesPrismaBackend } from "@/lib/project-setup/templates/shared";
+import { scopeIncludesBackend, slugify, shouldRunPrismaMigrate, usesPrismaBackend, hasBackendAuthMethod, usesBackendAuth, backendReadmeContent } from "@/lib/project-setup/templates/shared";
 import {
   expressLayeredFiles,
   expressPackageJson,
@@ -37,8 +37,14 @@ function expressChecklist(config: ProjectSetupConfig): string[] {
   const items = [
     "Express layered API (routes → controllers → services → config)",
   ];
-  if (config.backendAuth === "jwt") {
+  if (hasBackendAuthMethod(config, "jwt")) {
     items.push("JWT auth routes (/api/auth/register, /login, /me)");
+  }
+  if (hasBackendAuthMethod(config, "google_oauth")) {
+    items.push("Google OAuth routes (/api/auth/google, /google/callback)");
+  }
+  if (hasBackendAuthMethod(config, "azure_oauth")) {
+    items.push("Azure OAuth routes (/api/auth/azure, /azure/callback)");
   }
   if (config.database === "postgresql") {
     items.push("PostgreSQL via pg Pool + Prisma (@prisma/client) in src/config/db.ts");
@@ -51,8 +57,8 @@ function expressChecklist(config: ProjectSetupConfig): string[] {
 
 function nestChecklist(config: ProjectSetupConfig): string[] {
   const items = ["NestJS modular API (feature modules + shared guards/filters)"];
-  if (config.backendAuth === "jwt") {
-    items.push("JWT auth module (Passport + @nestjs/jwt)");
+  if (usesBackendAuth(config)) {
+    items.push("Auth module (JWT + OAuth as selected)");
   }
   if (config.database === "postgresql") {
     items.push("PostgreSQL via Prisma module");
@@ -65,7 +71,7 @@ function nestChecklist(config: ProjectSetupConfig): string[] {
 
 function expressDependencies(config: ProjectSetupConfig): string[] {
   const deps = ["express", "cors", "dotenv"];
-  if (config.backendAuth === "jwt") {
+  if (usesBackendAuth(config)) {
     deps.push("jsonwebtoken", "bcryptjs");
   }
   if (config.database === "mongodb") {
@@ -84,6 +90,10 @@ export const expressBaseModule: StackModule = {
     const slug = slugify(config.projectName);
     return [
       ...expressLayeredFiles(config),
+      {
+        relativePath: `${rel}README.md`,
+        content: backendReadmeContent(config),
+      },
       {
         relativePath: `${rel}package.json`,
         content: JSON.stringify(expressPackageJson(config, slug), null, 2),
@@ -126,7 +136,7 @@ export const prismaModule: StackModule = {
     return [
       {
         relativePath: `${rel}prisma/schema.prisma`,
-        content: prismaSchemaContent(),
+        content: prismaSchemaContent(config),
       },
       {
         relativePath: `${rel}prisma.config.ts`,
@@ -226,7 +236,7 @@ export const nestBaseModule: StackModule = {
       "reflect-metadata",
       "rxjs",
     ];
-    if (config.backendAuth === "jwt") {
+    if (usesBackendAuth(config)) {
       deps.push("@nestjs/jwt", "@nestjs/passport", "passport", "passport-jwt", "bcryptjs");
     }
     if (config.database === "mongodb") {
@@ -243,6 +253,10 @@ export const nestBaseModule: StackModule = {
     return [
       ...nestLayeredFiles(config),
       ...nestPrismaSchemaFiles(config),
+      {
+        relativePath: `${rel}README.md`,
+        content: backendReadmeContent(config),
+      },
       {
         relativePath: `${rel}package.json`,
         content: JSON.stringify(nestPackageJson(config, slug), null, 2),

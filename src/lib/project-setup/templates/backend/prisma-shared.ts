@@ -1,4 +1,6 @@
 import type { CommandStep } from "@/lib/project-setup/types";
+import { usesOAuth } from "@/lib/project-setup/templates/shared";
+import type { ProjectSetupConfig } from "@/lib/project-setup/types";
 
 /** Post-install step: generate Prisma Client types (no database required). */
 export function prismaGenerateStep(cwd: string): CommandStep {
@@ -28,7 +30,17 @@ export function prismaMigrateDevStep(cwd: string, databaseUrl: string): CommandS
 }
 
 /** Shared Prisma schema for generated Express and NestJS backends. */
-export function prismaSchemaContent(): string {
+export function prismaSchemaContent(config?: ProjectSetupConfig): string {
+  const oauth = config ? usesOAuth(config) : false;
+  const passwordField = oauth
+    ? "  passwordHash String?"
+    : "  passwordHash String";
+  const oauthFields = oauth
+    ? `
+  googleId     String?  @unique
+  azureOid     String?  @unique`
+    : "";
+
   return `generator client {
   provider = "prisma-client-js"
 }
@@ -40,7 +52,7 @@ datasource db {
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
-  passwordHash String
+${passwordField}${oauthFields}
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

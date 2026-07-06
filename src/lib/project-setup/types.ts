@@ -3,9 +3,8 @@ export type ProjectScope = "frontend_only" | "backend_only" | "full_stack";
 export type FrontendFramework = "nextjs" | "react";
 export type StylingOption = "tailwind" | "mui" | "shadcn";
 export type StateManagement = "redux" | "zustand" | "context";
-export type FrontendAuth = "none" | "jwt" | "google_oauth";
+export type AuthMethod = "jwt" | "google_oauth" | "azure_oauth";
 
-export type BackendAuth = "jwt" | "google_oauth";
 export type BackendFramework = "express" | "nestjs";
 export type DatabaseOption = "mongodb" | "postgresql";
 export type DeploymentTarget = "none" | "railway" | "render" | "vercel";
@@ -18,9 +17,11 @@ export interface ProjectSetupConfig {
   frontendFramework: FrontendFramework;
   styling: StylingOption;
   stateManagement: StateManagement;
-  frontendAuth: FrontendAuth;
+  /** Auth methods scaffolded on the frontend login page. */
+  frontendAuthMethods: AuthMethod[];
+  /** Auth routes and providers scaffolded on the backend API. */
+  backendAuthMethods: AuthMethod[];
   backendFramework: BackendFramework;
-  backendAuth: BackendAuth;
   database: DatabaseOption;
   swagger: boolean;
   redis: boolean;
@@ -34,6 +35,15 @@ export interface ProjectSetupConfig {
   runMigrations: boolean;
   /** Optional — written to .env when JWT auth is selected. */
   jwtSecret: string;
+  googleClientId: string;
+  googleClientSecret: string;
+  azureClientId: string;
+  azureClientSecret: string;
+  azureTenantId: string;
+  /** OAuth redirect target and frontend app origin, e.g. http://localhost:5173 */
+  frontendUrl: string;
+  /** Backend API base URL for frontend requests, e.g. http://localhost:4000 */
+  apiUrl: string;
 }
 
 export interface ProjectSetupResult {

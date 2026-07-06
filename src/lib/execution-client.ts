@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  EXECUTOR_BASE_URL,
-  EXECUTOR_LATEST_VERSION,
-} from "@/lib/project-setup/defaults";
+import { EXECUTOR_BASE_URL } from "@/lib/project-setup/defaults";
 import type { PlanResult, ProjectSetupConfig, ProjectSetupResult } from "@/lib/project-setup/types";
 
 export interface ExecutorStatus {
@@ -11,7 +8,9 @@ export interface ExecutorStatus {
   connected: boolean;
   paired: boolean;
   version: string | null;
+  latestVersion: string | null;
   updateAvailable: boolean;
+  downloadAvailable: boolean;
 }
 
 export interface LogEvent {
@@ -25,47 +24,99 @@ export interface LogEvent {
   error?: string | null;
 }
 
+export async function fetchLatestExecutorRelease(): Promise<{
+  version: string | null;
+  hasDownload: boolean;
+  name: string | null;
+}> {
+  try {
+    const res = await fetch("/api/executor/version", { method: "GET" });
+    if (!res.ok) {
+      return { version: null, hasDownload: false, name: null };
+    }
+    const data = (await res.json()) as {
+      version?: string;
+      hasDownload?: boolean;
+      name?: string | null;
+    };
+    return {
+      version: data.version?.trim() || null,
+      hasDownload: Boolean(data.hasDownload),
+      name: data.name ?? null,
+    };
+  } catch {
+    return { version: null, hasDownload: false, name: null };
+  }
+}
+
 export async function checkExecutorHealth(): Promise<ExecutorStatus> {
+  const release = await fetchLatestExecutorRelease();
+
+  const disconnected: ExecutorStatus = {
+    ok: false,
+    connected: false,
+    paired: false,
+    version: null,
+    latestVersion: release.version,
+    updateAvailable: false,
+    downloadAvailable: release.hasDownload,
+  };
+
   try {
     const res = await fetch(`${EXECUTOR_BASE_URL}/health`, { method: "GET" });
-    if (!res.ok) {
-      return {
-        ok: false,
-        connected: false,
-        paired: false,
-        version: null,
-        updateAvailable: false,
-      };
-    }
+    if (!res.ok) return disconnected;
+
     const data = (await res.json()) as {
       ok: boolean;
       version?: string;
       paired?: boolean;
     };
-    const version = data.version ?? null;
-    const updateAvailable = version
-      ? compareSemver(version, EXECUTOR_LATEST_VERSION) < 0
-      : false;
+    const version = data.version?.trim() || null;
+    const latestVersion = release.version;
+    const updateAvailable = Boolean(
+      isKnownExecutorVersion(version) &&
+        isKnownExecutorVersion(latestVersion) &&
+        normalizeVersion(version) !== normalizeVersion(latestVersion),
+    );
+
     return {
       ok: data.ok,
       connected: true,
       paired: Boolean(data.paired),
       version,
+      latestVersion,
       updateAvailable,
+      downloadAvailable: release.hasDownload,
     };
   } catch {
-    return {
-      ok: false,
-      connected: false,
-      paired: false,
-      version: null,
-      updateAvailable: false,
-    };
+    return disconnected;
   }
 }
 
-export async function fetchPairingToken(): Promise<string> {
-  const res = await fetch("/api/settings/executor-token", { method: "POST" });
+async function resolveExecutorVersion(version?: string | null): Promise<string | null> {
+  const normalized = version?.trim().replace(/^v/i, "") || null;
+  if (isKnownExecutorVersion(normalized)) return normalized;
+
+  try {
+    const res = await fetch(`${EXECUTOR_BASE_URL}/health`, { method: "GET" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { version?: string };
+    const healthVersion = data.version?.trim().replace(/^v/i, "") || null;
+    return isKnownExecutorVersion(healthVersion) ? healthVersion : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPairingToken(options?: {
+  version?: string | null;
+}): Promise<string> {
+  const version = await resolveExecutorVersion(options?.version);
+  const res = await fetch("/api/settings/executor-token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ version }),
+  });
   if (!res.ok) {
     const err = (await res.json()) as { error?: string };
     throw new Error(err.error ?? "Failed to fetch pairing token");
@@ -207,12 +258,10 @@ export async function syncResult(
   }
 }
 
-function compareSemver(a: string, b: string): number {
-  const pa = a.split(".").map(Number);
-  const pb = b.split(".").map(Number);
-  for (let i = 0; i < 3; i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-    if (diff !== 0) return diff;
-  }
-  return 0;
+function normalizeVersion(version: string): string {
+  return version.trim().replace(/^v/i, "");
+}
+
+function isKnownExecutorVersion(version: string | null | undefined): version is string {
+  return Boolean(version && version !== "unknown");
 }

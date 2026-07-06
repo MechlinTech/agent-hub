@@ -1,7 +1,6 @@
 import http from "http";
 import { URL } from "url";
 import {
-  EXECUTOR_LATEST_VERSION,
   EXECUTOR_DEFAULT_PORT,
 } from "../../src/lib/project-setup/defaults";
 import { getAllowedCorsOrigins, getExecutorPort } from "../../src/lib/project-setup/env";
@@ -21,7 +20,15 @@ import { pickNativeFolder } from "./pick-folder";
 import type { ExecutionLogEvent } from "../../src/lib/execution/execution-service";
 import type { ProjectSetupConfig } from "../../src/lib/project-setup/types";
 
-const VERSION = EXECUTOR_LATEST_VERSION;
+function resolveExecutorVersion(): string {
+  const runtime =
+    process.env.AGENTHUB_DESKTOP_VERSION?.trim() ||
+    process.env.AGENTHUB_EXECUTOR_VERSION?.trim();
+  if (runtime) return runtime.replace(/^v/i, "");
+  return "unknown";
+}
+
+const VERSION = resolveExecutorVersion();
 const MIN_UI_VERSION = "1.0.0";
 
 interface ActiveExecution {

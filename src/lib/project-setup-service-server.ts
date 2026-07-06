@@ -171,7 +171,9 @@ export async function syncProjectSetup(
   return rowToRecord(data);
 }
 
-export async function regenerateExecutorToken(): Promise<string> {
+export async function regenerateExecutorToken(
+  executorVersion?: string | null,
+): Promise<string> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -181,13 +183,19 @@ export async function regenerateExecutorToken(): Promise<string> {
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashToken(token);
   const now = new Date().toISOString();
+  const version = executorVersion?.trim().replace(/^v/i, "") || null;
 
-  const { error } = await supabase.from("executor_pairing_tokens").upsert({
+  const row: Record<string, unknown> = {
     user_id: user.id,
     token_hash: tokenHash,
     rotated_at: now,
     created_at: now,
-  });
+  };
+  if (version) {
+    row.version = version;
+  }
+
+  const { error } = await supabase.from("executor_pairing_tokens").upsert(row);
 
   if (error) throw new Error(error.message);
   return token;
@@ -205,7 +213,7 @@ export async function hasExecutorToken(): Promise<boolean> {
   if (!user) return false;
   const { data } = await supabase
     .from("executor_pairing_tokens")
-    .select("user_id")
+    .select("user_id, version")
     .eq("user_id", user.id)
     .maybeSingle();
   return Boolean(data);

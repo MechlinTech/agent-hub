@@ -32,7 +32,7 @@ export default function LocalExecutorSettingsPage() {
     setError(null);
     setMessage(null);
     try {
-      const t = await fetchPairingToken();
+      const t = await fetchPairingToken({ version: status?.version });
       setToken(t);
       setSessionToken(t);
       setMessage("Token generated. Pair the executor before closing this page.");

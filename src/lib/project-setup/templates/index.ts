@@ -12,6 +12,10 @@ import {
   tailwindFrontendModule,
 } from "@/lib/project-setup/templates/frontend/modules";
 import {
+  authNextModule,
+  authViteModule,
+} from "@/lib/project-setup/templates/frontend/auth-templates";
+import {
   expressBaseModule,
   nestBaseModule,
   mongooseModule,
@@ -21,7 +25,6 @@ import {
   swaggerModule,
 } from "@/lib/project-setup/templates/backend/modules";
 import {
-  authStubModule,
   deployStubModule,
   dockerModule,
   githubActionsModule,
@@ -53,6 +56,7 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(githubActionsModule);
   registerStackModule(deployStubModule);
   registerStackModule(stylingStubModule);
-  registerStackModule(authStubModule);
+  registerStackModule(authViteModule);
+  registerStackModule(authNextModule);
   registered = true;
 }
