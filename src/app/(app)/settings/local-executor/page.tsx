@@ -35,7 +35,9 @@ export default function LocalExecutorSettingsPage() {
       const t = await fetchPairingToken({ version: status?.version });
       setToken(t);
       setSessionToken(t);
-      setMessage("Token generated. Pair the executor before closing this page.");
+      setMessage(
+        "Token generated. Pair the executor before closing this page.",
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -70,18 +72,23 @@ export default function LocalExecutorSettingsPage() {
           <Terminal className="h-5 w-5 text-slate-600" />
           <h2 className="section-card-title border-0 pb-0">Local Executor</h2>
         </div>
-        <p className="text-sm text-slate-600">
-          Run <code className="rounded bg-slate-100 px-1">npm run executor</code> on the same
-          machine as your browser. Projects are created locally — not on the AgentHub server.
-        </p>
+        {/* <p className="text-sm text-slate-600">
+          Run AgentHub Desktop on the same machine as your browser. Projects are
+          created locally - not on the AgentHub server.
+        </p> */}
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
+          <li>Start AgentHub Desktop application.</li>
           <li>
-            Start the executor: <code>npm run executor</code>
+            Click the <strong>'Open AgentHub to connect'</strong> button in the
+            desktop app to open the browser.
           </li>
+        </ol>
+        {/* <p className="text-sm pl-10 text-slate-600">OR</p>
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
           <li>Generate a pairing token below</li>
           <li>Click Pair executor</li>
           <li>Use Project Setup Agent from the wizard</li>
-        </ol>
+        </ol> */}
       </div>
 
       {error ? (
@@ -120,9 +127,12 @@ export default function LocalExecutorSettingsPage() {
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Token (session only)
           </p>
-          <p className="mt-2 break-all font-mono text-sm text-slate-800">{token}</p>
+          <p className="mt-2 break-all font-mono text-sm text-slate-800">
+            {token}
+          </p>
           <p className="mt-2 text-xs text-slate-500">
-            Not stored in localStorage. Regenerating invalidates the previous token.
+            Not stored in localStorage. Regenerating invalidates the previous
+            token.
           </p>
         </div>
       ) : null}
