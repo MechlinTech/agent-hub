@@ -41,10 +41,10 @@ interface RunPreview {
   endedAt: string | null;
 }
 
-export function SelectTestRunPanel() {
+export function SelectTestRunPanel({ configured = true }: { configured?: boolean }) {
   const router = useRouter();
   const [runs, setRuns] = useState<TestRunRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(configured);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preview, setPreview] = useState<RunPreview | null>(null);
@@ -53,6 +53,13 @@ export function SelectTestRunPanel() {
   const [masterIdInput, setMasterIdInput] = useState("");
 
   useEffect(() => {
+    if (!configured) {
+      setLoading(false);
+      setRuns([]);
+      setError(null);
+      return;
+    }
+
     fetch("/api/results-analysis/blazemeter/runs")
       .then((r) => r.json())
       .then((data) => {
@@ -62,7 +69,7 @@ export function SelectTestRunPanel() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load runs"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [configured]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -96,6 +103,25 @@ export function SelectTestRunPanel() {
       setError(e instanceof Error ? e.message : "Import failed");
       setImporting(false);
     }
+  }
+
+  if (!configured) {
+    return (
+      <div className="card space-y-4 p-8 text-center">
+        <p className="text-sm text-slate-600">
+          Connect BlazeMeter under Integrations to browse and import test runs from your
+          workspace project.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link href="/integrations" className="btn-primary px-4 py-2 text-sm">
+            Configure BlazeMeter
+          </Link>
+          <Link href="/agents/results-analysis/new" className="btn-secondary px-4 py-2 text-sm">
+            Upload CSV instead
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

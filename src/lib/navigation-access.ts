@@ -16,7 +16,7 @@ export const AGENT_NAV_ITEM_ACCESS: Partial<Record<string, NavAccessRule>> = {
   "/agents/script-review/new": { resource: "script_review", requireWrite: true },
   "/agents/script-review/configure": { resource: "script_review", requireWrite: true },
   "/agents/results-analysis/new": { resource: "results_analysis", requireWrite: true },
-  "/agents/results-analysis/select-run": { resource: "results_analysis", requireWrite: true },
+  "/agents/results-analysis/select-run": { resource: "results_analysis" },
   "/agents/results-analysis/sla": { resource: "results_analysis", requireWrite: true },
   "/agents/project-setup/new": { resource: "project_setup", requireWrite: true },
 };

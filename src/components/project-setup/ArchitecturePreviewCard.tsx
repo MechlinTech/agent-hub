@@ -37,16 +37,23 @@ export function ArchitecturePreviewCard({ plan }: { plan: PlanResult | null }) {
 
 export function ProjectSummaryCard({
   config,
+  compact = false,
 }: {
   config: import("@/lib/project-setup/types").ProjectSetupConfig;
+  compact?: boolean;
 }) {
-  const items: string[] = [
-    `Scope: ${config.projectScope.replace(/_/g, " ")}`,
-    `Location: ${config.locationPath || "—"}`,
+  const rows: { label: string; value: string }[] = [
+    { label: "Scope", value: config.projectScope.replace(/_/g, " ") },
+    { label: "Location", value: config.locationPath || "—" },
   ];
+
   if (config.projectScope !== "backend_only") {
-    items.push(`Frontend: ${config.frontendFramework} + ${config.styling}`);
+    rows.push({
+      label: "Frontend",
+      value: `${config.frontendFramework} + ${config.styling}`,
+    });
   }
+
   if (config.projectScope !== "frontend_only") {
     const frameworkLabel =
       config.backendFramework === "express"
@@ -54,19 +61,49 @@ export function ProjectSummaryCard({
         : config.backendFramework === "nestjs"
           ? "NestJS"
           : config.backendFramework;
-    items.push(`Backend: ${frameworkLabel} + ${config.database}`);
+    rows.push({
+      label: "Backend",
+      value: `${frameworkLabel} + ${config.database}`,
+    });
   }
-  if (config.docker) items.push("Docker");
-  if (config.githubActions) items.push("GitHub Actions");
+
+  const extras: string[] = [];
+  if (config.swagger) extras.push("Swagger");
+  if (config.docker) extras.push("Docker");
+  if (config.githubActions) extras.push("GitHub Actions");
+  if (config.redis) extras.push("Redis");
+  if (config.socketIo) extras.push("Socket.IO");
 
   return (
     <div className="card h-fit p-5">
       <h3 className="font-semibold text-slate-900">Project summary</h3>
-      <ul className="mt-3 space-y-1 text-sm text-slate-600">
-        {items.map((item) => (
-          <li key={item}>{item}</li>
+      {!compact ? (
+        <p className="mt-1 text-xs text-slate-500">
+          Live preview of your current configuration.
+        </p>
+      ) : null}
+      <dl className="mt-4 space-y-3">
+        {rows.map((row) => (
+          <div key={row.label} className="flex flex-col gap-0.5">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              {row.label}
+            </dt>
+            <dd className="text-sm font-medium capitalize text-slate-800">{row.value}</dd>
+          </div>
         ))}
-      </ul>
+      </dl>
+      {extras.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {extras.map((item) => (
+            <span
+              key={item}
+              className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 ring-1 ring-brand-100"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
