@@ -3,6 +3,7 @@ import {
   nextjsModule,
   reactViteModule,
   flutterModule,
+  reactNativeModule,
   reduxNextModule,
   reduxViteModule,
   zustandNextModule,
@@ -39,6 +40,7 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(nextjsModule);
   registerStackModule(reactViteModule);
   registerStackModule(flutterModule);
+  registerStackModule(reactNativeModule);
   registerStackModule(tailwindFrontendModule);
   registerStackModule(shadcnFrontendModule);
   registerStackModule(reduxViteModule);

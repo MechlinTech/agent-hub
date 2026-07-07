@@ -184,7 +184,9 @@ export function ConfigSectionCards({
   const beHasJwt = beAuth.includes("jwt");
   const beHasGoogle = beAuth.includes("google_oauth");
   const beHasAzure = beAuth.includes("azure_oauth");
-  const isFlutter = config.frontendFramework === "flutter";
+  const isReactNative = config.frontendFramework === "react-native";
+  const isMobileFramework =
+    config.frontendFramework === "flutter" || isReactNative;
 
   return (
     <div className="space-y-5">
@@ -232,10 +234,11 @@ export function ConfigSectionCards({
                   { value: "nextjs", label: "Next.js" },
                   { value: "react", label: "React (Vite)" },
                   { value: "flutter", label: "Flutter (GetX)" },
+                  { value: "react-native", label: "React Native CLI" },
                 ]}
               />
             </Field>
-            {!isFlutter ? (
+            {!isMobileFramework ? (
               <Field label="Styling">
                 <StyledSelect
                   value={config.styling}
@@ -248,7 +251,7 @@ export function ConfigSectionCards({
                 />
               </Field>
             ) : null}
-            {!isFlutter ? (
+            {!isMobileFramework ? (
               <Field label="State management">
                 <StyledSelect
                   value={config.stateManagement}
@@ -262,7 +265,7 @@ export function ConfigSectionCards({
               </Field>
             ) : null}
           </div>
-          {!isFlutter ? (
+          {!isMobileFramework ? (
             <AuthMethodsGroup
               label="Authentication (login page)"
               hint="Controls which sign-in buttons and forms appear on the frontend /login page. OAuth buttons call your API URL."
@@ -271,13 +274,13 @@ export function ConfigSectionCards({
               error={fieldErrors.frontendAuthMethods}
             />
           ) : null}
-          {(feHasAuth || isFlutter) ? (
+          {(feHasAuth || isMobileFramework) ? (
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="API URL"
                 hint={
-                  isFlutter
-                    ? "Backend base URL for Dio API requests (written to .env as API_BASE_URL)."
+                  isMobileFramework
+                    ? "Backend base URL for API requests (written to .env as API_BASE_URL)."
                     : "Backend base URL for auth and API requests. Required for Frontend Only apps."
                 }
               >
@@ -292,7 +295,7 @@ export function ConfigSectionCards({
                   <p className="text-xs text-red-600">{fieldErrors.apiUrl}</p>
                 ) : null}
               </Field>
-              {feHasOAuth && !isFlutter ? (
+              {feHasOAuth && !isMobileFramework ? (
                 <Field
                   label="Frontend URL"
                   hint="Your app origin — used for OAuth callback redirect (/auth/callback)."

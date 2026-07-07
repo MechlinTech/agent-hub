@@ -1,6 +1,6 @@
 export type ProjectScope = "frontend_only" | "backend_only" | "full_stack";
 
-export type FrontendFramework = "nextjs" | "react" | "flutter";
+export type FrontendFramework = "nextjs" | "react" | "flutter" | "react-native";
 export type StylingOption = "tailwind" | "mui" | "shadcn";
 export type StateManagement = "redux" | "zustand" | "context";
 export type AuthMethod = "jwt" | "google_oauth" | "azure_oauth";

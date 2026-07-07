@@ -75,7 +75,7 @@ export const projectSetupConfigSchema = z
     description: z.string().max(2000).optional().default(""),
     projectScope: z.enum(["frontend_only", "backend_only", "full_stack"]),
     locationPath: locationPathSchema,
-    frontendFramework: z.enum(["nextjs", "react", "flutter"]),
+    frontendFramework: z.enum(["nextjs", "react", "flutter", "react-native"]),
     styling: z.enum(["tailwind", "mui", "shadcn"]),
     stateManagement: z.enum(["redux", "zustand", "context"]),
     frontendAuthMethods: z.array(authMethodSchema).default([]),

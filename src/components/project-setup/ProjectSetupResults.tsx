@@ -211,6 +211,13 @@ export function ProjectSetupResults({
                   <code className="text-xs">flutter pub get</code> and{" "}
                   <code className="text-xs">flutter run</code>
                 </>
+              ) : config.frontendFramework === "react-native" ? (
+                <>
+                  <code className="text-xs">npm install</code>,{" "}
+                  <code className="text-xs">cd ios && pod install</code>, then{" "}
+                  <code className="text-xs">npm run android</code> or{" "}
+                  <code className="text-xs">npm run ios</code>
+                </>
               ) : (
                 <>
                   <code className="text-xs">npm install</code> and{" "}

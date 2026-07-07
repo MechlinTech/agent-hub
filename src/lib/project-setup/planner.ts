@@ -39,7 +39,12 @@ export function buildPlan(config: ProjectSetupConfig): PlanResult {
     }
   }
 
-  if (scopeIncludesFrontend(config) && usesFrontendAuth(config)) {
+  if (
+    scopeIncludesFrontend(config) &&
+    (usesFrontendAuth(config) ||
+      config.frontendFramework === "flutter" ||
+      config.frontendFramework === "react-native")
+  ) {
     const feExample = frontendEnvExampleContent(config);
     if (feExample) {
       envFiles.push({

@@ -1,5 +1,6 @@
 import type { StackModule } from "@/lib/project-setup/templates/registry";
 import type { FileTemplate, ProjectSetupConfig } from "@/lib/project-setup/types";
+import path from "path";
 import { installLatestArgs, installLatestDevArgs } from "@/lib/project-setup/templates/package-latest";
 import {
   buildNextRootLayout,
@@ -7,6 +8,12 @@ import {
 } from "@/lib/project-setup/templates/frontend/styling-templates";
 import { scopeIncludesFrontend, frontendRelPrefix } from "@/lib/project-setup/templates/shared";
 import { flutterLayeredFiles, flutterPackageName } from "@/lib/project-setup/templates/frontend/flutter-templates";
+import {
+  REACT_NATIVE_EXTRA_DEPENDENCIES,
+  REACT_NATIVE_EXTRA_DEV_DEPENDENCIES,
+  reactNativeAndroidPackage,
+  reactNativeLayeredFiles,
+} from "@/lib/project-setup/templates/frontend/react-native-templates";
 
 function frontendCwd(config: ProjectSetupConfig, root: string): string {
   return config.projectScope === "frontend_only" ? root : `${root}/frontend`;
@@ -278,6 +285,88 @@ export const flutterModule: StackModule = {
         args: ["pub", "get"],
         cwd,
         timeoutMs: 600_000,
+        phase: "post",
+      },
+    ];
+  },
+};
+
+export const reactNativeModule: StackModule = {
+  id: "frontend-react-native",
+  appliesTo: (c) =>
+    scopeIncludesFrontend(c) && c.frontendFramework === "react-native",
+  checklist: () => [
+    "React Native CLI app with App/InnerApp architecture",
+    "FCM + Notifee handlers (foreground, background, killed state)",
+    "Light/dark/system theme with in-app toggle",
+    "Flatlogic-inspired UI components + gradient home screen",
+    "Replace placeholder Firebase config files (see FIREBASE_SETUP.md)",
+  ],
+  dependencies: () => [...REACT_NATIVE_EXTRA_DEPENDENCIES],
+  files: (config) => reactNativeLayeredFiles(config),
+  commands: (config, root) => {
+    const isFrontendOnly = config.projectScope === "frontend_only";
+    const cwd = frontendCwd(config, root);
+    const androidPackage = reactNativeAndroidPackage(config.projectName);
+    // RN CLI resolves `--directory .` via path.relative(cwd, '.') which is '' on
+    // Windows and crashes with mkdir(''). For frontend-only, init from the parent
+    // folder so the default projectName directory lands in projectRoot (same
+    // pattern as create-next-app using "." from projectRoot).
+    const initCwd = isFrontendOnly ? path.dirname(root) : root;
+    const initArgs = [
+      "@react-native-community/cli@latest",
+      "init",
+      config.projectName,
+      "--package-name",
+      androidPackage,
+      "--skip-install",
+      "--pm",
+      "npm",
+      "--replace-directory",
+      "true",
+    ];
+    if (!isFrontendOnly) {
+      initArgs.push("--directory", "frontend");
+    }
+    return [
+      {
+        id: "react-native-init",
+        label: "Creating React Native project",
+        exe: "npx",
+        args: initArgs,
+        cwd: initCwd,
+        timeoutMs: 900_000,
+        phase: "pre",
+      },
+      {
+        id: "react-native-install",
+        label: "Installing npm dependencies",
+        exe: "npm",
+        args: ["install"],
+        cwd,
+        timeoutMs: 600_000,
+        phase: "post",
+      },
+      {
+        id: "react-native-extra-deps",
+        label: "Installing React Native template dependencies",
+        exe: "npm",
+        args: [
+          "install",
+          ...REACT_NATIVE_EXTRA_DEPENDENCIES,
+          ...REACT_NATIVE_EXTRA_DEV_DEPENDENCIES.map((dep) => ["-D", dep]).flat(),
+        ],
+        cwd,
+        timeoutMs: 600_000,
+        phase: "post",
+      },
+      {
+        id: "react-native-android-firebase",
+        label: "Configuring Android Firebase build",
+        exe: "node",
+        args: ["scripts/configure-firebase-android.mjs"],
+        cwd,
+        timeoutMs: 60_000,
         phase: "post",
       },
     ];
