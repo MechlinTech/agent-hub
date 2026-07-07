@@ -2,6 +2,7 @@ import { registerStackModule } from "@/lib/project-setup/templates/registry";
 import {
   nextjsModule,
   reactViteModule,
+  flutterModule,
   reduxNextModule,
   reduxViteModule,
   zustandNextModule,
@@ -37,6 +38,7 @@ export function ensureTemplatesRegistered(): void {
   if (registered) return;
   registerStackModule(nextjsModule);
   registerStackModule(reactViteModule);
+  registerStackModule(flutterModule);
   registerStackModule(tailwindFrontendModule);
   registerStackModule(shadcnFrontendModule);
   registerStackModule(reduxViteModule);

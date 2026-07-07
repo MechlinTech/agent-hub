@@ -184,6 +184,7 @@ export function ConfigSectionCards({
   const beHasJwt = beAuth.includes("jwt");
   const beHasGoogle = beAuth.includes("google_oauth");
   const beHasAzure = beAuth.includes("azure_oauth");
+  const isFlutter = config.frontendFramework === "flutter";
 
   return (
     <div className="space-y-5">
@@ -230,44 +231,55 @@ export function ConfigSectionCards({
                 options={[
                   { value: "nextjs", label: "Next.js" },
                   { value: "react", label: "React (Vite)" },
+                  { value: "flutter", label: "Flutter (GetX)" },
                 ]}
               />
             </Field>
-            <Field label="Styling">
-              <StyledSelect
-                value={config.styling}
-                onChange={(styling) => onChange({ styling })}
-                options={[
-                  { value: "tailwind", label: "Tailwind CSS" },
-                  { value: "mui", label: "Material UI" },
-                  { value: "shadcn", label: "ShadCN UI" },
-                ]}
-              />
-            </Field>
-            <Field label="State management">
-              <StyledSelect
-                value={config.stateManagement}
-                onChange={(stateManagement) => onChange({ stateManagement })}
-                options={[
-                  { value: "redux", label: "Redux Toolkit" },
-                  { value: "zustand", label: "Zustand" },
-                  { value: "context", label: "Context API" },
-                ]}
-              />
-            </Field>
+            {!isFlutter ? (
+              <Field label="Styling">
+                <StyledSelect
+                  value={config.styling}
+                  onChange={(styling) => onChange({ styling })}
+                  options={[
+                    { value: "tailwind", label: "Tailwind CSS" },
+                    { value: "mui", label: "Material UI" },
+                    { value: "shadcn", label: "ShadCN UI" },
+                  ]}
+                />
+              </Field>
+            ) : null}
+            {!isFlutter ? (
+              <Field label="State management">
+                <StyledSelect
+                  value={config.stateManagement}
+                  onChange={(stateManagement) => onChange({ stateManagement })}
+                  options={[
+                    { value: "redux", label: "Redux Toolkit" },
+                    { value: "zustand", label: "Zustand" },
+                    { value: "context", label: "Context API" },
+                  ]}
+                />
+              </Field>
+            ) : null}
           </div>
-          <AuthMethodsGroup
-            label="Authentication (login page)"
-            hint="Controls which sign-in buttons and forms appear on the frontend /login page. OAuth buttons call your API URL."
-            methods={feAuth}
-            onChange={(frontendAuthMethods) => onChange({ frontendAuthMethods })}
-            error={fieldErrors.frontendAuthMethods}
-          />
-          {feHasAuth ? (
+          {!isFlutter ? (
+            <AuthMethodsGroup
+              label="Authentication (login page)"
+              hint="Controls which sign-in buttons and forms appear on the frontend /login page. OAuth buttons call your API URL."
+              methods={feAuth}
+              onChange={(frontendAuthMethods) => onChange({ frontendAuthMethods })}
+              error={fieldErrors.frontendAuthMethods}
+            />
+          ) : null}
+          {(feHasAuth || isFlutter) ? (
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="API URL"
-                hint="Backend base URL for auth and API requests. Required for Frontend Only apps."
+                hint={
+                  isFlutter
+                    ? "Backend base URL for Dio API requests (written to .env as API_BASE_URL)."
+                    : "Backend base URL for auth and API requests. Required for Frontend Only apps."
+                }
               >
                 <input
                   className="input w-full font-mono text-sm"
@@ -280,7 +292,7 @@ export function ConfigSectionCards({
                   <p className="text-xs text-red-600">{fieldErrors.apiUrl}</p>
                 ) : null}
               </Field>
-              {feHasOAuth ? (
+              {feHasOAuth && !isFlutter ? (
                 <Field
                   label="Frontend URL"
                   hint="Your app origin — used for OAuth callback redirect (/auth/callback)."

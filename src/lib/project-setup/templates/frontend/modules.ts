@@ -6,6 +6,7 @@ import {
   nextHomePageContent,
 } from "@/lib/project-setup/templates/frontend/styling-templates";
 import { scopeIncludesFrontend, frontendRelPrefix } from "@/lib/project-setup/templates/shared";
+import { flutterLayeredFiles, flutterPackageName } from "@/lib/project-setup/templates/frontend/flutter-templates";
 
 function frontendCwd(config: ProjectSetupConfig, root: string): string {
   return config.projectScope === "frontend_only" ? root : `${root}/frontend`;
@@ -229,6 +230,53 @@ export const reactViteModule: StackModule = {
         exe: "npm",
         args: ["install"],
         cwd: config.projectScope === "frontend_only" ? root : `${root}/frontend`,
+        timeoutMs: 600_000,
+        phase: "post",
+      },
+    ];
+  },
+};
+
+export const flutterModule: StackModule = {
+  id: "frontend-flutter",
+  appliesTo: (c) => scopeIncludesFrontend(c) && c.frontendFramework === "flutter",
+  checklist: () => [
+    "Flutter app with GetX architecture (Tapsy-inspired layout)",
+    "FCM notification handlers (foreground, background, killed state)",
+    "Branded splash + polished home screen with reusable UI widgets",
+    "Dummy launcher icon and Android notification icon included",
+    "Poppins-Regular.ttf bundled in assets/fonts/",
+    "Run flutterfire configure to replace firebase_options.dart stub",
+  ],
+  dependencies: () => ["get", "firebase_core", "firebase_messaging", "dio"],
+  files: (config) => flutterLayeredFiles(config),
+  commands: (config, root) => {
+    const dir = config.projectScope === "frontend_only" ? "." : "frontend";
+    const pkg = flutterPackageName(config.projectName);
+    const cwd = frontendCwd(config, root);
+    return [
+      {
+        id: "flutter-init",
+        label: "Creating Flutter project",
+        exe: "flutter",
+        args: [
+          "create",
+          dir,
+          "--org",
+          "com.example",
+          "--project-name",
+          pkg,
+        ],
+        cwd: root,
+        timeoutMs: 600_000,
+        phase: "pre",
+      },
+      {
+        id: "flutter-pub-get",
+        label: "Installing Flutter dependencies",
+        exe: "flutter",
+        args: ["pub", "get"],
+        cwd,
         timeoutMs: 600_000,
         phase: "post",
       },

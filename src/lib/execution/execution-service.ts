@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from "child_process";
 import type { CommandStep } from "@/lib/project-setup/types";
 
-const WIN_CMD_WRAPPERS = new Set(["npm", "npx", "yarn", "pnpm", "corepack"]);
+const WIN_CMD_WRAPPERS = new Set(["npm", "npx", "yarn", "pnpm", "corepack", "flutter", "dart"]);
 
 function isWindowsCmdWrapper(exe: string): boolean {
   if (process.platform !== "win32") return false;
@@ -28,7 +28,8 @@ function spawnStepProcess(step: CommandStep, cwd: string): ChildProcess {
   const useShell = Boolean(step.allowShell);
   const winPackageManager = isWindowsCmdWrapper(step.exe);
 
-  // Windows .cmd shims (npm/npx) need shell:true — direct spawn yields ENOENT or EINVAL.
+  // Windows .cmd/.bat shims (npm/npx, flutter.bat, dart.bat) need shell:true —
+  // direct spawn yields ENOENT or EINVAL.
   if (winPackageManager || (useShell && process.platform === "win32")) {
     return spawn(formatShellCommand(step.exe, step.args), [], {
       ...options,

@@ -145,6 +145,57 @@ CMD ["npm", "run", "dev"]
   commands: () => [],
 };
 
+function githubActionsSteps(config: ProjectSetupConfig): string {
+  const isFlutter =
+    scopeIncludesFrontend(config) && config.frontendFramework === "flutter";
+
+  const flutterSteps = (workingDirectory: string) => `      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Flutter pub get
+        working-directory: ${workingDirectory}
+        run: flutter pub get
+      - name: Flutter analyze
+        working-directory: ${workingDirectory}
+        run: flutter analyze
+      - name: Flutter test
+        working-directory: ${workingDirectory}
+        run: flutter test`;
+
+  if (config.projectScope === "full_stack") {
+    const frontendSteps = isFlutter
+      ? flutterSteps("frontend")
+      : `      - name: Install & test frontend
+        working-directory: frontend
+        run: npm ci || npm install
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build --if-present`;
+
+    return `${frontendSteps}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install & test backend
+        working-directory: backend
+        run: npm ci || npm install
+      - name: Test backend
+        working-directory: backend
+        run: npm test --if-present`;
+  }
+
+  if (config.projectScope === "frontend_only" && isFlutter) {
+    return flutterSteps(".");
+  }
+
+  return `      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci || npm install
+      - run: npm test --if-present`;
+}
+
 export const githubActionsModule: StackModule = {
   id: "devops-gha",
   appliesTo: (c) => c.githubActions,
@@ -156,22 +207,10 @@ export const githubActionsModule: StackModule = {
   // own), so CI would fail immediately on those scopes. Now it builds
   // working-directory steps per scope.
   files: (config) => {
-    const steps =
-      config.projectScope === "full_stack"
-        ? `      - name: Install & test frontend
-        working-directory: frontend
-        run: npm ci || npm install
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build --if-present
-      - name: Install & test backend
-        working-directory: backend
-        run: npm ci || npm install
-      - name: Test backend
-        working-directory: backend
-        run: npm test --if-present`
-        : `      - run: npm ci || npm install
-      - run: npm test --if-present`;
+    const steps = githubActionsSteps(config);
+    const needsNodeAtTop =
+      config.projectScope !== "full_stack" &&
+      !(config.projectScope === "frontend_only" && config.frontendFramework === "flutter");
 
     return [
       {
@@ -186,10 +225,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+${needsNodeAtTop ? `      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-${steps}
+` : ""}${steps}
 # ${config.projectName}
 `,
       },

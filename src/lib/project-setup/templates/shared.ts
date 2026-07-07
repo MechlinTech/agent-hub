@@ -121,6 +121,7 @@ export function hasFrontendEnvValues(config: ProjectSetupConfig): boolean {
 
 export function defaultFrontendUrl(config: ProjectSetupConfig): string {
   if (config.frontendUrl?.trim()) return config.frontendUrl.trim();
+  if (config.frontendFramework === "flutter") return "";
   return config.frontendFramework === "react"
     ? "http://localhost:5173"
     : "http://localhost:3000";
@@ -131,13 +132,33 @@ export function defaultApiUrl(config: ProjectSetupConfig): string {
 }
 
 export function frontendApiEnvKey(config: ProjectSetupConfig): string {
+  if (config.frontendFramework === "flutter") return "API_BASE_URL";
   return config.frontendFramework === "react" ? "VITE_API_URL" : "NEXT_PUBLIC_API_URL";
 }
 
 export function frontendUrlEnvKey(config: ProjectSetupConfig): string {
+  if (config.frontendFramework === "flutter") return "FRONTEND_URL";
   return config.frontendFramework === "react"
     ? "VITE_FRONTEND_URL"
     : "NEXT_PUBLIC_FRONTEND_URL";
+}
+
+export function frontendFrameworkLabel(config: ProjectSetupConfig): string {
+  switch (config.frontendFramework) {
+    case "nextjs":
+      return "Next.js";
+    case "react":
+      return "React (Vite)";
+    case "flutter":
+      return "Flutter (GetX)";
+  }
+}
+
+export function frontendStackLabel(config: ProjectSetupConfig): string {
+  if (config.frontendFramework === "flutter") {
+    return "Flutter (GetX)";
+  }
+  return `${config.frontendFramework} + ${config.styling}`;
 }
 
 /** Env vars for backend setup commands (Prisma migrate dev, etc.). */
@@ -340,8 +361,33 @@ export function readmeBackendSection(config: ProjectSetupConfig): string[] {
 
 export function readmeFrontendSection(config: ProjectSetupConfig): string[] {
   const dir = config.projectScope === "frontend_only" ? "." : "frontend";
-  const framework =
-    config.frontendFramework === "nextjs" ? "Next.js" : "React (Vite)";
+  const framework = frontendFrameworkLabel(config);
+
+  if (config.frontendFramework === "flutter") {
+    return [
+      "## Frontend",
+      "",
+      `Stack: **${framework}**`,
+      "",
+      "### Quick start",
+      "",
+      "```bash",
+      `cd ${dir === "." ? "." : dir}`,
+      "cp .env.example .env   # set API_BASE_URL",
+      "flutter pub get",
+      "flutter run",
+      "```",
+      "",
+      "### Notifications",
+      "",
+      "- Foreground: `FirebaseMessaging.onMessage`",
+      "- Background tap: `FirebaseMessaging.onMessageOpenedApp`",
+      "- Killed / cold-start: `getInitialMessage()` + AwesomeNotifications initial action",
+      "",
+      "Run `flutterfire configure` to replace `lib/firebase_options.dart`.",
+      "",
+    ];
+  }
 
   const lines = [
     "## Frontend",
@@ -477,7 +523,20 @@ export function backendEnvExampleContent(config: ProjectSetupConfig): string {
 }
 
 export function frontendEnvExampleContent(config: ProjectSetupConfig): string {
-  if (!scopeIncludesFrontend(config) || !usesFrontendAuth(config)) {
+  if (!scopeIncludesFrontend(config)) {
+    return "";
+  }
+
+  if (config.frontendFramework === "flutter") {
+    return [
+      "# Frontend environment",
+      "",
+      `API_BASE_URL="${defaultApiUrl(config)}"`,
+      "",
+    ].join("\n");
+  }
+
+  if (!usesFrontendAuth(config)) {
     return "";
   }
 

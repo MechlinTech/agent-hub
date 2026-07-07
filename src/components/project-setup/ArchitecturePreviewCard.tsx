@@ -1,6 +1,7 @@
 "use client";
 
 import type { PlanResult } from "@/lib/project-setup/types";
+import { frontendStackLabel } from "@/lib/project-setup/templates/shared";
 
 export function ArchitecturePreviewCard({ plan }: { plan: PlanResult | null }) {
   if (!plan) {
@@ -50,7 +51,7 @@ export function ProjectSummaryCard({
   if (config.projectScope !== "backend_only") {
     rows.push({
       label: "Frontend",
-      value: `${config.frontendFramework} + ${config.styling}`,
+      value: frontendStackLabel(config),
     });
   }
 

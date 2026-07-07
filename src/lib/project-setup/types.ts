@@ -1,6 +1,6 @@
 export type ProjectScope = "frontend_only" | "backend_only" | "full_stack";
 
-export type FrontendFramework = "nextjs" | "react";
+export type FrontendFramework = "nextjs" | "react" | "flutter";
 export type StylingOption = "tailwind" | "mui" | "shadcn";
 export type StateManagement = "redux" | "zustand" | "context";
 export type AuthMethod = "jwt" | "google_oauth" | "azure_oauth";
@@ -102,6 +102,8 @@ export interface FileTemplate {
   content: string;
   /** pre = before post commands (default); post = after (e.g. fix tsconfig after shadcn init). */
   writePhase?: "pre" | "post";
+  /** When "base64", content is decoded to binary before writing (e.g. PNG assets). */
+  encoding?: "utf8" | "base64";
 }
 
 export interface PlanResult {

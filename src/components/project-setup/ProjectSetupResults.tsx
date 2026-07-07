@@ -12,6 +12,7 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ProjectSetupConfig, ProjectSetupResult } from "@/lib/project-setup/types";
+import { frontendStackLabel } from "@/lib/project-setup/templates/shared";
 import {
   beginNewProjectSetup,
   PROJECT_SETUP_NEW_PATH,
@@ -193,7 +194,7 @@ export function ProjectSetupResults({
           {config.projectScope !== "backend_only" ? (
             <SummaryRow
               label="Frontend"
-              value={`${config.frontendFramework} + ${config.styling}`}
+              value={frontendStackLabel(config)}
             />
           ) : null}
           {config.swagger ? <SummaryRow label="API docs" value="Swagger at /api-docs" /> : null}
@@ -205,8 +206,18 @@ export function ProjectSetupResults({
             <p className="mt-1">
               Open the project folder, copy <code className="text-xs">.env.example</code> to{" "}
               <code className="text-xs">.env</code>, then run{" "}
-              <code className="text-xs">npm install</code> and{" "}
-              <code className="text-xs">npm run dev</code> (or your stack&apos;s start script).
+              {config.frontendFramework === "flutter" ? (
+                <>
+                  <code className="text-xs">flutter pub get</code> and{" "}
+                  <code className="text-xs">flutter run</code>
+                </>
+              ) : (
+                <>
+                  <code className="text-xs">npm install</code> and{" "}
+                  <code className="text-xs">npm run dev</code>
+                </>
+              )}{" "}
+              (or your stack&apos;s start script).
             </p>
           </div>
         ) : null}
