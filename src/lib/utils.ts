@@ -5,6 +5,27 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Scroll the app shell main column (and fallbacks) to the top. */
+export function scrollAppToTop() {
+  const main = document.querySelector<HTMLElement>("[data-app-scroll]");
+  if (main) {
+    main.scrollTop = 0;
+  }
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+/** Remove ANSI color/formatting codes from terminal output. */
+export function stripAnsi(text: string): string {
+  return text.replace(/\u001b\[[0-9;]*[A-Za-z]/g, "").replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "");
+}
+
+/** Normalize a terminal log line for safe display in the UI. */
+export function sanitizeTerminalLine(line: string): string {
+  return stripAnsi(line.replace(/\r/g, "")).trimEnd();
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;

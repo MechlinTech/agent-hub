@@ -337,7 +337,7 @@ export const SCRIPT_EXECUTIVE_SUMMARY_STYLES = `
     background: #fffbfb;
   }
   .script-summary-embed .failed-tx h4 { margin: 0 0 6px; font-size: 12px; color: #991b1b; word-break: break-word; }
-  .script-summary-embed .tx-url { margin: 0 0 6px; font-size: 10px; color: #2563eb; word-break: break-all; }
+  .script-summary-embed .tx-url { margin: 0 0 6px; font-size: 10px; color: #7c3aed; word-break: break-all; }
   .script-summary-embed .tx-meta { margin: 0 0 8px; font-size: 10px; color: #64748b; }
   .script-summary-embed .response-row td { background: #f8fafc !important; padding-top: 4px; }
   .script-summary-embed .response-label { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
@@ -418,11 +418,11 @@ const PDF_PAGE_STYLES = `
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    border-bottom: 3px solid #2563eb;
+    border-bottom: 3px solid #7c3aed;
     padding-bottom: 14px;
     margin-bottom: 20px;
   }
-  .brand { font-size: 11px; font-weight: 700; color: #2563eb; letter-spacing: 0.06em; text-transform: uppercase; }
+  .brand { font-size: 11px; font-weight: 700; color: #7c3aed; letter-spacing: 0.06em; text-transform: uppercase; }
   .report-title { font-size: 22px; font-weight: 700; margin: 6px 0 2px; }
   .report-subtitle { font-size: 13px; color: #64748b; margin: 0; }
   .generated { font-size: 11px; color: #94a3b8; text-align: right; white-space: nowrap; }

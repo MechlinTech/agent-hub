@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { Upload, Play, FileCode } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { RulePackSelect } from "@/components/agents/RulePackSelect";
+import { StyledSelect } from "@/components/ui/StyledSelect";
+import { StyledCheckbox, StyledCheckboxGroup } from "@/components/ui/StyledCheckbox";
 import { createClient } from "@/lib/supabase/client";
 import { prepareReview } from "@/lib/review-service";
 import { inferFileType } from "@/lib/storage";
@@ -232,53 +234,58 @@ export default function NewReviewPage() {
                 onChange={(rulePack) => setConfig({ ...config, rulePack })}
               />
             </div>
-            <label className="flex items-center justify-between">
-              <span>Include Security Checks</span>
-              <input
-                type="checkbox"
-                checked={config.includeSecurity}
-                onChange={(e) => setConfig({ ...config, includeSecurity: e.target.checked })}
-              />
-            </label>
-            <label className="flex items-center justify-between">
-              <span>Include BlazeMeter Readiness</span>
-              <input
-                type="checkbox"
-                checked={config.includeBlazeMeter}
-                onChange={(e) => setConfig({ ...config, includeBlazeMeter: e.target.checked })}
-              />
-            </label>
+            <StyledCheckbox
+              variant="row"
+              label="Include Security Checks"
+              checked={config.includeSecurity}
+              onChange={(includeSecurity) => setConfig({ ...config, includeSecurity })}
+            />
+            <StyledCheckbox
+              variant="row"
+              label="Include BlazeMeter Readiness"
+              checked={config.includeBlazeMeter}
+              onChange={(includeBlazeMeter) => setConfig({ ...config, includeBlazeMeter })}
+            />
             <div>
               <label className="font-medium text-slate-700">Severity Threshold</label>
-              <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              <StyledSelect
+                className="mt-1"
                 value={config.severityThreshold}
-                onChange={(e) => setConfig({ ...config, severityThreshold: e.target.value })}
-              >
-                <option value="critical">Critical only</option>
-                <option value="high">High and above</option>
-                <option value="medium">Medium and above</option>
-                <option value="all">All severities</option>
-              </select>
+                onChange={(severityThreshold) => setConfig({ ...config, severityThreshold })}
+                options={[
+                  { value: "critical", label: "Critical only" },
+                  { value: "high", label: "High and above" },
+                  { value: "medium", label: "Medium and above" },
+                  { value: "all", label: "All severities" },
+                ]}
+              />
             </div>
             <div>
               <label className="font-medium text-slate-700">AI Recommendation (this review)</label>
-              <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              <StyledSelect
+                className="mt-1"
                 value={config.aiRecommendationMode}
-                onChange={(e) =>
+                onChange={(aiRecommendationMode) =>
                   setConfig({
                     ...config,
-                    aiRecommendationMode: e.target.value as "disabled" | "enabled",
+                    aiRecommendationMode: aiRecommendationMode as "disabled" | "enabled",
                   })
                 }
-              >
-                <option value="disabled">Disabled, built-in templates</option>
-                <option value="enabled" disabled={!aiAvailable}>
-                  Enabled: AI enhancements
-                  {!aiAvailable ? " (no provider configured)" : aiProviderLabel ? ` (${aiProviderLabel})` : ""}
-                </option>
-              </select>
+                options={[
+                  { value: "disabled", label: "Disabled, built-in templates" },
+                  {
+                    value: "enabled",
+                    label: `Enabled: AI enhancements${
+                      !aiAvailable
+                        ? " (no provider configured)"
+                        : aiProviderLabel
+                          ? ` (${aiProviderLabel})`
+                          : ""
+                    }`,
+                    disabled: !aiAvailable,
+                  },
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -299,28 +306,21 @@ export default function NewReviewPage() {
               </button>
             </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {RULE_CATEGORY_OPTIONS.map((cat) => (
-              <label
-                key={cat.id}
-                className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50"
-              >
-                <input
-                  type="checkbox"
-                  checked={categories.includes(cat.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) setCategories([...categories, cat.id]);
-                    else setCategories(categories.filter((c) => c !== cat.id));
-                  }}
-                  className="mt-1"
-                />
-                <div>
-                  <p className="text-sm font-medium">{cat.label}</p>
-                  <p className="text-xs text-slate-400">{cat.desc}</p>
-                </div>
-              </label>
-            ))}
-          </div>
+          <StyledCheckboxGroup
+            variant="card"
+            items={RULE_CATEGORY_OPTIONS.map((cat) => ({
+              key: cat.id,
+              label: cat.label,
+              description: cat.desc,
+            }))}
+            values={Object.fromEntries(
+              RULE_CATEGORY_OPTIONS.map((cat) => [cat.id, categories.includes(cat.id)]),
+            ) as Record<string, boolean>}
+            onChange={(catId, checked) => {
+              if (checked) setCategories([...categories, catId]);
+              else setCategories(categories.filter((c) => c !== catId));
+            }}
+          />
         </div>
 
         <div className="card p-6">
@@ -364,7 +364,7 @@ export default function NewReviewPage() {
           type="button"
           disabled={!file || starting}
           onClick={startReview}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
         >
           <Play className="h-4 w-4" />
           {starting ? "Starting..." : "Start Review"}

@@ -74,7 +74,7 @@ export function KpiTimelineSection({ kpiTimeline }: { kpiTimeline: BlazeMeterKpi
     {
       title: "Hits per second",
       data: kpiTimeline.hitsPerSec,
-      color: "#2563eb",
+      color: "#7c3aed",
       formatter: (v: number) => `${v.toFixed(2)} / sec`,
     },
     {
@@ -92,7 +92,7 @@ export function KpiTimelineSection({ kpiTimeline }: { kpiTimeline: BlazeMeterKpi
     {
       title: "Bandwidth",
       data: kpiTimeline.bandwidthKiBps,
-      color: "#059669",
+      color: "#7c3aed",
       formatter: (v: number) => `${v.toFixed(2)} KiB/s`,
     },
     {

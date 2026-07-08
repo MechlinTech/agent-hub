@@ -8,7 +8,8 @@ export type AgentIconKey =
   | "play"
   | "line-chart"
   | "search"
-  | "file-bar-chart";
+  | "file-bar-chart"
+  | "folder-open";
 
 export interface AgentDefinition {
   id: string;
@@ -31,8 +32,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     status: "active",
     href: "/agents/script-review",
     iconKey: "file-search",
-    iconBg: "bg-blue-50",
-    iconColor: "text-blue-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
     recommended: true,
   },
   {
@@ -43,8 +44,20 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     status: "active",
     href: "/agents/results-analysis",
     iconKey: "line-chart",
-    iconBg: "bg-rose-50",
-    iconColor: "text-rose-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
+  },
+  {
+    id: "project-setup",
+    name: "Project Setup Agent",
+    description:
+      "Configure a project stack and scaffold frontend, backend, DevOps files on your machine via the Local Executor.",
+    status: "active",
+    href: "/agents/project-setup",
+    iconKey: "folder-open",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
+    recommended: true,
   },
   {
     id: "workload-modeling",
@@ -61,8 +74,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     description: "Detects dynamic values and extractor recommendations.",
     status: "coming_soon",
     iconKey: "git-branch",
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
   {
     id: "test-data",
@@ -70,8 +83,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     description: "Validates and generates datasets and CSV inputs.",
     status: "coming_soon",
     iconKey: "database",
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
   {
     id: "execution",
@@ -79,8 +92,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     description: "Orchestrates BlazeMeter test runs.",
     status: "coming_soon",
     iconKey: "play",
-    iconBg: "bg-rose-50",
-    iconColor: "text-rose-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
   {
     id: "rca",
@@ -88,8 +101,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     description: "Correlates errors with infra and app signals.",
     status: "coming_soon",
     iconKey: "search",
-    iconBg: "bg-orange-50",
-    iconColor: "text-orange-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
   {
     id: "executive-report",
@@ -97,8 +110,8 @@ export const AGENT_CATALOG: AgentDefinition[] = [
     description: "Creates summary reports and release recommendations.",
     status: "coming_soon",
     iconKey: "file-bar-chart",
-    iconBg: "bg-indigo-50",
-    iconColor: "text-indigo-600",
+    iconBg: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
 ];
 

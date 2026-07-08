@@ -1,6 +1,7 @@
-import { Bot, Clock, Layers } from "lucide-react";
+import { ArrowUpRight, Bot, Clock, Layers, Sparkles } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { AgentExplorer } from "@/components/agents/AgentExplorer";
+import { DashboardWelcome } from "@/components/dashboard/DashboardWelcome";
 import {
   getActiveAgentCount,
   getComingSoonAgentCount,
@@ -13,70 +14,80 @@ export default function DashboardPage() {
     {
       label: "Active Agents",
       value: String(getActiveAgentCount()),
-      sub: `${getActiveAgentCount()} deployed`,
+      sub: `${getActiveAgentCount()} deployed & ready`,
+      trend: "Live in your workspace",
       icon: Bot,
-      tone: "from-blue-500/10 to-blue-600/5 text-blue-600",
+      tone: "bg-violet-100 text-violet-600",
     },
     {
       label: "Total Agents",
       value: String(getTotalAgentCount()),
-      sub: "In catalog",
+      sub: "Available in catalog",
+      trend: "Full agent library",
       icon: Layers,
-      tone: "from-violet-500/10 to-violet-600/5 text-violet-600",
+      tone: "bg-violet-100 text-violet-600",
     },
     {
       label: "Coming Soon",
       value: String(getComingSoonAgentCount()),
       sub: "In development",
+      trend: "On the roadmap",
       icon: Clock,
-      tone: "from-amber-500/10 to-amber-600/5 text-amber-600",
+      tone: "bg-violet-100 text-violet-600",
     },
   ];
 
   return (
     <div>
-      <Breadcrumbs items={[{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }]} />
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }]}
+      />
 
-      <div className="page-header hidden lg:block">
-        <h1 className="page-title">AI Performance Engineering Workspace</h1>
-        <p className="page-subtitle">
-          Browse and open agents to automate parts of the load testing lifecycle.
-        </p>
-      </div>
+      <DashboardWelcome />
 
-      <div className="mb-6 lg:hidden">
-        <p className="text-sm font-medium text-slate-500">Welcome back</p>
-        <h2 className="mt-0.5 text-lg font-bold tracking-tight text-slate-900">
-          Your workspace overview
-        </h2>
-      </div>
-
-      <div className="mobile-stat-scroll mb-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
         {metricCards.map((m) => {
           const Icon = m.icon;
           return (
-            <div key={m.label} className="mobile-stat-card lg:card lg:min-w-0 lg:snap-none">
-              <div className={cn("mb-3 inline-flex rounded-xl bg-gradient-to-br p-2.5", m.tone)}>
-                <Icon className="h-4 w-4" />
+            <div key={m.label} className="metric-card min-w-0">
+              <div className="mb-4 flex items-start justify-between">
+                <div className={cn("metric-card-icon", m.tone)}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400">
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
               </div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                {m.label}
+              <p className="text-sm font-medium text-slate-500">{m.label}</p>
+              <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+                {m.value}
               </p>
-              <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{m.value}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{m.sub}</p>
+              <p className="mt-1 text-xs text-slate-500">{m.sub}</p>
+              <p className="mt-3 text-xs font-semibold text-brand-600">
+                {m.trend}
+              </p>
             </div>
           );
         })}
       </div>
 
-      <div className="mb-4">
-        <h2 className="section-title">Explore Agents</h2>
-        <p className="section-subtitle hidden sm:block">
-          Search by name or filter by status. Open an agent to access its tools and workflows.
-        </p>
-      </div>
+      <div className="panel-card">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+              <Sparkles className="h-3.5 w-3.5" />
+              Agent catalog
+            </div>
+            <h2 className="section-title">Explore Agents</h2>
+            <p className="section-subtitle mt-1">
+              Search by name or filter by status. Open an agent to access its
+              tools and workflows.
+            </p>
+          </div>
+        </div>
 
-      <AgentExplorer />
+        <AgentExplorer />
+      </div>
     </div>
   );
 }

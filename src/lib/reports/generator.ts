@@ -132,7 +132,7 @@ export function generateHtmlReport(data: ReportData): string {
   <title>Review Report: ${data.scriptName}</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; color: #0f172a; line-height: 1.6; }
-    h1 { color: #1d4ed8; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+    h1 { color: #6d28d9; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
     h2 { margin-top: 2rem; color: #334155; }
     h3 { color: #475569; }
     table { border-collapse: collapse; width: 100%; margin: 1rem 0; }

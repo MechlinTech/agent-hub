@@ -65,11 +65,11 @@ const REPORT_STYLES = `
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 12px 24px;
-    border-bottom: 3px solid #2563eb;
+    border-bottom: 3px solid #7c3aed;
     padding-bottom: 16px;
     margin-bottom: 24px;
   }
-  .brand { font-size: 13px; font-weight: 700; color: #2563eb; letter-spacing: 0.04em; text-transform: uppercase; }
+  .brand { font-size: 13px; font-weight: 700; color: #7c3aed; letter-spacing: 0.04em; text-transform: uppercase; }
   .report-title { font-size: 24px; font-weight: 700; margin: 8px 0 4px; color: #0f172a; line-height: 1.2; }
   .report-subtitle { font-size: 14px; color: #64748b; margin: 0; max-width: 42rem; }
   .generated { font-size: 12px; color: #94a3b8; text-align: right; white-space: nowrap; flex-shrink: 0; }
@@ -106,7 +106,7 @@ const REPORT_STYLES = `
   ul { padding-left: 20px; margin: 8px 0; }
   .summary-box {
     background: #eff6ff;
-    border-left: 4px solid #2563eb;
+    border-left: 4px solid #7c3aed;
     padding: 14px 16px;
     border-radius: 0 8px 8px 0;
     margin: 12px 0;

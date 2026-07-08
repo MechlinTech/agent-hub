@@ -249,7 +249,7 @@ function ResponseBodyModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            className="btn-primary rounded-lg px-4 py-2 text-sm font-medium"
           >
             Close
           </button>

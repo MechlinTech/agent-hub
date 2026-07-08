@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireRead, requireWrite } from "@/lib/supabase/get-auth-context";
 import {
   createResultsAnalysis,
   listResultsAnalyses,
@@ -7,6 +8,9 @@ import type { TestContext } from "@/lib/results-analysis/types";
 import { DEFAULT_TEST_CONTEXT } from "@/lib/results-analysis/defaults";
 
 export async function GET() {
+  const { response } = await requireRead("results_analysis");
+  if (response) return response;
+
   try {
     const analyses = await listResultsAnalyses();
     return NextResponse.json({ analyses });
@@ -19,6 +23,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const { response } = await requireWrite("results_analysis");
+  if (response) return response;
+
   try {
     const body = (await request.json()) as {
       runName?: string;
