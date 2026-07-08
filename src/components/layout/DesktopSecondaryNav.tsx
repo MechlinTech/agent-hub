@@ -53,7 +53,7 @@ export function DesktopSecondaryNav() {
   if (inSettings && settingsNav.length > 1) {
     return (
       <div className="hidden border-b border-slate-200/40 lg:block">
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 [@media(min-width:1400px)]:pl-0">
           <AnimatedTabNav
             {...tabNavProps}
             ariaLabel="Settings navigation"
@@ -97,7 +97,7 @@ export function DesktopSecondaryNav() {
 
   return (
     <div className="hidden border-b border-slate-200/40 lg:block">
-      <div className="mx-auto flex max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8 [@media(min-width:1400px)]:pl-0">
         <AgentsBackLink />
         <div className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
           <AnimatedTabNav
