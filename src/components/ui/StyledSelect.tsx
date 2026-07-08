@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ export function StyledSelect<T extends string>({
 
   useEffect(() => setMounted(true), []);
 
-  function updateMenuPosition() {
+  const updateMenuPosition = useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) return false;
     const rect = trigger.getBoundingClientRect();
@@ -87,13 +87,13 @@ export function StyledSelect<T extends string>({
       });
     }
     return true;
-  }
+  }, [options.length]);
 
-  function syncMenuOrClose() {
+  const syncMenuOrClose = useCallback(() => {
     if (!updateMenuPosition()) {
       setOpen(false);
     }
-  }
+  }, [updateMenuPosition]);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -113,7 +113,7 @@ export function StyledSelect<T extends string>({
       window.removeEventListener("resize", syncMenuOrClose);
       window.removeEventListener("scroll", syncMenuOrClose, true);
     };
-  }, [open, options.length]);
+  }, [open, syncMenuOrClose, updateMenuPosition]);
 
   useEffect(() => {
     if (!open) return;
@@ -191,6 +191,7 @@ export function StyledSelect<T extends string>({
       <button
         ref={triggerRef}
         type="button"
+        role="combobox"
         id={id}
         disabled={disabled}
         aria-haspopup="listbox"
