@@ -1,45 +1,36 @@
-# ---- Base image ----
-FROM node:20-alpine AS base
+FROM node:20-alpine AS deps
+
 WORKDIR /app
 
-# ---- Dependencies ----
-FROM base AS deps
-COPY package.json package-lock.json* ./
+COPY package*.json ./
+
 RUN npm install
 
-# ---- Build ----
-FROM base AS builder
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# 1. Declare the build-time arguments passed from GitHub Actions
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_SUPABASE_URL
-ARG PORT
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_SITE_URL
 
-# 2. Expose them as environment variables so the build script can read them
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV PORT=$PORT
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
 RUN npm run build
 
-# ---- Production ----
-FROM node:20-alpine AS runner
+FROM node:20-alpine
+
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# 3. Re-declare PORT in the final stage to make it available at runtime
-ARG PORT
-ENV PORT=$PORT
-
-# Copy only needed files
 COPY --from=builder /app ./
 
-# Use the dynamic PORT variable (defaults to 3040 if the secret isn't passed somehow)
-EXPOSE ${PORT:-3040}
+EXPOSE 3040
 
-# Modified to ensure your framework respects the dynamic PORT env variable
-CMD ["sh", "-c", "npm run start -- -p ${PORT:-3040}"]
+CMD ["npm","run","start"]

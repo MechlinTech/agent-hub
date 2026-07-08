@@ -4,83 +4,101 @@ on:
   push:
     branches:
       - main
+      - production
 
 jobs:
-  deploy:
+  deploy-dev:
+    if: github.ref == 'refs/heads/main'
+
     runs-on: self-hosted
 
+    environment: dev
+
     steps:
-      # --- CLEAN + FRESH CHECKOUT ---
-      - name: Checkout Code (force clean)
-        uses: actions/checkout@v4
-        with:
-          clean: true
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      # --- DEBUG: SHOW FILES ---
-      - name: Show latest files
-        run: Get-ChildItem -Force
-
-      # --- SET IMAGE TAG ---
       - name: Set Docker Tag
         shell: powershell
         run: |
-          "TAG=$($env:GITHUB_SHA.Substring(0,7))" >> $env:GITHUB_ENV
+          "TAG=dev-$($env:GITHUB_SHA.Substring(0,7))" >> $env:GITHUB_ENV
 
-      # --- LOGIN TO DOCKER HUB ---
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # --- BUILD IMAGE ---
-      - name: Build Docker Image
+      - name: Build Image
         run: |
           docker build `
-            --no-cache `
-            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" `
             --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" `
-            --build-arg PORT="${{ secrets.PORT }}" `
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" `
             -f docker/Dockerfile `
             -t akshatpareek/agenthub:${{ env.TAG }} `
-            -t akshatpareek/agenthub:latest `
+            -t akshatpareek/agenthub:dev-latest `
             .
 
-      # --- PUSH IMAGE ---
-      - name: Push Image to Docker Hub
+      - name: Push
         run: |
           docker push akshatpareek/agenthub:${{ env.TAG }}
-          docker push akshatpareek/agenthub:latest
+          docker push akshatpareek/agenthub:dev-latest
 
-      # --- STOP OLD CONTAINERS ---
-      - name: Stop Containers and Remove Network
-        run: |
-          docker compose -f docker/docker-compose.yml down --remove-orphans
-          docker network prune -f
-        continue-on-error: true
+      - name: Pull Dev Image
+        run: docker compose -f docker/docker-compose.dev.yml pull
 
-      # --- REMOVE OLD IMAGE TO FORCE FRESH PULL ---
-      - name: Remove Old Local Images
-        run: |
-          docker image rm -f akshatpareek/agenthub:latest
-          docker image rm -f akshatpareek/agenthub:${{ env.TAG }}
-        continue-on-error: true
-
-      # --- PULL LATEST IMAGE ---
-      - name: Pull Latest Image from Docker Hub
-        run: |
-          docker compose -f docker/docker-compose.yml pull
-
-      # --- DEPLOY WITH FRESH IMAGE ---
-      - name: Deploy with Docker Compose
+      - name: Deploy Dev
         env:
-          PORT: ${{ secrets.PORT }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          docker compose -f docker/docker-compose.yml up -d --force-recreate
+          docker compose -f docker/docker-compose.dev.yml up -d --force-recreate
 
-      # --- CLEANUP ---
-      - name: Cleanup Old Images
+      - name: Cleanup
+        run: docker image prune -f
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/production'
+
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Docker Tag
+        shell: powershell
+        run: |
+          "TAG=prod-$($env:GITHUB_SHA.Substring(0,7))" >> $env:GITHUB_ENV
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Image
+        run: |
+          docker build `
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" `
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" `
+            -f docker/Dockerfile `
+            -t akshatpareek/agenthub:${{ env.TAG }} `
+            -t akshatpareek/agenthub:prod-latest `
+            .
+
+      - name: Push
+        run: |
+          docker push akshatpareek/agenthub:${{ env.TAG }}
+          docker push akshatpareek/agenthub:prod-latest
+
+      - name: Pull Prod Image
+        run: docker compose -f docker/docker-compose.prod.yml pull
+
+      - name: Deploy Prod
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: |
+          docker compose -f docker/docker-compose.prod.yml up -d --force-recreate
+
+      - name: Cleanup
         run: docker image prune -f
