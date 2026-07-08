@@ -270,11 +270,13 @@ export function ConfigSectionCards({
               label="Authentication (login page)"
               hint="Controls which sign-in buttons and forms appear on the frontend /login page. OAuth buttons call your API URL."
               methods={feAuth}
-              onChange={(frontendAuthMethods) => onChange({ frontendAuthMethods })}
+              onChange={(frontendAuthMethods) =>
+                onChange({ frontendAuthMethods })
+              }
               error={fieldErrors.frontendAuthMethods}
             />
           ) : null}
-          {(feHasAuth || isMobileFramework) ? (
+          {feHasAuth || isMobileFramework ? (
             <div className="grid gap-5 sm:grid-cols-2">
               <Field
                 label="API URL"
@@ -342,7 +344,7 @@ export function ConfigSectionCards({
                 value={config.database}
                 onChange={(database) => onChange({ database })}
                 options={[
-                  { value: "mongodb", label: "MongoDB" },
+                  // { value: "mongodb", label: "MongoDB" },
                   { value: "postgresql", label: "PostgreSQL" },
                 ]}
               />
@@ -409,7 +411,9 @@ export function ConfigSectionCards({
                     <input
                       className="input w-full font-mono text-sm"
                       value={config.googleClientId}
-                      onChange={(e) => onChange({ googleClientId: e.target.value })}
+                      onChange={(e) =>
+                        onChange({ googleClientId: e.target.value })
+                      }
                       placeholder="Leave blank to set manually"
                     />
                   </Field>
@@ -433,7 +437,9 @@ export function ConfigSectionCards({
                     <input
                       className="input w-full font-mono text-sm"
                       value={config.azureTenantId}
-                      onChange={(e) => onChange({ azureTenantId: e.target.value })}
+                      onChange={(e) =>
+                        onChange({ azureTenantId: e.target.value })
+                      }
                       placeholder="Leave blank to set manually"
                     />
                   </Field>
@@ -441,7 +447,9 @@ export function ConfigSectionCards({
                     <input
                       className="input w-full font-mono text-sm"
                       value={config.azureClientId}
-                      onChange={(e) => onChange({ azureClientId: e.target.value })}
+                      onChange={(e) =>
+                        onChange({ azureClientId: e.target.value })
+                      }
                       placeholder="Leave blank to set manually"
                     />
                   </Field>
@@ -466,17 +474,17 @@ export function ConfigSectionCards({
             onChange={onChange}
             items={[
               { key: "swagger", label: "Swagger" },
-              { key: "redis", label: "Redis" },
-              { key: "socketIo", label: "Socket.IO" },
+              // { key: "redis", label: "Redis" },
+              // { key: "socketIo", label: "Socket.IO" },
             ]}
           />
-          {config.backendFramework === "nestjs" ? (
+          {/* {config.backendFramework === "nestjs" ? (
             <p className="text-xs text-slate-500">
-              Redis and Socket.IO scaffolding is currently available for Express.js
-              projects only. NestJS includes modular auth, users, database layers, and
-              Swagger when those options are selected.
+              Redis and Socket.IO scaffolding is currently available for
+              Express.js projects only. NestJS includes modular auth, users,
+              database layers, and Swagger when those options are selected.
             </p>
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
 
@@ -490,7 +498,7 @@ export function ConfigSectionCards({
             { key: "githubActions", label: "GitHub Actions" },
           ]}
         />
-        <Field label="Deployment target">
+        {/* <Field label="Deployment target">
           <StyledSelect
             value={config.deploymentTarget}
             onChange={(deploymentTarget) => onChange({ deploymentTarget })}
@@ -501,7 +509,7 @@ export function ConfigSectionCards({
               { value: "vercel", label: "Vercel" },
             ]}
           />
-        </Field>
+        </Field> */}
       </div>
     </div>
   );
