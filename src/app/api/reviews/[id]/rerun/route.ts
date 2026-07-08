@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireWrite } from "@/lib/supabase/get-auth-context";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { response } = await requireWrite("script_review");
+  if (response) return response;
+
   const { id } = await params;
   const supabase = await createClient();
   const {

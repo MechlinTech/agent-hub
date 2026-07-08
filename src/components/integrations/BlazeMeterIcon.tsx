@@ -18,7 +18,11 @@ export function BlazeMeterIcon({
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
-      className={cn("shrink-0", monochrome ? "text-slate-700" : "text-[#CA2133]", className)}
+      className={cn(
+        "shrink-0",
+        monochrome ? "text-slate-700" : "text-violet-600",
+        className,
+      )}
       aria-label="BlazeMeter"
     >
       <title>BlazeMeter</title>

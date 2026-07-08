@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MOBILE_TAB_NAV } from "@/lib/mobile-nav";
 import { isGlobalNavActive } from "@/lib/agents/navigation";
+import { filterGlobalNavByAccess } from "@/lib/navigation-access";
+import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { canRead, canWrite } = usePermissions();
+  const visibleTabs = filterGlobalNavByAccess(canRead, canWrite);
 
   return (
     <nav
-      className="bottom-nav fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/90 shadow-[0_-8px_32px_rgba(15,23,42,0.06)] backdrop-blur-xl backdrop-saturate-150 lg:hidden"
+      className="bottom-nav fixed inset-x-0 bottom-0 z-30 mx-3 mb-3 overflow-hidden rounded-3xl border border-white/60 bg-white/90 shadow-[0_8px_32px_rgba(15,23,42,0.1)] backdrop-blur-xl backdrop-saturate-150 lg:hidden"
       aria-label="Main navigation"
     >
       <div className="mx-auto flex h-[var(--bottom-nav-height)] max-w-lg items-stretch justify-around px-2">
-        {MOBILE_TAB_NAV.map((item) => {
+        {visibleTabs.map((item) => {
           const active = isGlobalNavActive(pathname, item.href);
           const Icon = item.icon;
           return (
@@ -30,7 +33,7 @@ export function BottomNav() {
               <span
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-xl transition-colors duration-200",
-                  active && "bg-brand-50 text-brand-600"
+                  active && "bg-brand-100 text-brand-700"
                 )}
               >
                 <Icon

@@ -6,7 +6,7 @@ const COLORS: Record<string, string> = {
   critical: "#ef4444",
   high: "#f97316",
   medium: "#eab308",
-  low: "#3b82f6",
+  low: "#64748b",
   info: "#94a3b8",
 };
 

@@ -147,7 +147,7 @@ function AnalyzingContent() {
                     cy="56"
                     r="50"
                     fill="none"
-                    stroke="#2563eb"
+                    stroke="#7c3aed"
                     strokeWidth="8"
                     strokeDasharray={`${progress * 3.14} 314`}
                   />

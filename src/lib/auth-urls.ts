@@ -8,7 +8,8 @@ export function getSiteUrl(): string {
 }
 
 /** Supabase auth callback URL (must be allowlisted in Supabase Auth settings). */
-export function getAuthCallbackUrl(next = "/dashboard"): string {
+export function getAuthCallbackUrl(next = "/dashboard", origin?: string): string {
   const nextPath = next.startsWith("/") ? next : `/${next}`;
-  return `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+  const base = (origin ?? getSiteUrl()).replace(/\/$/, "");
+  return `${base}/auth/callback?next=${encodeURIComponent(nextPath)}`;
 }

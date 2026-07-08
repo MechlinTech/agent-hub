@@ -28,6 +28,8 @@ export interface AgentNavConfig {
   id: string;
   basePath: string;
   name: string;
+  /** Shorter label for compact secondary navigation. */
+  shortName?: string;
   /** Routes outside basePath that belong to this agent (shown in agent sidebar). */
   scopedPaths: string[];
   items: NavItem[];
@@ -42,12 +44,14 @@ export const GLOBAL_NAV: NavItem[] = [
 
 const SCRIPT_REVIEW_BASE = "/agents/script-review";
 const RESULTS_ANALYSIS_BASE = "/agents/results-analysis";
+const PROJECT_SETUP_BASE = "/agents/project-setup";
 
 export const AGENT_NAV: Record<string, AgentNavConfig> = {
   "script-review": {
     id: "script-review",
     basePath: SCRIPT_REVIEW_BASE,
     name: "Script Review Agent",
+    shortName: "Script Review",
     scopedPaths: ["/test-assets", "/reports", "/executions"],
     items: [
       {
@@ -96,6 +100,7 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
     id: "results-analysis",
     basePath: RESULTS_ANALYSIS_BASE,
     name: "BlazeMeter Results Analysis Agent",
+    shortName: "Results Analysis",
     scopedPaths: [],
     items: [
       {
@@ -139,6 +144,35 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
       },
     ],
   },
+  "project-setup": {
+    id: "project-setup",
+    basePath: PROJECT_SETUP_BASE,
+    name: "Project Setup Agent",
+    shortName: "Project Setup",
+    scopedPaths: [],
+    items: [
+      {
+        href: PROJECT_SETUP_BASE,
+        label: "Overview",
+        icon: FolderOpen,
+        isActive: (pathname) =>
+          pathname === PROJECT_SETUP_BASE ||
+          (pathname.startsWith(`${PROJECT_SETUP_BASE}/`) &&
+            !pathname.startsWith(`${PROJECT_SETUP_BASE}/new`) &&
+            !pathname.startsWith(`${PROJECT_SETUP_BASE}/history`)),
+      },
+      {
+        href: `${PROJECT_SETUP_BASE}/new`,
+        label: "New Setup",
+        icon: Plus,
+      },
+      {
+        href: `${PROJECT_SETUP_BASE}/history`,
+        label: "History",
+        icon: History,
+      },
+    ],
+  },
 };
 
 function belongsToAgent(pathname: string, config: AgentNavConfig): boolean {
@@ -176,6 +210,9 @@ export function isGlobalNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/agents") {
     return pathname === "/agents" || (pathname.startsWith("/agents/") && !getActiveAgentFromPath(pathname));
+  }
+  if (href === "/settings") {
+    return pathname === "/settings" || pathname.startsWith("/settings/");
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }

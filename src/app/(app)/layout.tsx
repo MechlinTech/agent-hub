@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthContext } from "@/lib/supabase/get-auth-context";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -10,6 +11,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect("/login");
 
+  const auth = await getAuthContext();
+  if (!auth) redirect("/login");
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, team_name, avatar_url")
@@ -17,7 +21,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .single();
 
   return (
-    <AppShell user={user} profile={profile}>
+    <AppShell
+      user={user}
+      profile={profile}
+      role={auth.role}
+      isSuperAdmin={auth.isSuperAdmin}
+      overrides={auth.overrides}
+      access={auth.access}
+      configurableResources={auth.configurableResources}
+    >
       {children}
     </AppShell>
   );

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireRead, requireWrite } from "@/lib/supabase/get-auth-context";
 import { getBlazeMeterOrgConfig, saveBlazeMeterOrgConfig } from "@/lib/blazemeter/org-settings";
 import {
   mergeBlazeMeterOrgConfig,
@@ -23,6 +24,9 @@ function buildStatus(config: BlazeMeterOrgConfig): BlazeMeterPublicStatus {
 }
 
 export async function GET() {
+  const { response } = await requireRead("integrations");
+  if (response) return response;
+
   try {
     const config = await getBlazeMeterOrgConfig();
     return NextResponse.json(buildStatus(config));
@@ -35,6 +39,9 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const { response } = await requireWrite("integrations");
+  if (response) return response;
+
   try {
     const body = await request.json();
     const existing = await getBlazeMeterOrgConfig();

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { scoreColor, readinessLabel, severityColor, pillBadge } from "@/lib/utils";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 interface ReviewOption {
   id: string;
@@ -29,22 +30,22 @@ export function CompareReviews({ reviews }: { reviews: ReviewOption[] }) {
     <div className="card p-4">
       <h3 className="font-semibold">Compare Reviews</h3>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <select value={a} onChange={(e) => setA(e.target.value)} className="rounded-lg border px-2 py-1.5 text-sm">
-          <option value="">Review A</option>
-          {reviews.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.script_name}
-            </option>
-          ))}
-        </select>
-        <select value={b} onChange={(e) => setB(e.target.value)} className="rounded-lg border px-2 py-1.5 text-sm">
-          <option value="">Review B</option>
-          {reviews.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.script_name}
-            </option>
-          ))}
-        </select>
+        <StyledSelect
+          value={a}
+          onChange={setA}
+          options={[
+            { value: "", label: "Review A" },
+            ...reviews.map((r) => ({ value: r.id, label: r.script_name })),
+          ]}
+        />
+        <StyledSelect
+          value={b}
+          onChange={setB}
+          options={[
+            { value: "", label: "Review B" },
+            ...reviews.map((r) => ({ value: r.id, label: r.script_name })),
+          ]}
+        />
       </div>
       {reviewA && reviewB && (
         <div className="mt-4 overflow-x-auto">

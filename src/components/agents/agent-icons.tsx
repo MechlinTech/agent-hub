@@ -5,6 +5,7 @@ import {
   Database,
   FileBarChart,
   FileSearch,
+  FolderOpen,
   GitBranch,
   LineChart,
   Play,
@@ -22,6 +23,7 @@ const AGENT_ICON_MAP: Record<AgentIconKey, LucideIcon> = {
   "line-chart": LineChart,
   search: Search,
   "file-bar-chart": FileBarChart,
+  "folder-open": FolderOpen,
 };
 
 export function getAgentIcon(iconKey: AgentIconKey): LucideIcon {

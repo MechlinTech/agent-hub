@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
+import { canAccessNavHref } from "@/lib/navigation-access";
+import { usePermissions } from "@/lib/permissions-context";
+import { cn } from "@/lib/utils";
 
 interface SearchResult {
   type: string;
@@ -12,8 +15,9 @@ interface SearchResult {
   href: string;
 }
 
-export function GlobalSearch() {
+export function GlobalSearch({ variant = "default" }: { variant?: "default" | "nav" }) {
   const router = useRouter();
+  const { canRead, canWrite } = usePermissions();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -45,16 +49,36 @@ export function GlobalSearch() {
     return () => clearTimeout(t);
   }, [query, search]);
 
+  const visibleResults = results.filter((r) => canAccessNavHref(r.href, canRead, canWrite));
+
   if (!open) {
     return (
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mx-auto flex w-full max-w-xl items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left"
+        className={
+          variant === "nav"
+            ? "flex w-48 items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-left ring-1 ring-white/15 transition-colors hover:bg-white/15 xl:w-56"
+            : "mx-auto flex w-full max-w-xl items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/95 px-3 py-2 text-left shadow-sm backdrop-blur-sm"
+        }
       >
-        <Search className="h-4 w-4 text-slate-400" />
-        <span className="flex-1 text-sm text-slate-400">Search agents, assets, executions, reports...</span>
-        <kbd className="hidden rounded border border-slate-200 bg-white px-1.5 py-0.5 text-xs text-slate-400 sm:inline">
+        <Search className={cn("h-4 w-4", variant === "nav" ? "text-white/70" : "text-slate-400")} />
+        <span
+          className={cn(
+            "flex-1 truncate text-sm",
+            variant === "nav" ? "text-white/60" : "text-slate-400",
+          )}
+        >
+          Search...
+        </span>
+        <kbd
+          className={cn(
+            "hidden rounded border px-1.5 py-0.5 text-xs sm:inline",
+            variant === "nav"
+              ? "border-white/20 bg-white/10 text-white/50"
+              : "border-slate-200 bg-white text-slate-400",
+          )}
+        >
           ⌘ K
         </kbd>
       </button>
@@ -77,8 +101,8 @@ export function GlobalSearch() {
             <X className="h-4 w-4 text-slate-400" />
           </button>
         </div>
-        <ul className="max-h-72 overflow-y-auto py-2">
-          {results.map((r) => (
+        <ul className="scrollbar-brand max-h-72 overflow-y-auto py-2">
+          {visibleResults.map((r) => (
             <li key={`${r.type}-${r.id}`}>
               <button
                 type="button"
@@ -93,7 +117,7 @@ export function GlobalSearch() {
               </button>
             </li>
           ))}
-          {query.length >= 2 && !results.length && (
+          {query.length >= 2 && !visibleResults.length && (
             <li className="px-4 py-6 text-center text-sm text-slate-500">No results</li>
           )}
         </ul>

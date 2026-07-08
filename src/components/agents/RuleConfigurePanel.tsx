@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { PermissionLink } from "@/components/permissions/PermissionLink";
+import { usePermissions } from "@/lib/permissions-context";
 import { RotateCcw, Save } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { RulePackSelect } from "@/components/agents/RulePackSelect";
+import { StyledSelect } from "@/components/ui/StyledSelect";
+import { StyledCheckbox, StyledCheckboxGroup } from "@/components/ui/StyledCheckbox";
 import { createClient } from "@/lib/supabase/client";
 import { getRuleIdsForPack } from "@/lib/jmx/rule-packs";
 import { getRuleCatalog, RULE_CATEGORY_OPTIONS } from "@/lib/jmx/rule-catalog";
@@ -17,6 +20,8 @@ import {
 import { cn, severityColor, pillBadge } from "@/lib/utils";
 
 export function RuleConfigurePanel() {
+  const { canWrite } = usePermissions();
+  const canEdit = canWrite("script_review");
   const [config, setConfig] = useState<UserRuleConfig>(DEFAULT_USER_RULE_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -70,6 +75,7 @@ export function RuleConfigurePanel() {
   }
 
   async function save() {
+    if (!canEdit) return;
     setSaving(true);
     setError(null);
     const supabase = createClient();
@@ -130,23 +136,27 @@ export function RuleConfigurePanel() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={resetDefaults}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Reset
-          </button>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {saved ? "Saved!" : saving ? "Saving..." : "Save Configuration"}
-          </button>
+          {canEdit && (
+            <>
+              <button
+                type="button"
+                onClick={resetDefaults}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="inline-flex items-center gap-2 btn-primary rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {saved ? "Saved!" : saving ? "Saving..." : "Save Configuration"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -186,35 +196,32 @@ export function RuleConfigurePanel() {
 
             <div>
               <label className="font-medium text-slate-700">Severity Threshold</label>
-              <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              <StyledSelect
+                className="mt-1"
                 value={config.severityThreshold}
-                onChange={(e) => setConfig({ ...config, severityThreshold: e.target.value })}
-              >
-                <option value="critical">Critical only</option>
-                <option value="high">High and above</option>
-                <option value="medium">Medium and above</option>
-                <option value="low">Low and above</option>
-                <option value="all">All severities</option>
-              </select>
+                onChange={(severityThreshold) => setConfig({ ...config, severityThreshold })}
+                options={[
+                  { value: "critical", label: "Critical only" },
+                  { value: "high", label: "High and above" },
+                  { value: "medium", label: "Medium and above" },
+                  { value: "low", label: "Low and above" },
+                  { value: "all", label: "All severities" },
+                ]}
+              />
             </div>
 
-            <label className="flex items-center justify-between">
-              <span>Include Security Checks</span>
-              <input
-                type="checkbox"
-                checked={config.includeSecurity}
-                onChange={(e) => setConfig({ ...config, includeSecurity: e.target.checked })}
-              />
-            </label>
-            <label className="flex items-center justify-between">
-              <span>Include BlazeMeter Readiness</span>
-              <input
-                type="checkbox"
-                checked={config.includeBlazeMeter}
-                onChange={(e) => setConfig({ ...config, includeBlazeMeter: e.target.checked })}
-              />
-            </label>
+            <StyledCheckbox
+              variant="row"
+              label="Include Security Checks"
+              checked={config.includeSecurity}
+              onChange={(includeSecurity) => setConfig({ ...config, includeSecurity })}
+            />
+            <StyledCheckbox
+              variant="row"
+              label="Include BlazeMeter Readiness"
+              checked={config.includeBlazeMeter}
+              onChange={(includeBlazeMeter) => setConfig({ ...config, includeBlazeMeter })}
+            />
           </div>
         </div>
 
@@ -243,25 +250,21 @@ export function RuleConfigurePanel() {
               </button>
             </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {RULE_CATEGORY_OPTIONS.map((cat) => (
-              <label
-                key={cat.id}
-                className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-100 p-2 hover:bg-slate-50"
-              >
-                <input
-                  type="checkbox"
-                  checked={config.ruleCategories.includes(cat.id)}
-                  onChange={(e) => toggleCategory(cat.id, e.target.checked)}
-                  className="mt-1"
-                />
-                <div>
-                  <p className="text-sm font-medium">{cat.label}</p>
-                  <p className="text-xs text-slate-400">{cat.desc}</p>
-                </div>
-              </label>
-            ))}
-          </div>
+          <StyledCheckboxGroup
+            variant="card"
+            items={RULE_CATEGORY_OPTIONS.map((cat) => ({
+              key: cat.id,
+              label: cat.label,
+              description: cat.desc,
+            }))}
+            values={Object.fromEntries(
+              RULE_CATEGORY_OPTIONS.map((cat) => [
+                cat.id,
+                config.ruleCategories.includes(cat.id),
+              ]),
+            ) as Record<string, boolean>}
+            onChange={toggleCategory}
+          />
         </div>
       </div>
 
@@ -317,11 +320,11 @@ export function RuleConfigurePanel() {
                     )}
                   >
                     <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
+                      <StyledCheckbox
+                        boxOnly
                         checked={enabled}
                         disabled={!inPack}
-                        onChange={(e) => setRuleEnabled(rule.id, e.target.checked)}
+                        onChange={(next) => setRuleEnabled(rule.id, next)}
                         title={!inPack ? "Not included in selected rule pack" : undefined}
                       />
                     </td>
@@ -356,9 +359,14 @@ export function RuleConfigurePanel() {
 
       <p className="text-sm text-slate-500">
         These defaults apply to{" "}
-        <Link href="/agents/script-review/new" className="text-brand-600 hover:underline">
+        <PermissionLink
+          href="/agents/script-review/new"
+          resource="script_review"
+          requireWrite
+          className="text-brand-600 hover:underline"
+        >
           New Review
-        </Link>
+        </PermissionLink>
         . You can still override settings per review.
       </p>
     </div>

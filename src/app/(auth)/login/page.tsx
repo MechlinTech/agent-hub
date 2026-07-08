@@ -4,43 +4,168 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getAuthCallbackUrl } from "@/lib/auth-urls";
+import { AgentHubLogo } from "@/components/brand/AgentHubMark";
+
+function MicrosoftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 21 21"
+      aria-hidden="true"
+      fill="none"
+    >
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  );
+}
+
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard";
+  const urlError = searchParams.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(urlError);
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  // Function to sign in with Microsoft or Google
+  async function signInWithProvider(provider: "azure" | "google") {
+    setError(null);
+
+    const callbackUrl = getAuthCallbackUrl(redirect, window.location.origin);
+
+    const options: {
+      redirectTo: string;
+      skipBrowserRedirect: boolean;
+      scopes?: string;
+      queryParams?: { prompt: string };
+    } = {
+      redirectTo: callbackUrl,
+      skipBrowserRedirect: true,
+    };
+
+    if (provider === "azure") {
+      options.scopes = "email openid";
+      options.queryParams = {
+        prompt: "select_account",
+      };
+    } else {
+      options.queryParams = {
+        prompt: "select_account",
+      };
+    }
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options,
+    });
+
+    if (error) {
+      setError(error.message || "Failed to start sign in. Please try again.");
+      return;
+    }
+
+    if (data.url) {
+      window.location.assign(data.url);
+    }
+  }
+
+  // Function to sign in with email and password
+  async function signInWithEmail(email: string, password: string) {
+    setError(null);
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      console.log("Error signing in with email and password:", error);
+      setError(
+        error.message || "Failed to sign in. Please check your credentials.",
+      );
+      setLoading(false);
+    } else {
+      console.log("Successfully signed in with email and password:", data);
+      router.push(redirect);
+      router.refresh();
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-      return;
-    }
-    router.push(redirect);
-    router.refresh();
+    await signInWithEmail(email, password);
+  }
+
+  async function handleSSOSubmit(provider: "azure" | "google") {
+    await signInWithProvider(provider);
   }
 
   return (
     <div className="card p-8">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white">
-          AH
-        </div>
-        <h1 className="text-xl font-bold text-slate-900">Agent Hub</h1>
-        <p className="mt-1 text-sm text-slate-500">Sign in to your performance workspace</p>
+        <AgentHubLogo size="lg" className="mx-auto mb-3" />
+        <h1 className="text-xl font-bold text-slate-900">Mechlin Agent Hub</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Sign in to your performance workspace
+        </p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() => handleSSOSubmit("azure")}
+          className="btn-secondary w-full gap-2.5"
+        >
+          <MicrosoftIcon className="h-5 w-5 shrink-0" />
+          Sign in with Microsoft
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSSOSubmit("google")}
+          className="btn-secondary w-full gap-2.5"
+        >
+          <GoogleIcon className="h-5 w-5 shrink-0" />
+          Sign in with Google
+        </button>
+      </div>
+      <div className="auth-divider">
+        <span>Or continue with</span>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            Email
+          </label>
           <input
             type="email"
             required
@@ -51,7 +176,9 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            Password
+          </label>
           <input
             type="password"
             required
@@ -64,14 +191,17 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary w-full disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-slate-500">
         No account?{" "}
-        <Link href="/signup" className="font-medium text-brand-600 hover:underline">
+        <Link
+          href="/signup"
+          className="font-medium text-brand-600 hover:underline"
+        >
           Create one
         </Link>
       </p>
@@ -81,7 +211,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="card p-8 text-center text-sm text-slate-500">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="card p-8 text-center text-sm text-slate-500">
+          Loading...
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { AgentCard } from "@/components/agents/AgentCard";
 import { AGENT_CATALOG, type AgentStatus } from "@/lib/agents/catalog";
+import { AGENT_RESOURCE_MAP } from "@/lib/permissions";
+import { usePermissions } from "@/lib/permissions-context";
 import { cn } from "@/lib/utils";
 
 type StatusFilter = "all" | AgentStatus;
@@ -15,11 +17,16 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
 ];
 
 export function AgentExplorer({
-  gridClassName = "grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4",
+  gridClassName = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3",
 }: {
   gridClassName?: string;
 }) {
-  const agents = AGENT_CATALOG;
+  const { canRead } = usePermissions();
+  const agents = AGENT_CATALOG.filter((agent) => {
+    const resource = AGENT_RESOURCE_MAP[agent.id];
+    if (!resource) return true;
+    return canRead(resource);
+  });
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -63,10 +70,10 @@ export function AgentExplorer({
               type="button"
               onClick={() => setStatusFilter(option.value)}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
                 statusFilter === option.value
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200/80 hover:bg-slate-50"
+                  ? "brand-gradient text-white shadow-sm shadow-brand-600/25"
+                  : "bg-slate-50 text-slate-600 ring-1 ring-slate-200/80 hover:bg-white"
               )}
             >
               {option.label}
