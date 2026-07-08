@@ -4,7 +4,13 @@ import { useState } from "react";
 import { FolderOpen, Loader2 } from "lucide-react";
 import { StyledSelect } from "@/components/ui/StyledSelect";
 import { StyledCheckboxGroup } from "@/components/ui/StyledCheckbox";
-import type { ProjectSetupConfig } from "@/lib/project-setup/types";
+import type { AuthMethod, ProjectSetupConfig } from "@/lib/project-setup/types";
+
+const AUTH_METHOD_OPTIONS: { key: AuthMethod; label: string }[] = [
+  { key: "jwt", label: "JWT" },
+  { key: "google_oauth", label: "Google OAuth" },
+  { key: "azure_oauth", label: "Azure / MS OAuth" },
+];
 
 export function FolderPicker({
   value,
@@ -118,6 +124,42 @@ function CheckboxGroup({
   );
 }
 
+function AuthMethodsGroup({
+  label,
+  hint,
+  methods,
+  onChange,
+  error,
+}: {
+  label: string;
+  hint?: string;
+  methods: AuthMethod[];
+  onChange: (methods: AuthMethod[]) => void;
+  error?: string;
+}) {
+  const values = Object.fromEntries(
+    AUTH_METHOD_OPTIONS.map(({ key }) => [key, methods.includes(key)]),
+  ) as Record<AuthMethod, boolean>;
+
+  return (
+    <div className="field-group">
+      <label className="field-label">{label}</label>
+      <StyledCheckboxGroup
+        items={AUTH_METHOD_OPTIONS}
+        values={values}
+        onChange={(key, checked) => {
+          const next = checked
+            ? [...methods, key]
+            : methods.filter((m) => m !== key);
+          onChange(next);
+        }}
+      />
+      {hint ? <p className="field-hint">{hint}</p> : null}
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
 export function ConfigSectionCards({
   config,
   onChange,
@@ -133,6 +175,19 @@ export function ConfigSectionCards({
   fieldErrors?: Record<string, string>;
   onBrowseFolder?: () => Promise<string | null>;
 }) {
+  const feAuth = config.frontendAuthMethods;
+  const beAuth = config.backendAuthMethods;
+  const feHasAuth = feAuth.length > 0;
+  const beHasAuth = beAuth.length > 0;
+  const feHasOAuth =
+    feAuth.includes("google_oauth") || feAuth.includes("azure_oauth");
+  const beHasJwt = beAuth.includes("jwt");
+  const beHasGoogle = beAuth.includes("google_oauth");
+  const beHasAzure = beAuth.includes("azure_oauth");
+  const isReactNative = config.frontendFramework === "react-native";
+  const isMobileFramework =
+    config.frontendFramework === "flutter" || isReactNative;
+
   return (
     <div className="space-y-5">
       <div className="card space-y-5 p-5 sm:p-6">
@@ -178,58 +233,95 @@ export function ConfigSectionCards({
                 options={[
                   { value: "nextjs", label: "Next.js" },
                   { value: "react", label: "React (Vite)" },
+                  { value: "flutter", label: "Flutter (GetX)" },
+                  { value: "react-native", label: "React Native CLI" },
                 ]}
               />
             </Field>
-            <Field label="Styling">
-              <StyledSelect
-                value={config.styling}
-                onChange={(styling) => onChange({ styling })}
-                options={[
-                  { value: "tailwind", label: "Tailwind CSS" },
-                  { value: "mui", label: "Material UI" },
-                  { value: "shadcn", label: "ShadCN UI" },
-                ]}
-              />
-            </Field>
-            <Field label="State management">
-              <StyledSelect
-                value={config.stateManagement}
-                onChange={(stateManagement) => onChange({ stateManagement })}
-                options={[
-                  { value: "redux", label: "Redux Toolkit" },
-                  { value: "zustand", label: "Zustand" },
-                  { value: "context", label: "Context API" },
-                ]}
-              />
-            </Field>
-            <Field label="Authentication">
-              <StyledSelect
-                value={config.frontendAuth}
-                onChange={(frontendAuth) => onChange({ frontendAuth })}
-                options={[
-                  { value: "none", label: "None" },
-                  { value: "jwt", label: "JWT" },
-                  { value: "google_oauth", label: "Google OAuth" },
-                ]}
-              />
-            </Field>
-            {config.frontendAuth === "jwt" && !showBackend ? (
-              <Field
-                label="JWT secret (optional)"
-                hint="Used by the frontend for auth. Same value as the backend JWT secret in full-stack apps."
-              >
-                <input
-                  className="input w-full font-mono text-sm"
-                  type="password"
-                  value={config.jwtSecret}
-                  onChange={(e) => onChange({ jwtSecret: e.target.value })}
-                  placeholder="Leave blank to set manually after setup"
-                  autoComplete="new-password"
+            {!isMobileFramework ? (
+              <Field label="Styling">
+                <StyledSelect
+                  value={config.styling}
+                  onChange={(styling) => onChange({ styling })}
+                  options={[
+                    { value: "tailwind", label: "Tailwind CSS" },
+                    { value: "mui", label: "Material UI" },
+                    { value: "shadcn", label: "ShadCN UI" },
+                  ]}
+                />
+              </Field>
+            ) : null}
+            {!isMobileFramework ? (
+              <Field label="State management">
+                <StyledSelect
+                  value={config.stateManagement}
+                  onChange={(stateManagement) => onChange({ stateManagement })}
+                  options={[
+                    { value: "redux", label: "Redux Toolkit" },
+                    { value: "zustand", label: "Zustand" },
+                    { value: "context", label: "Context API" },
+                  ]}
                 />
               </Field>
             ) : null}
           </div>
+          {!isMobileFramework ? (
+            <AuthMethodsGroup
+              label="Authentication (login page)"
+              hint="Controls which sign-in buttons and forms appear on the frontend /login page. OAuth buttons call your API URL."
+              methods={feAuth}
+              onChange={(frontendAuthMethods) =>
+                onChange({ frontendAuthMethods })
+              }
+              error={fieldErrors.frontendAuthMethods}
+            />
+          ) : null}
+          {feHasAuth || isMobileFramework ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field
+                label="API URL"
+                hint={
+                  isMobileFramework
+                    ? "Backend base URL for API requests (written to .env as API_BASE_URL)."
+                    : "Backend base URL for auth and API requests. Required for Frontend Only apps."
+                }
+              >
+                <input
+                  className="input w-full font-mono text-sm"
+                  value={config.apiUrl}
+                  onChange={(e) => onChange({ apiUrl: e.target.value })}
+                  placeholder="http://localhost:4000"
+                  aria-invalid={Boolean(fieldErrors.apiUrl)}
+                />
+                {fieldErrors.apiUrl ? (
+                  <p className="text-xs text-red-600">{fieldErrors.apiUrl}</p>
+                ) : null}
+              </Field>
+              {feHasOAuth && !isMobileFramework ? (
+                <Field
+                  label="Frontend URL"
+                  hint="Your app origin — used for OAuth callback redirect (/auth/callback)."
+                >
+                  <input
+                    className="input w-full font-mono text-sm"
+                    value={config.frontendUrl}
+                    onChange={(e) => onChange({ frontendUrl: e.target.value })}
+                    placeholder={
+                      config.frontendFramework === "react"
+                        ? "http://localhost:5173"
+                        : "http://localhost:3000"
+                    }
+                    aria-invalid={Boolean(fieldErrors.frontendUrl)}
+                  />
+                  {fieldErrors.frontendUrl ? (
+                    <p className="text-xs text-red-600">
+                      {fieldErrors.frontendUrl}
+                    </p>
+                  ) : null}
+                </Field>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -242,18 +334,8 @@ export function ConfigSectionCards({
                 value={config.backendFramework}
                 onChange={(backendFramework) => onChange({ backendFramework })}
                 options={[
-                  { value: "express", label: "Express.js" },
-                  { value: "nestjs", label: "NestJS" },
-                ]}
-              />
-            </Field>
-            <Field label="Authentication">
-              <StyledSelect
-                value={config.backendAuth}
-                onChange={(backendAuth) => onChange({ backendAuth })}
-                options={[
-                  { value: "jwt", label: "JWT" },
-                  { value: "google_oauth", label: "Google OAuth" },
+                  { value: "express", label: "Node.js + Express.js" },
+                  { value: "nestjs", label: "Node.js + NestJS" },
                 ]}
               />
             </Field>
@@ -262,7 +344,7 @@ export function ConfigSectionCards({
                 value={config.database}
                 onChange={(database) => onChange({ database })}
                 options={[
-                  { value: "mongodb", label: "MongoDB" },
+                  // { value: "mongodb", label: "MongoDB" },
                   { value: "postgresql", label: "PostgreSQL" },
                 ]}
               />
@@ -299,37 +381,110 @@ export function ConfigSectionCards({
               />
             </>
           ) : null}
-          {config.backendAuth === "jwt" ? (
-            <Field
-              label="JWT secret (optional)"
-              hint="Written to .env for the backend. Generate a long random string for production."
-            >
-              <input
-                className="input w-full font-mono text-sm"
-                type="password"
-                value={config.jwtSecret}
-                onChange={(e) => onChange({ jwtSecret: e.target.value })}
-                placeholder="Leave blank to set manually after setup"
-                autoComplete="new-password"
-              />
-            </Field>
+          <AuthMethodsGroup
+            label="Authentication (API)"
+            hint="Controls which auth routes are scaffolded on the backend (/api/auth/...)."
+            methods={beAuth}
+            onChange={(backendAuthMethods) => onChange({ backendAuthMethods })}
+            error={fieldErrors.backendAuthMethods}
+          />
+          {beHasAuth ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {beHasJwt ? (
+                <Field
+                  label="JWT secret (optional)"
+                  hint="Written to backend .env. Generate a long random string for production."
+                >
+                  <input
+                    className="input w-full font-mono text-sm"
+                    type="password"
+                    value={config.jwtSecret}
+                    onChange={(e) => onChange({ jwtSecret: e.target.value })}
+                    placeholder="Leave blank to set manually after setup"
+                    autoComplete="new-password"
+                  />
+                </Field>
+              ) : null}
+              {beHasGoogle ? (
+                <>
+                  <Field label="Google client ID (optional)">
+                    <input
+                      className="input w-full font-mono text-sm"
+                      value={config.googleClientId}
+                      onChange={(e) =>
+                        onChange({ googleClientId: e.target.value })
+                      }
+                      placeholder="Leave blank to set manually"
+                    />
+                  </Field>
+                  <Field label="Google client secret (optional)">
+                    <input
+                      className="input w-full font-mono text-sm"
+                      type="password"
+                      value={config.googleClientSecret}
+                      onChange={(e) =>
+                        onChange({ googleClientSecret: e.target.value })
+                      }
+                      placeholder="Leave blank to set manually"
+                      autoComplete="new-password"
+                    />
+                  </Field>
+                </>
+              ) : null}
+              {beHasAzure ? (
+                <>
+                  <Field label="Azure tenant ID (optional)">
+                    <input
+                      className="input w-full font-mono text-sm"
+                      value={config.azureTenantId}
+                      onChange={(e) =>
+                        onChange({ azureTenantId: e.target.value })
+                      }
+                      placeholder="Leave blank to set manually"
+                    />
+                  </Field>
+                  <Field label="Azure client ID (optional)">
+                    <input
+                      className="input w-full font-mono text-sm"
+                      value={config.azureClientId}
+                      onChange={(e) =>
+                        onChange({ azureClientId: e.target.value })
+                      }
+                      placeholder="Leave blank to set manually"
+                    />
+                  </Field>
+                  <Field label="Azure client secret (optional)">
+                    <input
+                      className="input w-full font-mono text-sm"
+                      type="password"
+                      value={config.azureClientSecret}
+                      onChange={(e) =>
+                        onChange({ azureClientSecret: e.target.value })
+                      }
+                      placeholder="Leave blank to set manually"
+                      autoComplete="new-password"
+                    />
+                  </Field>
+                </>
+              ) : null}
+            </div>
           ) : null}
           <CheckboxGroup
             config={config}
             onChange={onChange}
             items={[
               { key: "swagger", label: "Swagger" },
-              { key: "redis", label: "Redis" },
-              { key: "socketIo", label: "Socket.IO" },
+              // { key: "redis", label: "Redis" },
+              // { key: "socketIo", label: "Socket.IO" },
             ]}
           />
-          {config.backendFramework === "nestjs" ? (
+          {/* {config.backendFramework === "nestjs" ? (
             <p className="text-xs text-slate-500">
-              Swagger, Redis, and Socket.IO scaffolding is currently available
-              for Express.js projects only. NestJS includes modular auth, users,
-              and database layers when JWT and a database are selected.
+              Redis and Socket.IO scaffolding is currently available for
+              Express.js projects only. NestJS includes modular auth, users,
+              database layers, and Swagger when those options are selected.
             </p>
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
 
@@ -343,7 +498,7 @@ export function ConfigSectionCards({
             { key: "githubActions", label: "GitHub Actions" },
           ]}
         />
-        <Field label="Deployment target">
+        {/* <Field label="Deployment target">
           <StyledSelect
             value={config.deploymentTarget}
             onChange={(deploymentTarget) => onChange({ deploymentTarget })}
@@ -354,7 +509,7 @@ export function ConfigSectionCards({
               { value: "vercel", label: "Vercel" },
             ]}
           />
-        </Field>
+        </Field> */}
       </div>
     </div>
   );

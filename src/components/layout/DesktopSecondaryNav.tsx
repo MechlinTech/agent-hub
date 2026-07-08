@@ -17,7 +17,19 @@ import {
   beginNewProjectSetup,
   PROJECT_SETUP_NEW_PATH,
 } from "@/stores/project-setup-store";
-import { AnimatedTabNav, AnimatedTabNavRow } from "./AnimatedTabNav";
+import { AnimatedTabNav, type AnimatedTabItem } from "./AnimatedTabNav";
+
+function AgentsBackLink() {
+  return (
+    <Link
+      href="/agents"
+      className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-slate-500 transition-colors hover:text-slate-800"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" />
+      Agents
+    </Link>
+  );
+}
 
 export function DesktopSecondaryNav() {
   const pathname = usePathname();
@@ -32,19 +44,26 @@ export function DesktopSecondaryNav() {
     ? getResultsAnalysisIdFromPath(pathname)
     : null;
 
+  const tabNavProps = {
+    variant: "underline" as const,
+    size: "compact" as const,
+    listClassName: "flex-nowrap",
+  };
+
   if (inSettings && settingsNav.length > 1) {
     return (
-      <div className="hidden px-6 pt-2 pb-2 lg:block">
-        <AnimatedTabNavRow>
+      <div className="hidden border-b border-slate-200/40 lg:block">
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 [@media(min-width:1400px)]:pl-0">
           <AnimatedTabNav
-            variant="light"
+            {...tabNavProps}
+            ariaLabel="Settings navigation"
             tabs={settingsNav.map((item) => ({
               href: item.href,
               label: item.label,
               active: isSettingsNavActive(pathname, item.href),
             }))}
           />
-        </AnimatedTabNavRow>
+        </div>
       </div>
     );
   }
@@ -56,7 +75,8 @@ export function DesktopSecondaryNav() {
     canRead,
     canWrite,
   );
-  const tabs = [
+
+  const tabs: AnimatedTabItem[] = [
     ...visibleItems.map((item) => ({
       href: item.href,
       label: item.label,
@@ -76,20 +96,17 @@ export function DesktopSecondaryNav() {
   ];
 
   return (
-    <div className="hidden px-6 pb-2 pt-2 lg:block">
-      <AnimatedTabNavRow>
-        <Link
-          href="/agents"
-          className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-slate-500 shadow-card ring-1 ring-slate-200/80 transition-colors hover:text-brand-600"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          All agents
-        </Link>
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          {activeAgent.name}
-        </span>
-        <AnimatedTabNav variant="light" tabs={tabs} />
-      </AnimatedTabNavRow>
+    <div className="hidden border-b border-slate-200/40 lg:block">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8 [@media(min-width:1400px)]:pl-0">
+        <AgentsBackLink />
+        <div className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
+          <AnimatedTabNav
+            {...tabNavProps}
+            ariaLabel={`${activeAgent.name} navigation`}
+            tabs={tabs}
+          />
+        </div>
+      </div>
     </div>
   );
 }

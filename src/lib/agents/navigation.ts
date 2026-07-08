@@ -28,6 +28,8 @@ export interface AgentNavConfig {
   id: string;
   basePath: string;
   name: string;
+  /** Shorter label for compact secondary navigation. */
+  shortName?: string;
   /** Routes outside basePath that belong to this agent (shown in agent sidebar). */
   scopedPaths: string[];
   items: NavItem[];
@@ -49,6 +51,7 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
     id: "script-review",
     basePath: SCRIPT_REVIEW_BASE,
     name: "Script Review Agent",
+    shortName: "Script Review",
     scopedPaths: ["/test-assets", "/reports", "/executions"],
     items: [
       {
@@ -97,6 +100,7 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
     id: "results-analysis",
     basePath: RESULTS_ANALYSIS_BASE,
     name: "BlazeMeter Results Analysis Agent",
+    shortName: "Results Analysis",
     scopedPaths: [],
     items: [
       {
@@ -144,6 +148,7 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
     id: "project-setup",
     basePath: PROJECT_SETUP_BASE,
     name: "Project Setup Agent",
+    shortName: "Project Setup",
     scopedPaths: [],
     items: [
       {

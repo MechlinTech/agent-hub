@@ -1,7 +1,24 @@
 import type { FileTemplate, ProjectSetupConfig } from "@/lib/project-setup/types";
 import { latestDeps } from "@/lib/project-setup/templates/package-latest";
 import { expressPrismaDbSource } from "@/lib/project-setup/templates/backend/prisma-shared";
-import { slugify, usesPrismaBackend } from "@/lib/project-setup/templates/shared";
+import {
+  expressOAuthFiles,
+  expressOAuthRouteImports,
+  expressOAuthRouteLines,
+} from "@/lib/project-setup/templates/backend/oauth-express";
+import {
+  needsJwtSigning,
+  slugify,
+  usesAnyAuth,
+  usesJwtLogin,
+  usesOAuth,
+  usesPrismaBackend,
+} from "@/lib/project-setup/templates/shared";
+import {
+  swaggerAppImport,
+  swaggerAppSetup,
+  swaggerServerLog,
+} from "@/lib/project-setup/templates/backend/swagger-express";
 
 function relPrefix(config: ProjectSetupConfig): string {
   return config.projectScope === "backend_only" ? "" : "backend/";
@@ -12,7 +29,7 @@ function esm(config: ProjectSetupConfig): string {
 }
 
 function usesJwt(config: ProjectSetupConfig): boolean {
-  return config.backendAuth === "jwt";
+  return usesAnyAuth(config);
 }
 
 function usesMongo(config: ProjectSetupConfig): boolean {
@@ -29,7 +46,7 @@ export function expressPackageJson(config: ProjectSetupConfig, slug: string) {
     "@types/node",
   );
 
-  if (usesJwt(config)) {
+  if (needsJwtSigning(config)) {
     Object.assign(deps, latestDeps("jsonwebtoken", "bcryptjs"));
     Object.assign(devDeps, latestDeps("@types/jsonwebtoken"));
   }
@@ -41,6 +58,10 @@ export function expressPackageJson(config: ProjectSetupConfig, slug: string) {
   if (usesPrismaBackend(config)) {
     Object.assign(deps, latestDeps("@prisma/client", "@prisma/adapter-pg", "pg"));
     Object.assign(devDeps, latestDeps("prisma"));
+  }
+
+  if (config.swagger) {
+    Object.assign(deps, latestDeps("swagger-ui-express"));
   }
 
   const base = {
@@ -105,12 +126,12 @@ function appSource(config: ProjectSetupConfig): string {
 import cors from "cors";
 import routes from "./routes/index${e}";
 import { errorMiddleware } from "./middlewares/error.middleware${e}";
-
+${swaggerAppImport(config)}
 export function createApp() {
   const app = express();
 
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json());${swaggerAppSetup(config)}
   app.use("/api", routes);
   app.use(errorMiddleware);
 
@@ -132,7 +153,7 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 4000);
 
   app.listen(port, () => {
-    console.log(\`API listening on \${port}\`);
+    console.log(\`API listening on \${port}\`);${swaggerServerLog(config)}
   });
 }
 
@@ -153,7 +174,7 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 4000);
 
   app.listen(port, () => {
-    console.log(\`API listening on \${port}\`);
+    console.log(\`API listening on \${port}\`);${swaggerServerLog(config)}
   });
 }
 
@@ -182,7 +203,7 @@ function typesIndexSource(config: ProjectSetupConfig): string {
   const e = esm(config);
   const exports: string[] = [`export * from "./user.types${e}";`];
 
-  if (usesJwt(config)) {
+  if (needsJwtSigning(config)) {
     exports.push(`export * from "./auth.types${e}";`);
   }
 
@@ -322,8 +343,58 @@ export function authMiddleware(req: Request, _res: Response, next: NextFunction)
 
 function userServiceSource(config: ProjectSetupConfig): string {
   const e = esm(config);
+  const oauthFnsPrisma = usesOAuth(config)
+    ? `
+export async function findOrCreateOAuthUser(
+  email: string,
+  provider: "google" | "azure",
+  providerId: string,
+): Promise<PublicUser> {
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    return { id: existing.id, email: existing.email };
+  }
+  return createOAuthUser(email, provider, providerId);
+}
+`
+    : "";
+
+  const oauthFnsMongo = usesOAuth(config)
+    ? `
+export async function findOrCreateOAuthUser(
+  email: string,
+  provider: "google" | "azure",
+  providerId: string,
+): Promise<PublicUser> {
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    return { id: String((existing as { _id: unknown })._id), email: existing.email };
+  }
+  return createOAuthUser(email, provider, providerId);
+}
+`
+    : "";
 
   if (usesPrismaBackend(config)) {
+    const oauthCreate = usesOAuth(config)
+      ? `
+export async function createOAuthUser(
+  email: string,
+  provider: "google" | "azure",
+  providerId: string,
+): Promise<PublicUser> {
+  const data =
+    provider === "google"
+      ? { email, googleId: providerId }
+      : { email, azureOid: providerId };
+  return prisma.user.create({
+    data,
+    select: { id: true, email: true },
+  });
+}
+`
+      : "";
+
     return `import prisma from "../config/db${e}";
 import type { PublicUser } from "../types/user.types${e}";
 
@@ -351,19 +422,48 @@ export async function listUsers(): Promise<PublicUser[]> {
     orderBy: { createdAt: "desc" },
   });
 }
-`;
+${oauthCreate}${oauthFnsPrisma}`;
   }
 
-  return `import mongoose from "mongoose";
-import type { PublicUser } from "../types/user.types${e}";
+  const oauthMongo = usesOAuth(config)
+    ? `
+export async function createOAuthUser(
+  email: string,
+  provider: "google" | "azure",
+  providerId: string,
+): Promise<PublicUser> {
+  const data =
+    provider === "google"
+      ? { email, googleId: providerId }
+      : { email, azureOid: providerId };
+  const user = await User.create(data);
+  return { id: String(user._id), email: user.email };
+}
+`
+    : "";
 
-const userSchema = new mongoose.Schema(
+  const mongoSchema = usesOAuth(config)
+    ? `const userSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    passwordHash: { type: String },
+    googleId: { type: String, unique: true, sparse: true },
+    azureOid: { type: String, unique: true, sparse: true },
+  },
+  { timestamps: true },
+);`
+    : `const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
   },
   { timestamps: true },
-);
+);`;
+
+  return `import mongoose from "mongoose";
+import type { PublicUser } from "../types/user.types${e}";
+
+${mongoSchema}
 
 const User = mongoose.models.User ?? mongoose.model("User", userSchema);
 
@@ -386,7 +486,7 @@ export async function listUsers(): Promise<PublicUser[]> {
   const users = await User.find().select("email").sort({ createdAt: -1 }).lean();
   return users.map((user) => ({ id: String(user._id), email: user.email }));
 }
-`;
+${oauthMongo}${oauthFnsMongo}`;
 }
 
 function authServiceSource(config: ProjectSetupConfig): string {
@@ -514,15 +614,22 @@ export function getHealth(_req: Request, res: Response) {
 
 function authRoutesSource(config: ProjectSetupConfig): string {
   const e = esm(config);
+  const jwtRoutes = usesJwtLogin(config)
+    ? `router.post("/register", authController.register);
+router.post("/login", authController.login);
+`
+    : "";
+  const oauthRoutes = expressOAuthRouteLines(config, e).join("\n");
+  const oauthImport = expressOAuthRouteImports(config, e);
+
   return `import { Router } from "express";
 import * as authController from "../controllers/auth.controller${e}";
 import { authMiddleware } from "../middlewares/auth.middleware${e}";
-
+${oauthImport}
 const router = Router();
 
-router.post("/register", authController.register);
-router.post("/login", authController.login);
-router.get("/me", authMiddleware, authController.me);
+${jwtRoutes}router.get("/me", authMiddleware, authController.me);
+${oauthRoutes ? `\n${oauthRoutes}` : ""}
 
 export default router;
 `;
@@ -572,6 +679,7 @@ export default router;
 export function expressLayeredFiles(config: ProjectSetupConfig): FileTemplate[] {
   const rel = relPrefix(config);
   const slug = slugify(config.projectName);
+  const e = esm(config);
   const files: FileTemplate[] = [
     { relativePath: `${rel}src/app.ts`, content: appSource(config) },
     { relativePath: `${rel}src/server.ts`, content: serverSource(config) },
@@ -611,15 +719,20 @@ export function expressLayeredFiles(config: ProjectSetupConfig): FileTemplate[] 
         content: authMiddlewareSource(config),
       },
       {
-        relativePath: `${rel}src/services/auth.service.ts`,
-        content: authServiceSource(config),
-      },
-      {
         relativePath: `${rel}src/controllers/auth.controller.ts`,
         content: authControllerSource(config),
       },
       { relativePath: `${rel}src/routes/auth.routes.ts`, content: authRoutesSource(config) },
     );
+
+    if (usesJwtLogin(config)) {
+      files.push({
+        relativePath: `${rel}src/services/auth.service.ts`,
+        content: authServiceSource(config),
+      });
+    }
+
+    files.push(...expressOAuthFiles(config, rel, e));
   }
 
   return files;

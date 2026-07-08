@@ -15,7 +15,11 @@ export async function writeProjectFiles(
   for (const file of files) {
     const fullPath = path.join(projectRoot, file.relativePath);
     await fs.mkdir(path.dirname(fullPath), { recursive: true });
-    await fs.writeFile(fullPath, file.content, "utf8");
+    const payload =
+      file.encoding === "base64"
+        ? Buffer.from(file.content, "base64")
+        : file.content;
+    await fs.writeFile(fullPath, payload, file.encoding === "base64" ? undefined : "utf8");
     if (!seen.has(fullPath)) {
       seen.add(fullPath);
       written.push(fullPath);

@@ -39,6 +39,7 @@ WITH CHECK (auth.uid() = user_id);
 CREATE TABLE IF NOT EXISTS public.executor_pairing_tokens (
   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   token_hash text NOT NULL,
+  version text NOT NULL DEFAULT '1.0.0',
   created_at timestamptz NOT NULL DEFAULT now(),
   rotated_at timestamptz NOT NULL DEFAULT now()
 );

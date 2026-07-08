@@ -26,6 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 import { StyledCheckbox } from "@/components/ui/StyledCheckbox";
 import { usePermissions } from "@/lib/permissions-context";
+import { isAdminRole } from "@/lib/permissions";
+import { ExecutorBinaryUploadPanel } from "@/components/admin/ExecutorBinaryUploadPanel";
 
 const EDITABLE_BUILT_IN: BuiltInRole[] = ["performance_engineer", "viewer"];
 
@@ -63,7 +65,8 @@ function AccessToggle({
 }
 
 export function RolePermissionsPanel() {
-  const { isSuperAdmin, configurableResources } = usePermissions();
+  const { isSuperAdmin, role, configurableResources } = usePermissions();
+  const canManageExecutorBuilds = isSuperAdmin || isAdminRole(role);
   const visibleResources = configurableResources;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -604,6 +607,8 @@ export function RolePermissionsPanel() {
           </div>
         )}
       </div>
+
+      {canManageExecutorBuilds && <ExecutorBinaryUploadPanel />}
     </div>
   );
 }

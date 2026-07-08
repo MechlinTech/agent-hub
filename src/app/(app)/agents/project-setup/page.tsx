@@ -70,11 +70,15 @@ export default async function ProjectSetupOverviewPage() {
           How Project Setup works
         </summary>
         <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-slate-600">
-          <li>Run the Local Executor on your PC (`npm run executor`).</li>
-          <li>Pair it with your AgentHub account in Settings.</li>
+          <li>Run the AgentHub Desktop on your PC.</li>
+          <li>
+            Click the <strong>'Open AgentHub to connect'</strong> button in the
+            desktop app to open the browser.
+          </li>
           <li>Configure scope, stack, and target folder in the wizard.</li>
           <li>
-            Run Agent — files and commands execute locally via the executor.
+            Click the <strong>'Run Agent'</strong> button to start the project
+            setup.
           </li>
         </ol>
       </details>

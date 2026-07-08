@@ -2,6 +2,8 @@ import { registerStackModule } from "@/lib/project-setup/templates/registry";
 import {
   nextjsModule,
   reactViteModule,
+  flutterModule,
+  reactNativeModule,
   reduxNextModule,
   reduxViteModule,
   zustandNextModule,
@@ -12,6 +14,10 @@ import {
   tailwindFrontendModule,
 } from "@/lib/project-setup/templates/frontend/modules";
 import {
+  authNextModule,
+  authViteModule,
+} from "@/lib/project-setup/templates/frontend/auth-templates";
+import {
   expressBaseModule,
   nestBaseModule,
   mongooseModule,
@@ -21,7 +27,6 @@ import {
   swaggerModule,
 } from "@/lib/project-setup/templates/backend/modules";
 import {
-  authStubModule,
   deployStubModule,
   dockerModule,
   githubActionsModule,
@@ -34,6 +39,8 @@ export function ensureTemplatesRegistered(): void {
   if (registered) return;
   registerStackModule(nextjsModule);
   registerStackModule(reactViteModule);
+  registerStackModule(flutterModule);
+  registerStackModule(reactNativeModule);
   registerStackModule(tailwindFrontendModule);
   registerStackModule(shadcnFrontendModule);
   registerStackModule(reduxViteModule);
@@ -53,6 +60,7 @@ export function ensureTemplatesRegistered(): void {
   registerStackModule(githubActionsModule);
   registerStackModule(deployStubModule);
   registerStackModule(stylingStubModule);
-  registerStackModule(authStubModule);
+  registerStackModule(authViteModule);
+  registerStackModule(authNextModule);
   registered = true;
 }

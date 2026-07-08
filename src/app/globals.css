@@ -272,11 +272,11 @@ body {
   }
 
   .wizard-action-bar {
-    @apply pointer-events-none fixed inset-x-0 bottom-0 z-20 px-4 pb-4 pt-2 lg:px-8;
+    @apply pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(1rem+var(--safe-bottom))] pt-2 lg:px-8;
   }
 
   .wizard-action-bar-inner {
-    @apply pointer-events-auto mx-auto flex max-w-[1400px] items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/70 px-4 py-2.5 shadow-card backdrop-blur-xl backdrop-saturate-150;
+    @apply pointer-events-auto mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-xl backdrop-saturate-150;
   }
 
   .checkbox-chip {

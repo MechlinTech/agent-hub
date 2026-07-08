@@ -3,7 +3,7 @@ import { NewProjectSetupView } from "@/components/project-setup/NewProjectSetupV
 
 export default function ProjectSetupNewPage() {
   return (
-    <div className="pb-20">
+    <div>
       <Breadcrumbs
         items={[
           { label: "Home", href: "/dashboard" },

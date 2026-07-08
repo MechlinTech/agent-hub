@@ -1,7 +1,11 @@
 import type { StackModule } from "@/lib/project-setup/templates/registry";
 import type { ProjectSetupConfig } from "@/lib/project-setup/types";
+import {
+  muiInstallArgs,
+  muiNextThemeFiles,
+} from "@/lib/project-setup/templates/frontend/styling-templates";
 import { installLatestArgs } from "@/lib/project-setup/templates/package-latest";
-import { scopeIncludesFrontend } from "@/lib/project-setup/templates/shared";
+import { frontendRelPrefix, scopeIncludesFrontend } from "@/lib/project-setup/templates/shared";
 
 function dbServiceBlock(config: ProjectSetupConfig): string {
   if (config.database === "postgresql") {
@@ -141,6 +145,57 @@ CMD ["npm", "run", "dev"]
   commands: () => [],
 };
 
+function githubActionsSteps(config: ProjectSetupConfig): string {
+  const isFlutter =
+    scopeIncludesFrontend(config) && config.frontendFramework === "flutter";
+
+  const flutterSteps = (workingDirectory: string) => `      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Flutter pub get
+        working-directory: ${workingDirectory}
+        run: flutter pub get
+      - name: Flutter analyze
+        working-directory: ${workingDirectory}
+        run: flutter analyze
+      - name: Flutter test
+        working-directory: ${workingDirectory}
+        run: flutter test`;
+
+  if (config.projectScope === "full_stack") {
+    const frontendSteps = isFlutter
+      ? flutterSteps("frontend")
+      : `      - name: Install & test frontend
+        working-directory: frontend
+        run: npm ci || npm install
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build --if-present`;
+
+    return `${frontendSteps}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install & test backend
+        working-directory: backend
+        run: npm ci || npm install
+      - name: Test backend
+        working-directory: backend
+        run: npm test --if-present`;
+  }
+
+  if (config.projectScope === "frontend_only" && isFlutter) {
+    return flutterSteps(".");
+  }
+
+  return `      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci || npm install
+      - run: npm test --if-present`;
+}
+
 export const githubActionsModule: StackModule = {
   id: "devops-gha",
   appliesTo: (c) => c.githubActions,
@@ -152,22 +207,10 @@ export const githubActionsModule: StackModule = {
   // own), so CI would fail immediately on those scopes. Now it builds
   // working-directory steps per scope.
   files: (config) => {
-    const steps =
-      config.projectScope === "full_stack"
-        ? `      - name: Install & test frontend
-        working-directory: frontend
-        run: npm ci || npm install
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build --if-present
-      - name: Install & test backend
-        working-directory: backend
-        run: npm ci || npm install
-      - name: Test backend
-        working-directory: backend
-        run: npm test --if-present`
-        : `      - run: npm ci || npm install
-      - run: npm test --if-present`;
+    const steps = githubActionsSteps(config);
+    const needsNodeAtTop =
+      config.projectScope !== "full_stack" &&
+      !(config.projectScope === "frontend_only" && config.frontendFramework === "flutter");
 
     return [
       {
@@ -182,10 +225,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+${needsNodeAtTop ? `      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-${steps}
+` : ""}${steps}
 # ${config.projectName}
 `,
       },
@@ -211,19 +254,23 @@ export const deployStubModule: StackModule = {
 export const stylingStubModule: StackModule = {
   id: "styling-mui",
   appliesTo: (c) =>
-    (c.projectScope === "frontend_only" || c.projectScope === "full_stack") &&
-    c.styling === "mui",
-  checklist: () => ["Material UI styling"],
-  dependencies: () => ["@mui/material", "@emotion/react", "@emotion/styled"],
-  files: (config) => [
-    {
-      relativePath:
-        config.projectScope === "frontend_only"
-          ? "STYLING.md"
-          : "frontend/STYLING.md",
-      content: `# Material UI setup\n\nMUI packages are installed. Import components from \`@mui/material\` in your app.\n`,
-    },
-  ],
+    scopeIncludesFrontend(c) && c.styling === "mui",
+  checklist: () => ["Material UI theme, CssBaseline, and App Router cache provider"],
+  dependencies: () => ["@mui/material", "@mui/material-nextjs", "@emotion/react", "@emotion/styled"],
+  files: (config) => {
+    const rel = frontendRelPrefix(config);
+    const files = muiNextThemeFiles(rel);
+    if (config.frontendFramework === "nextjs") {
+      return files;
+    }
+    return [
+      ...files.filter((f) => !f.relativePath.endsWith("ThemeRegistry.tsx")),
+      {
+        relativePath: `${rel}STYLING.md`,
+        content: `# Material UI setup\n\nMUI packages are installed. Wrap your Vite root with \`ThemeProvider\` and \`CssBaseline\` from \`@mui/material\`.\n`,
+      },
+    ];
+  },
   commands: (config, root) => {
     const cwd = config.projectScope === "frontend_only" ? root : `${root}/frontend`;
     return [
@@ -231,7 +278,7 @@ export const stylingStubModule: StackModule = {
         id: "styling-install",
         label: "Installing MUI dependencies",
         exe: "npm",
-        args: installLatestArgs("@mui/material", "@emotion/react", "@emotion/styled"),
+        args: muiInstallArgs(),
         cwd,
         timeoutMs: 300_000,
         phase: "post",
@@ -278,17 +325,4 @@ export const stateStubModule: StackModule = {
       },
     ];
   },
-};
-
-export const authStubModule: StackModule = {
-  id: "auth-stubs",
-  appliesTo: (c) => c.frontendAuth !== "none",
-  checklist: (c) => {
-    const items: string[] = [];
-    if (c.frontendAuth !== "none") items.push(`Frontend auth: ${c.frontendAuth}`);
-    return items;
-  },
-  dependencies: () => [],
-  files: () => [],
-  commands: () => [],
 };

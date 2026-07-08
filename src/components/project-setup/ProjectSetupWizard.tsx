@@ -38,9 +38,15 @@ import {
 import { CommandPreviewCard } from "@/components/project-setup/CommandPreviewCard";
 import { GenerationProgress } from "@/components/project-setup/GenerationProgress";
 import { ProjectSetupResults } from "@/components/project-setup/ProjectSetupResults";
+import { WizardStepper } from "@/components/project-setup/WizardStepper";
 import type { ProjectSetupResult } from "@/lib/project-setup/types";
+import {
+  beginNewProjectSetup,
+  PROJECT_SETUP_NEW_PATH,
+} from "@/stores/project-setup-store";
+import Link from "next/link";
 
-const STEPS = ["Configure", "Review", "Generate & Results"];
+const STEPS = ["Configure", "Review", "Generate & Results"] as const;
 
 export function ProjectSetupWizard() {
   const {
@@ -76,7 +82,7 @@ export function ProjectSetupWizard() {
 
   useEffect(() => {
     refreshHealth();
-    const t = setInterval(refreshHealth, 5000);
+    const t = setInterval(refreshHealth, 10000);
     return () => clearInterval(t);
   }, [refreshHealth]);
 
@@ -92,7 +98,7 @@ export function ProjectSetupWizard() {
         const previewConfig = buildDraftPreviewConfig(config);
         let token = sessionToken;
         if (!token) {
-          token = await fetchPairingToken();
+          token = await fetchPairingToken({ version: executorStatus?.version });
           setSessionToken(token);
         }
         const preview = await fetchPreview(previewConfig, token);
@@ -113,16 +119,12 @@ export function ProjectSetupWizard() {
   ]);
 
   async function ensureToken(): Promise<string> {
-    let token = sessionToken;
-    if (!token) {
-      token = await fetchPairingToken();
-      setSessionToken(token);
-    }
-    const health = await checkExecutorHealth();
-    if (!health.paired) {
-      await pairExecutor(token);
-      await refreshHealth();
-    }
+    const token =
+      sessionToken ??
+      (await fetchPairingToken({ version: executorStatus?.version }));
+    setSessionToken(token);
+    await pairExecutor(token);
+    await refreshHealth();
     return token;
   }
 
@@ -254,39 +256,34 @@ export function ProjectSetupWizard() {
     !running &&
     currentStep >= 2;
 
+  const isResultsView = currentStep === 3 && Boolean(result);
+  const showArchitecturePreview = currentStep === 1 || currentStep === 2;
+  const showCommandPreview = currentStep === 2;
+  const showSidebar = !isResultsView;
+
   return (
-    <div className="pb-20">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">New project setup</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Configure, review, and generate on your machine.
-        </p>
+    <div className="pb-32 lg:pb-28">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+            Step {currentStep} of {STEPS.length}
+          </p>
+          <h1 className="mt-1 text-2xl font-bold text-slate-900">{STEPS[currentStep - 1]}</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {currentStep === 1
+              ? "Choose your stack and where the project should live."
+              : currentStep === 2
+                ? "Review the plan before generating on your machine."
+                : result
+                  ? "Your project has been scaffolded locally."
+                  : "Run the agent to create files and install dependencies."}
+          </p>
+        </div>
       </div>
 
       {executorStatus ? <ExecutorStatusBanner status={executorStatus} /> : null}
 
-      <div className="mb-6 flex gap-2">
-        {STEPS.map((label, i) => {
-          const stepNum = (i + 1) as 1 | 2 | 3;
-          const active = currentStep === stepNum;
-          const done = currentStep > stepNum;
-          return (
-            <div
-              key={label}
-              className={cn(
-                "flex-1 rounded-lg border px-3 py-2 text-center text-xs font-medium sm:text-sm",
-                active && "border-brand-300 bg-brand-50 text-brand-800",
-                done &&
-                  !active &&
-                  "border-slate-200 bg-slate-50 text-slate-600",
-                !active && !done && "border-slate-100 text-slate-400",
-              )}
-            >
-              {i + 1}. {label}
-            </div>
-          );
-        })}
-      </div>
+      <WizardStepper currentStep={currentStep} />
 
       {error ? (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -294,8 +291,8 @@ export function ProjectSetupWizard() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
+      <div className={cn("grid gap-6", showSidebar ? "lg:grid-cols-3" : "grid-cols-1")}>
+        <div className={cn("space-y-4", showSidebar && "lg:col-span-2")}>
           {currentStep === 1 ? (
             <>
               <ScopeSelector
@@ -326,23 +323,35 @@ export function ProjectSetupWizard() {
           {currentStep === 3 ? (
             <div className="space-y-4">
               {result ? (
-                <ProjectSetupResults result={result} />
+                <ProjectSetupResults result={result} config={config} />
               ) : (
-                <GenerationProgress
-                  events={events}
-                  logLines={logLines}
-                  running={running}
-                />
+                <div className="card p-5 sm:p-6">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Generating project</h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      The Local Executor is writing files and running commands on your machine.
+                    </p>
+                  </div>
+                  <GenerationProgress
+                    events={events}
+                    logLines={logLines}
+                    running={running}
+                  />
+                </div>
               )}
             </div>
           ) : null}
         </div>
 
-        <div className="space-y-4">
-          <ProjectSummaryCard config={config} />
-          <ArchitecturePreviewCard plan={plan} />
-          <CommandPreviewCard plan={plan} executorReady={executorReady} />
-        </div>
+        {showSidebar ? (
+          <div className="space-y-4">
+            <ProjectSummaryCard config={config} compact={currentStep === 3} />
+            {showArchitecturePreview ? <ArchitecturePreviewCard plan={plan} /> : null}
+            {showCommandPreview ? (
+              <CommandPreviewCard plan={plan} executorReady={executorReady} />
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="wizard-action-bar">
@@ -350,13 +359,30 @@ export function ProjectSetupWizard() {
           <button
             type="button"
             className="btn-secondary px-5 py-2"
-            disabled={currentStep === 1 || running}
+            disabled={currentStep === 1 || running || Boolean(result)}
             onClick={prevStep}
           >
             Back
           </button>
-          <div className="flex gap-2">
-            {currentStep < 3 ? (
+          <div className="flex flex-wrap justify-end gap-2">
+            {result ? (
+              <>
+                <Link
+                  href="/agents/project-setup"
+                  className="btn-secondary px-5 py-2"
+                >
+                  Overview
+                </Link>
+                <Link
+                  href={PROJECT_SETUP_NEW_PATH}
+                  onClick={beginNewProjectSetup}
+                  className="btn-primary px-5 py-2"
+                >
+                  New setup
+                </Link>
+              </>
+            ) : null}
+            {!result && currentStep < 3 ? (
               <button
                 type="button"
                 className="btn-primary inline-flex items-center gap-2 px-5 py-2"
@@ -367,7 +393,7 @@ export function ProjectSetupWizard() {
                 Next
               </button>
             ) : null}
-            {currentStep >= 2 && !result ? (
+            {!result && currentStep >= 2 ? (
               <button
                 type="button"
                 className="btn-primary inline-flex items-center gap-2 px-5 py-2"

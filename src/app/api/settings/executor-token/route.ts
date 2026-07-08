@@ -20,12 +20,13 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   const { response } = await requireWrite("settings");
   if (response) return response;
 
   try {
-    const token = await regenerateExecutorToken();
+    const body = (await request.json().catch(() => ({}))) as { version?: string };
+    const token = await regenerateExecutorToken(body.version ?? null);
     return NextResponse.json({ token });
   } catch (e) {
     return NextResponse.json(

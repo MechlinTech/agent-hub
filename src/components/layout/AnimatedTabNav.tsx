@@ -26,12 +26,14 @@ const INDICATOR_TRANSITION =
 export function AnimatedTabNav({
   tabs,
   variant = "light",
+  size = "default",
   className,
   listClassName,
   ariaLabel,
 }: {
   tabs: AnimatedTabItem[];
   variant?: "dark" | "light" | "underline";
+  size?: "default" | "compact";
   className?: string;
   listClassName?: string;
   ariaLabel?: string;
@@ -89,7 +91,7 @@ export function AnimatedTabNav({
     variant === "dark" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/30",
     variant === "light" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/25",
     variant === "underline" &&
-      "top-auto bottom-0 h-0.5 rounded-full bg-brand-500 shadow-none",
+      "top-auto bottom-0 h-px rounded-none bg-brand-500/70 shadow-none",
   );
 
   return (
@@ -108,7 +110,11 @@ export function AnimatedTabNav({
     >
       <div
         ref={listRef}
-        className={cn("relative flex items-center gap-1", listClassName)}
+        className={cn(
+          "relative flex items-center",
+          size === "compact" ? "gap-0.5" : "gap-1",
+          listClassName,
+        )}
       >
         <div
           aria-hidden
@@ -133,8 +139,17 @@ export function AnimatedTabNav({
               href={tab.href}
               onClick={tab.onClick}
               className={cn(
-                "relative z-10 shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-300",
-                variant === "underline" && "rounded-none py-3.5",
+                "relative z-10 shrink-0 transition-colors duration-200",
+                variant !== "underline" && "rounded-full font-semibold",
+                variant !== "underline" && (size === "compact" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"),
+                variant === "underline" &&
+                  (size === "compact"
+                    ? "rounded-none px-3 py-2 text-sm"
+                    : "rounded-none px-4 py-3.5 text-sm"),
+                variant === "underline" &&
+                  (tab.active
+                    ? "font-semibold text-slate-900"
+                    : "font-medium text-slate-500 hover:text-slate-700"),
                 variant === "dark" &&
                   (tab.active
                     ? "text-white"
@@ -142,16 +157,14 @@ export function AnimatedTabNav({
                 variant === "light" &&
                   (tab.active
                     ? "text-white"
-                    : "text-indigo-500 hover:text-indigo-800"),
-                variant === "underline" &&
-                  (tab.active
-                    ? "text-brand-600"
-                    : "text-slate-500 hover:text-slate-700"),
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"),
               )}
             >
-              <span className="flex items-center gap-2">
-                {Icon ? <Icon className="h-4 w-4 shrink-0" /> : null}
-                {tab.label}
+              <span className={cn("flex items-center", size === "compact" ? "gap-1.5" : "gap-2")}>
+                {Icon ? (
+                  <Icon className={cn("shrink-0", size === "compact" ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                ) : null}
+                <span className="whitespace-nowrap">{tab.label}</span>
               </span>
             </Link>
           );
