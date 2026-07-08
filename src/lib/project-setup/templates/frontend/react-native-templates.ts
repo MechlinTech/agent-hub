@@ -1383,23 +1383,29 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 `;
 }
 
-function tsconfigPathsPatch(): string {
-  return `{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@components/*": ["src/components/*"],
-      "@configs/*": ["src/configs/*"],
-      "@navigation/*": ["src/navigation/*"],
-      "@notifications/*": ["src/notifications/*"],
-      "@redux/*": ["src/redux/*"],
-      "@screens/*": ["src/screens/*"],
-      "@theme/*": ["src/theme/*"],
-      "@utils/*": ["src/utils/*"]
-    }
-  }
-}
-`;
+function tsconfigJson(): string {
+  return `${JSON.stringify(
+    {
+      extends: "@react-native/typescript-config",
+      compilerOptions: {
+        types: ["jest"],
+        paths: {
+          "@components/*": ["./src/components/*"],
+          "@configs/*": ["./src/configs/*"],
+          "@navigation/*": ["./src/navigation/*"],
+          "@notifications/*": ["./src/notifications/*"],
+          "@redux/*": ["./src/redux/*"],
+          "@screens/*": ["./src/screens/*"],
+          "@theme/*": ["./src/theme/*"],
+          "@utils/*": ["./src/utils/*"],
+        },
+      },
+      include: ["**/*.ts", "**/*.tsx"],
+      exclude: ["**/node_modules", "**/Pods"],
+    },
+    null,
+    2
+  )}\n`;
 }
 
 export function reactNativeLayeredFiles(config: ProjectSetupConfig): FileTemplate[] {
@@ -1413,7 +1419,7 @@ export function reactNativeLayeredFiles(config: ProjectSetupConfig): FileTemplat
     { relativePath: `${rel}App.tsx`, content: appTsx(c), writePhase },
     { relativePath: `${rel}index.js`, content: indexJs(c), writePhase },
     { relativePath: `${rel}FIREBASE_SETUP.md`, content: firebaseSetupMd(c), writePhase },
-    { relativePath: `${rel}tsconfig.paths.json`, content: tsconfigPathsPatch(), writePhase },
+    { relativePath: `${rel}tsconfig.json`, content: tsconfigJson(), writePhase },
     { relativePath: `${rel}src/theme/colors.ts`, content: colorsTs(), writePhase },
     { relativePath: `${rel}src/theme/ThemeProvider.tsx`, content: themeProviderTs(), writePhase },
     { relativePath: `${rel}src/theme/useTheme.ts`, content: themeUseTs(), writePhase },

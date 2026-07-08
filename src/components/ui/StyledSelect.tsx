@@ -12,10 +12,16 @@ export type SelectOption<T extends string = string> = {
 };
 
 type MenuPosition = {
-  top: number;
+  top?: number;
+  bottom?: number;
   left: number;
   width: number;
+  maxHeight: number;
 };
+
+const MENU_GAP_PX = 8;
+const MENU_PREFERRED_MAX_PX = 240;
+const MENU_OPTION_ESTIMATE_PX = 44;
 
 export function StyledSelect<T extends string>({
   value,
@@ -56,11 +62,30 @@ export function StyledSelect<T extends string>({
       rect.right > 0 &&
       rect.left < window.innerWidth;
     if (!visible) return false;
-    setMenuPosition({
-      top: rect.bottom + 8,
-      left: rect.left,
-      width: rect.width,
-    });
+
+    const contentHeight = Math.min(
+      MENU_PREFERRED_MAX_PX,
+      options.length * MENU_OPTION_ESTIMATE_PX + 12,
+    );
+    const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP_PX;
+    const spaceAbove = rect.top - MENU_GAP_PX;
+    const openUpward = spaceBelow < contentHeight && spaceAbove > spaceBelow;
+
+    if (openUpward) {
+      setMenuPosition({
+        bottom: window.innerHeight - rect.top + MENU_GAP_PX,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(MENU_PREFERRED_MAX_PX, spaceAbove),
+      });
+    } else {
+      setMenuPosition({
+        top: rect.bottom + MENU_GAP_PX,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.min(MENU_PREFERRED_MAX_PX, spaceBelow),
+      });
+    }
     return true;
   }
 
@@ -88,7 +113,7 @@ export function StyledSelect<T extends string>({
       window.removeEventListener("resize", syncMenuOrClose);
       window.removeEventListener("scroll", syncMenuOrClose, true);
     };
-  }, [open]);
+  }, [open, options.length]);
 
   useEffect(() => {
     if (!open) return;
@@ -121,10 +146,12 @@ export function StyledSelect<T extends string>({
         role="listbox"
         style={{
           top: menuPosition.top,
+          bottom: menuPosition.bottom,
           left: menuPosition.left,
           width: menuPosition.width,
+          maxHeight: menuPosition.maxHeight,
         }}
-        className="glass-panel fixed z-[200] max-h-60 overflow-auto rounded-2xl py-1.5 ring-1 ring-brand-500/20"
+        className="glass-panel fixed z-[200] overflow-auto rounded-2xl py-1.5 ring-1 ring-brand-500/20"
       >
         {options.map((option) => {
           const isSelected = option.value === value;
