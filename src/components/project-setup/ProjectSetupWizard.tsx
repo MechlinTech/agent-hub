@@ -113,6 +113,7 @@ export function ProjectSetupWizard() {
     config,
     currentStep,
     executorReady,
+    executorStatus?.version,
     sessionToken,
     setPlan,
     setSessionToken,

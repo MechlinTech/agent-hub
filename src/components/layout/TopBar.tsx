@@ -55,7 +55,7 @@ export function TopBar({
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [confirmOpen]);
+  }, [confirmOpen, signingOut]);
 
   async function signOut() {
     setSigningOut(true);

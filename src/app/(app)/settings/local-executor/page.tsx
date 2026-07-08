@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Terminal } from "lucide-react";
+import { Download, Loader2, Terminal } from "lucide-react";
 import {
   checkExecutorHealth,
   fetchPairingToken,
@@ -79,10 +79,44 @@ export default function LocalExecutorSettingsPage() {
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
           <li>Start AgentHub Desktop application.</li>
           <li>
-            Click the <strong>'Open AgentHub to connect'</strong> button in the
+            Click the <strong>Open AgentHub to connect</strong> button in the
             desktop app to open the browser.
           </li>
         </ol>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+          <p className="text-sm font-medium text-slate-800">AgentHub Desktop</p>
+          {status === null ? (
+            <p className="mt-1 inline-flex items-center gap-2 text-sm text-slate-600">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Checking for available builds…
+            </p>
+          ) : status.downloadAvailable ? (
+            <>
+              <p className="mt-1 text-sm text-slate-600">
+                {status.latestVersion
+                  ? `Latest build available: v${status.latestVersion}`
+                  : "A desktop build is available for download."}
+                {status.connected &&
+                status.version &&
+                status.updateAvailable
+                  ? ` (you have v${status.version})`
+                  : null}
+              </p>
+              <a
+                href="/api/executor/download"
+                className="btn-primary mt-3 inline-flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download AgentHub Desktop
+              </a>
+            </>
+          ) : (
+            <p className="mt-1 text-sm text-slate-500">
+              No desktop build is available yet.
+            </p>
+          )}
+        </div>
         {/* <p className="text-sm pl-10 text-slate-600">OR</p>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
           <li>Generate a pairing token below</li>

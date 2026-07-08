@@ -72,12 +72,12 @@ export default async function ProjectSetupOverviewPage() {
         <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-slate-600">
           <li>Run the AgentHub Desktop on your PC.</li>
           <li>
-            Click the <strong>'Open AgentHub to connect'</strong> button in the
+            Click the <strong>Open AgentHub to connect</strong> button in the
             desktop app to open the browser.
           </li>
           <li>Configure scope, stack, and target folder in the wizard.</li>
           <li>
-            Click the <strong>'Run Agent'</strong> button to start the project
+            Click the <strong>Run Agent</strong> button to start the project
             setup.
           </li>
         </ol>
