@@ -7,6 +7,16 @@ export function getSiteUrl(): string {
   return url.replace(/\/$/, "");
 }
 
+/** Public origin for server-side redirects behind a reverse proxy. */
+export function getRequestOrigin(request: Request): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost.split(",")[0].trim()}`;
+  }
+  return getSiteUrl();
+}
+
 /** Supabase auth callback URL (must be allowlisted in Supabase Auth settings). */
 export function getAuthCallbackUrl(next = "/dashboard", origin?: string): string {
   const nextPath = next.startsWith("/") ? next : `/${next}`;
