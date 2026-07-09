@@ -58,7 +58,10 @@ export function ExecutorBinaryUploadPanel() {
     }
 
     const displayName = name.trim() || file.name;
-    const storagePath = buildExecutorBinaryStoragePath(trimmedVersion, file.name);
+    const storagePath = buildExecutorBinaryStoragePath(
+      trimmedVersion,
+      file.name,
+    );
 
     setUploading(true);
     setError(null);
@@ -92,7 +95,9 @@ export function ExecutorBinaryUploadPanel() {
         throw new Error(data.error ?? "Failed to register build");
       }
 
-      setSuccess(`Published v${trimmedVersion}. Users on older builds will see the update banner.`);
+      setSuccess(
+        `Published v${trimmedVersion}. Users on older builds will see the update banner.`,
+      );
       setVersion("");
       setName("");
       setFile(null);
@@ -136,12 +141,12 @@ export function ExecutorBinaryUploadPanel() {
 
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-slate-100 bg-teal-50/50 px-5 py-4">
+      <div className="rounded-t-3xl border-b border-slate-100 bg-v-50/50 px-5 py-4">
         <p className="font-semibold text-slate-900">AgentHub Desktop builds</p>
         <p className="mt-1 text-sm text-slate-600">
-          Upload a new installer (.exe or .msi). The most recently uploaded build becomes the
-          latest version, and users on older executors will get a download link in the Local
-          Executor banner.
+          Upload a new installer (.exe or .msi). The most recently uploaded
+          build becomes the latest version, and users on older executors will
+          get a download link in the Local Executor banner.
         </p>
       </div>
 
@@ -207,12 +212,18 @@ export function ExecutorBinaryUploadPanel() {
           disabled={uploading || !file}
           className="btn-primary inline-flex items-center gap-2"
         >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
           {uploading ? "Uploading…" : "Upload build"}
         </button>
 
         <div className="border-t border-slate-100 pt-4">
-          <p className="mb-3 text-sm font-medium text-slate-800">Published builds</p>
+          <p className="mb-3 text-sm font-medium text-slate-800">
+            Published builds
+          </p>
           {loading ? (
             <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
           ) : binaries.length === 0 ? (
@@ -229,7 +240,9 @@ export function ExecutorBinaryUploadPanel() {
                       {binary.name}{" "}
                       <span className="text-slate-500">v{binary.version}</span>
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">{binary.path}</p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                      {binary.path}
+                    </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <a
