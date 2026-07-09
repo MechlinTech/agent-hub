@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3040",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3040",
+    "start": "next start",
     "lint": "next lint",
     "executor": "node packages/local-executor/bin/start.mjs",
     "dev:all": "concurrently \"npm run dev\" \"npm run executor\"",
