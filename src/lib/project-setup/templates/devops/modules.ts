@@ -3,6 +3,9 @@ import type { ProjectSetupConfig } from "@/lib/project-setup/types";
 import {
   muiInstallArgs,
   muiNextThemeFiles,
+  nextFontCssFile,
+  viteMuiIndexCss,
+  viteMuiThemeFiles,
 } from "@/lib/project-setup/templates/frontend/styling-templates";
 import { installLatestArgs } from "@/lib/project-setup/templates/package-latest";
 import { frontendRelPrefix, scopeIncludesFrontend } from "@/lib/project-setup/templates/shared";
@@ -259,17 +262,20 @@ export const stylingStubModule: StackModule = {
   dependencies: () => ["@mui/material", "@mui/material-nextjs", "@emotion/react", "@emotion/styled"],
   files: (config) => {
     const rel = frontendRelPrefix(config);
-    const files = muiNextThemeFiles(rel);
     if (config.frontendFramework === "nextjs") {
-      return files;
+      return [...muiNextThemeFiles(rel), nextFontCssFile(rel)];
     }
-    return [
-      ...files.filter((f) => !f.relativePath.endsWith("ThemeRegistry.tsx")),
-      {
-        relativePath: `${rel}STYLING.md`,
-        content: `# Material UI setup\n\nMUI packages are installed. Wrap your Vite root with \`ThemeProvider\` and \`CssBaseline\` from \`@mui/material\`.\n`,
-      },
-    ];
+    if (config.frontendFramework === "react") {
+      return [
+        ...viteMuiThemeFiles(rel),
+        {
+          relativePath: `${rel}src/index.css`,
+          writePhase: "post",
+          content: viteMuiIndexCss(),
+        },
+      ];
+    }
+    return [];
   },
   commands: (config, root) => {
     const cwd = config.projectScope === "frontend_only" ? root : `${root}/frontend`;

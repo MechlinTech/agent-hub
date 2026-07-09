@@ -88,8 +88,10 @@ export function AnimatedTabNav({
   const indicatorClass = cn(
     "pointer-events-none absolute rounded-full",
     INDICATOR_TRANSITION,
-    variant === "dark" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/30",
-    variant === "light" && "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/25",
+    variant === "dark" &&
+      "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/30",
+    variant === "light" &&
+      "bg-gradient-to-r from-brand-600 to-brand-400 shadow-sm shadow-brand-600/25",
     variant === "underline" &&
       "top-auto bottom-0 h-px rounded-none bg-brand-500/70 shadow-none",
   );
@@ -141,7 +143,10 @@ export function AnimatedTabNav({
               className={cn(
                 "relative z-10 shrink-0 transition-colors duration-200",
                 variant !== "underline" && "rounded-full font-semibold",
-                variant !== "underline" && (size === "compact" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"),
+                variant !== "underline" &&
+                  (size === "compact"
+                    ? "px-3 py-1.5 text-xs"
+                    : "px-4 py-2 text-sm"),
                 variant === "underline" &&
                   (size === "compact"
                     ? "rounded-none px-3 py-2 text-sm"
@@ -157,12 +162,22 @@ export function AnimatedTabNav({
                 variant === "light" &&
                   (tab.active
                     ? "text-white"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"),
+                    : "text-indigo-600 hover:bg-violet-200/80 hover:text-indigo-900"),
               )}
             >
-              <span className={cn("flex items-center", size === "compact" ? "gap-1.5" : "gap-2")}>
+              <span
+                className={cn(
+                  "flex items-center",
+                  size === "compact" ? "gap-1.5" : "gap-2",
+                )}
+              >
                 {Icon ? (
-                  <Icon className={cn("shrink-0", size === "compact" ? "h-3.5 w-3.5" : "h-4 w-4")} />
+                  <Icon
+                    className={cn(
+                      "shrink-0",
+                      size === "compact" ? "h-3.5 w-3.5" : "h-4 w-4",
+                    )}
+                  />
                 ) : null}
                 <span className="whitespace-nowrap">{tab.label}</span>
               </span>

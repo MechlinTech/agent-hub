@@ -10,6 +10,7 @@ import {
 } from "@/lib/execution-client";
 import { useExecutorSessionStore } from "@/stores/executor-session-store";
 import { ExecutorStatusBanner } from "@/components/project-setup/ExecutorStatusBanner";
+import { LocalExecutorInstructions } from "@/components/project-setup/LocalExecutorInstructions";
 
 export default function LocalExecutorSettingsPage() {
   const [status, setStatus] = useState<ExecutorStatus | null>(null);
@@ -76,13 +77,7 @@ export default function LocalExecutorSettingsPage() {
           Run AgentHub Desktop on the same machine as your browser. Projects are
           created locally - not on the AgentHub server.
         </p> */}
-        <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
-          <li>Start AgentHub Desktop application.</li>
-          <li>
-            Click the <strong>Open AgentHub to connect</strong> button in the
-            desktop app to open the browser.
-          </li>
-        </ol>
+        <LocalExecutorInstructions variant="settings" />
 
         <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
           <p className="text-sm font-medium text-slate-800">AgentHub Desktop</p>

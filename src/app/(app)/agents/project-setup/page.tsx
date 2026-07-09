@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FolderOpen, Plus, Terminal } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { PermissionLink } from "@/components/permissions/PermissionLink";
+import { LocalExecutorInstructions } from "@/components/project-setup/LocalExecutorInstructions";
 import { listProjectSetups } from "@/lib/project-setup-service-server";
 import { formatDate } from "@/lib/utils";
 
@@ -69,18 +70,9 @@ export default async function ProjectSetupOverviewPage() {
         <summary className="cursor-pointer font-semibold text-slate-900">
           How Project Setup works
         </summary>
-        <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-slate-600">
-          <li>Run the AgentHub Desktop on your PC.</li>
-          <li>
-            Click the <strong>Open AgentHub to connect</strong> button in the
-            desktop app to open the browser.
-          </li>
-          <li>Configure scope, stack, and target folder in the wizard.</li>
-          <li>
-            Click the <strong>Run Agent</strong> button to start the project
-            setup.
-          </li>
-        </ol>
+        <div className="mt-4">
+          <LocalExecutorInstructions />
+        </div>
       </details>
 
       <div className="card overflow-hidden">
