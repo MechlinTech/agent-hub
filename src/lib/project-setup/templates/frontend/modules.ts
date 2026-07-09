@@ -4,7 +4,12 @@ import path from "path";
 import { installLatestArgs, installLatestDevArgs } from "@/lib/project-setup/templates/package-latest";
 import {
   buildNextRootLayout,
+  buildViteMainEntry,
+  nextFontCssFile,
   nextHomePageContent,
+  viteDashboardAppContent,
+  viteInterFontsCssFile,
+  viteInterIndexCss,
 } from "@/lib/project-setup/templates/frontend/styling-templates";
 import { scopeIncludesFrontend, frontendRelPrefix } from "@/lib/project-setup/templates/shared";
 import { flutterLayeredFiles, flutterPackageName } from "@/lib/project-setup/templates/frontend/flutter-templates";
@@ -27,10 +32,11 @@ function usesTailwindCna(config: ProjectSetupConfig): boolean {
  * @/* path aliases for Vite + shadcn.
  * Must be written in the pre phase (before `shadcn init`): the CLI reads root
  * tsconfig.json via tsconfig-paths and does not follow project references.
- * TS 6 deprecates baseUrl — use fully-qualified paths entries instead.
+ * shadcn CLI requires baseUrl + paths in tsconfig (reads root tsconfig via tsconfig-paths).
  */
 function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTemplate[] {
   const paths = { "@/*": ["./src/*"] };
+  const aliasOptions = { baseUrl: ".", paths };
 
   return [
     {
@@ -43,7 +49,7 @@ function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTe
             { path: "./tsconfig.app.json" },
             { path: "./tsconfig.node.json" },
           ],
-          compilerOptions: { paths },
+          compilerOptions: aliasOptions,
         },
         null,
         2
@@ -55,7 +61,7 @@ function viteTsconfigAliasFiles(rel: string, writePhase: "pre" | "post"): FileTe
       content: `${JSON.stringify(
         {
           compilerOptions: {
-            paths,
+            ...aliasOptions,
             tsBuildInfoFile: "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
             target: "ES2023",
             lib: ["ES2023", "DOM"],
@@ -97,6 +103,16 @@ function viteTailwindPrepFiles(
     {
       relativePath: `${rel}src/index.css`,
       content: `@import "tailwindcss";\n`,
+    },
+    {
+      relativePath: `${rel}tailwind.config.ts`,
+      content: `import type { Config } from "tailwindcss";
+
+/** Minimal config for shadcn CLI validation; Tailwind v4 uses @tailwindcss/vite at build time. */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+} satisfies Config;
+`,
     },
     {
       relativePath: `${rel}vite.config.ts`,
@@ -152,7 +168,73 @@ function viteTailwindInstallCommand(
     timeoutMs: 300_000,
     phase: "post" as const,
   };
-}export const nextjsModule: StackModule = {
+}
+
+/** Counter controls styled for the dashboard center card. */
+function counterDemoUi(
+  styling: ProjectSetupConfig["styling"],
+  incrementAttr: string,
+  decrementAttr: string,
+): { shadcnImport: string; muiImport: string; ui: string } {
+  const shadcnImport =
+    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
+  const muiImport = styling === "mui" ? 'import Box from "@mui/material/Box";\nimport Button from "@mui/material/Button";\nimport Typography from "@mui/material/Typography";\n' : "";
+
+  const ui =
+    styling === "shadcn"
+      ? `<div className="flex flex-col items-center gap-4">
+      <span className="text-4xl font-bold tabular-nums tracking-tight text-slate-900">{count}</span>
+      <div className="flex items-center gap-2">
+        <Button type="button" variant="outline" size="icon" className="h-10 w-10 rounded-full text-lg" ${decrementAttr}>
+          −
+        </Button>
+        <Button type="button" size="icon" className="h-10 w-10 rounded-full text-lg" ${incrementAttr}>
+          +
+        </Button>
+      </div>
+    </div>`
+      : styling === "mui"
+        ? `<Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+      <Typography
+        component="span"
+        variant="h3"
+        sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}
+      >
+        {count}
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Button variant="outlined" sx={{ minWidth: 40, width: 40, height: 40, borderRadius: "999px", p: 0, fontSize: 18 }} ${decrementAttr}>
+          −
+        </Button>
+        <Button variant="contained" sx={{ minWidth: 40, width: 40, height: 40, borderRadius: "999px", p: 0, fontSize: 18, bgcolor: "#2563eb" }} ${incrementAttr}>
+          +
+        </Button>
+      </Box>
+    </Box>`
+        : `<div className="flex flex-col items-center gap-4">
+      <span className="text-4xl font-bold tabular-nums tracking-tight text-slate-900">{count}</span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-lg font-medium shadow-sm hover:bg-slate-50"
+          ${decrementAttr}
+        >
+          −
+        </button>
+        <button
+          type="button"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-lg font-medium text-white shadow-sm hover:bg-blue-500"
+          ${incrementAttr}
+        >
+          +
+        </button>
+      </div>
+    </div>`;
+
+  return { shadcnImport, muiImport, ui };
+}
+
+export const nextjsModule: StackModule = {
   id: "frontend-nextjs",
   appliesTo: (c) => scopeIncludesFrontend(c) && c.frontendFramework === "nextjs",
   checklist: () => ["Next.js app with TypeScript"],
@@ -379,11 +461,17 @@ export const shadcnFrontendModule: StackModule = {
   checklist: () => ["ShadCN UI initialized (includes Button starter)"],
   dependencies: () => ["class-variance-authority", "clsx", "tailwind-merge"],
   files: (config) => {
-    if (config.frontendFramework !== "react") return [];
     const rel = frontendRelPrefix(config);
-    // Aliases must land in the pre phase (see viteTsconfigAliasFiles). A post-phase
-    // duplicate would dedupe over pre and run shadcn init before aliases exist.
-    return viteTailwindPrepFiles(rel, true, "pre");
+    if (config.frontendFramework === "react") {
+      return [
+        ...viteTailwindPrepFiles(rel, true, "pre"),
+        viteInterFontsCssFile(rel),
+      ];
+    }
+    if (config.frontendFramework === "nextjs") {
+      return [nextFontCssFile(rel)];
+    }
+    return [];
   },
   commands: (config, root) => {
     const cwd = frontendCwd(config, root);
@@ -428,7 +516,17 @@ export const tailwindFrontendModule: StackModule = {
     scopeIncludesFrontend(c) && c.frontendFramework === "react" && c.styling === "tailwind",
   checklist: () => ["Tailwind CSS (v4, Vite plugin)"],
   dependencies: () => ["tailwindcss", "@tailwindcss/vite"],
-  files: (config) => viteTailwindPrepFiles(frontendRelPrefix(config), false),
+  files: (config) => {
+    const rel = frontendRelPrefix(config);
+    return [
+      ...viteTailwindPrepFiles(rel, false),
+      {
+        relativePath: `${rel}src/index.css`,
+        writePhase: "post",
+        content: viteInterIndexCss(),
+      },
+    ];
+  },
   commands: (config, root) => [
     viteTailwindInstallCommand(config, root, "tailwind-init", "Adding Tailwind CSS", false),
   ],
@@ -486,46 +584,11 @@ function reduxViteCounterFile(
   rel: string,
   styling: ProjectSetupConfig["styling"]
 ): import("@/lib/project-setup/types").FileTemplate {
-  const shadcnImport =
-    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
-  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
-
-  const ui =
-    styling === "shadcn"
-      ? `<div className="flex items-center gap-4">
-      <Button onClick={() => dispatch(increment())}>Increment</Button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <Button onClick={() => dispatch(decrement())}>Decrement</Button>
-    </div>`
-      : styling === "mui"
-        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Button variant="contained" onClick={() => dispatch(increment())}>
-        Increment
-      </Button>
-      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
-        {count}
-      </span>
-      <Button variant="contained" onClick={() => dispatch(decrement())}>
-        Decrement
-      </Button>
-    </div>`
-        : `<div className="flex items-center gap-4">
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={() => dispatch(increment())}
-      >
-        Increment
-      </button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={() => dispatch(decrement())}
-      >
-        Decrement
-      </button>
-    </div>`;
+  const { shadcnImport, muiImport, ui } = counterDemoUi(
+    styling,
+    'onClick={() => dispatch(increment())}',
+    'onClick={() => dispatch(decrement())}',
+  );
 
   return {
     relativePath: `${rel}src/features/counter/Counter.tsx`,
@@ -589,42 +652,12 @@ export const reduxViteModule: StackModule = {
       {
         relativePath: `${rel}src/main.tsx`,
         writePhase: "post",
-        content: `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
-import "./index.css";
-import App from "./App.tsx";
-import { store } from "./app/store";
-
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error(
-    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
-  );
-}
-
-createRoot(container).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>,
-);
-`,
+        content: buildViteMainEntry(config),
       },
       {
         relativePath: `${rel}src/App.tsx`,
         writePhase: "post",
-        content: `import { Counter } from "./features/counter/Counter";
-
-export default function App() {
-  return (
-    <main className="flex min-h-svh items-center justify-center">
-      <Counter />
-    </main>
-  );
-}
-`,
+        content: viteDashboardAppContent(config, "./features/counter/Counter"),
       },
     ];
   },
@@ -639,49 +672,11 @@ function reduxNextCounterFile(
   rel: string,
   styling: ProjectSetupConfig["styling"]
 ): import("@/lib/project-setup/types").FileTemplate {
-  const shadcnImport =
-    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
-  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
-  const ui =
-    styling === "shadcn"
-      ? `<div className="flex items-center gap-4">
-      <Button type="button" onClick={() => dispatch(increment())}>
-        Increment
-      </Button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <Button type="button" onClick={() => dispatch(decrement())}>
-        Decrement
-      </Button>
-    </div>`
-      : styling === "mui"
-        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Button variant="contained" onClick={() => dispatch(increment())}>
-        Increment
-      </Button>
-      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
-        {count}
-      </span>
-      <Button variant="contained" onClick={() => dispatch(decrement())}>
-        Decrement
-      </Button>
-    </div>`
-        : `<div className="flex items-center gap-4">
-      <button
-        type="button"
-        className="rounded-md border px-4 py-2"
-        onClick={() => dispatch(increment())}
-      >
-        Increment
-      </button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <button
-        type="button"
-        className="rounded-md border px-4 py-2"
-        onClick={() => dispatch(decrement())}
-      >
-        Decrement
-      </button>
-    </div>`;
+  const { shadcnImport, muiImport, ui } = counterDemoUi(
+    styling,
+    'onClick={() => dispatch(increment())}',
+    'onClick={() => dispatch(decrement())}',
+  );
 
   return {
     relativePath: `${rel}src/lib/features/counter/Counter.tsx`,
@@ -766,6 +761,7 @@ export default function StoreProvider({
       writePhase: "post",
       content: buildNextRootLayout(config, "{children}"),
     },
+    nextFontCssFile(rel),
     {
       relativePath: `${rel}src/app/page.tsx`,
       writePhase: "post",
@@ -826,52 +822,7 @@ function zustandCounterUi(styling: ProjectSetupConfig["styling"]): {
   muiImport: string;
   ui: string;
 } {
-  const shadcnImport =
-    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
-  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
-
-  const ui =
-    styling === "shadcn"
-      ? `<div className="flex items-center gap-4">
-      <Button type="button" onClick={increment}>
-        Increment
-      </Button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <Button type="button" onClick={decrement}>
-        Decrement
-      </Button>
-    </div>`
-      : styling === "mui"
-        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Button variant="contained" onClick={increment}>
-        Increment
-      </Button>
-      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
-        {count}
-      </span>
-      <Button variant="contained" onClick={decrement}>
-        Decrement
-      </Button>
-    </div>`
-        : `<div className="flex items-center gap-4">
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={increment}
-      >
-        Increment
-      </button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={decrement}
-      >
-        Decrement
-      </button>
-    </div>`;
-
-  return { shadcnImport, muiImport, ui };
+  return counterDemoUi(styling, "onClick={increment}", "onClick={decrement}");
 }
 
 function zustandViteCounterFile(
@@ -925,38 +876,12 @@ export const zustandViteModule: StackModule = {
       {
         relativePath: `${rel}src/main.tsx`,
         writePhase: "post",
-        content: `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.tsx";
-
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error(
-    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
-  );
-}
-
-createRoot(container).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
-`,
+        content: buildViteMainEntry(config),
       },
       {
         relativePath: `${rel}src/App.tsx`,
         writePhase: "post",
-        content: `import { Counter } from "./features/counter/Counter";
-
-export default function App() {
-  return (
-    <main className="flex min-h-svh items-center justify-center">
-      <Counter />
-    </main>
-  );
-}
-`,
+        content: viteDashboardAppContent(config, "./features/counter/Counter"),
       },
     ];
   },
@@ -1002,6 +927,7 @@ function zustandNextSourceFiles(config: ProjectSetupConfig): import("@/lib/proje
       writePhase: "post",
       content: buildNextRootLayout(config, "{children}"),
     },
+    nextFontCssFile(rel),
     {
       relativePath: `${rel}src/app/page.tsx`,
       writePhase: "post",
@@ -1105,52 +1031,11 @@ function contextCounterUi(styling: ProjectSetupConfig["styling"]): {
   muiImport: string;
   ui: string;
 } {
-  const shadcnImport =
-    styling === "shadcn" ? 'import { Button } from "@/components/ui/button";\n' : "";
-  const muiImport = styling === "mui" ? 'import Button from "@mui/material/Button";\n' : "";
-
-  const ui =
-    styling === "shadcn"
-      ? `<div className="flex items-center gap-4">
-      <Button type="button" onClick={() => dispatch({ type: "incremented" })}>
-        Increment
-      </Button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <Button type="button" onClick={() => dispatch({ type: "decremented" })}>
-        Decrement
-      </Button>
-    </div>`
-      : styling === "mui"
-        ? `<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Button variant="contained" onClick={() => dispatch({ type: "incremented" })}>
-        Increment
-      </Button>
-      <span style={{ minWidth: "2ch", textAlign: "center", fontSize: "1.125rem" }}>
-        {count}
-      </span>
-      <Button variant="contained" onClick={() => dispatch({ type: "decremented" })}>
-        Decrement
-      </Button>
-    </div>`
-        : `<div className="flex items-center gap-4">
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={() => dispatch({ type: "incremented" })}
-      >
-        Increment
-      </button>
-      <span className="min-w-[2ch] text-center text-lg tabular-nums">{count}</span>
-      <button
-        type="button"
-        className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-slate-50"
-        onClick={() => dispatch({ type: "decremented" })}
-      >
-        Decrement
-      </button>
-    </div>`;
-
-  return { shadcnImport, muiImport, ui };
+  return counterDemoUi(
+    styling,
+    'onClick={() => dispatch({ type: "incremented" })}',
+    'onClick={() => dispatch({ type: "decremented" })}',
+  );
 }
 
 function contextViteCounterFile(
@@ -1212,41 +1097,12 @@ export const contextViteModule: StackModule = {
       {
         relativePath: `${rel}src/main.tsx`,
         writePhase: "post",
-        content: `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { CounterProvider } from "./context/counter/CounterContext";
-import "./index.css";
-import App from "./App.tsx";
-
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error(
-    "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",
-  );
-}
-
-createRoot(container).render(
-  <StrictMode>
-    <CounterProvider>
-      <App />
-    </CounterProvider>
-  </StrictMode>,
-);
-`,
+        content: buildViteMainEntry(config),
       },
       {
         relativePath: `${rel}src/App.tsx`,
         writePhase: "post",
-        content: `import { Counter } from "./features/counter/Counter";
-
-export default function App() {
-  return (
-    <main className="flex min-h-svh items-center justify-center">
-      <Counter />
-    </main>
-  );
-}
-`,
+        content: viteDashboardAppContent(config, "./features/counter/Counter"),
       },
     ];
   },
@@ -1300,6 +1156,7 @@ ${contextProviderContent()}`,
       writePhase: "post",
       content: buildNextRootLayout(config, "{children}"),
     },
+    nextFontCssFile(rel),
     {
       relativePath: `${rel}src/app/page.tsx`,
       writePhase: "post",

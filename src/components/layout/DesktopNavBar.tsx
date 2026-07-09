@@ -82,7 +82,7 @@ export function DesktopNavBar({
         />
 
         <div className="flex shrink-0 items-center gap-2">
-          <div className="[&_button]:rounded-full [&_button]:text-indigo-500 [&_button]:hover:bg-violet-100/80 [&_button]:hover:text-indigo-900">
+          <div className="[&_button]:rounded-full [&_button]:text-indigo-500 [&_button]:hover:bg-violet-200/80 [&_button]:hover:text-indigo-900">
             <NotificationsBell userId={user.id} />
           </div>
           <div className="flex items-center gap-2 rounded-full bg-violet-100/60 py-1 pl-1 pr-3 ring-1 ring-violet-200/50">
@@ -103,7 +103,7 @@ export function DesktopNavBar({
             onClick={() => setConfirmOpen(true)}
             title="Sign out"
             aria-haspopup="dialog"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-indigo-400 transition-colors hover:bg-violet-100/80 hover:text-indigo-800"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-indigo-400 transition-colors hover:bg-violet-200/80 hover:text-indigo-800"
           >
             <LogOut className="h-4 w-4" />
           </button>

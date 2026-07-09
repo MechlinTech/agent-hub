@@ -13,6 +13,10 @@ import {
 } from "@/lib/project-setup/templates/shared";
 import {
   buildNextRootLayout,
+  buildViteMainEntry,
+  dashboardMuiImports,
+  frontendDashboardShell,
+  nextFontCssFile,
   usesTailwindStyling,
 } from "@/lib/project-setup/templates/frontend/styling-templates";
 
@@ -720,48 +724,17 @@ function authenticatedHomeSource(
     ? "export function HomePage()"
     : "export default function Home()";
 
-  if (!usesTailwindStyling(config)) {
-    const muiImports = isVite
-      ? `import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-`
-      : `import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-`;
+  const muiImports = !usesTailwindStyling(config) ? dashboardMuiImports() : "";
 
-    return `${clientDirective}${muiImports}import { useAuth } from "${authImport}";
-import { RequireAuth } from "${requireAuthImport}";
-import { Counter } from "${counterImport}";
-
-${exportLine} {
-  const { user, logout } = useAuth();
-
-  return (
-    <RequireAuth>
-      <Box
-        component="main"
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 3,
-          p: 4,
-        }}
-      >
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ width: "100%", maxWidth: 480, alignItems: "center", justifyContent: "space-between" }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Signed in as {user?.email}
-          </Typography>
+  const topBarMui = `<Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right" }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {user?.email}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Signed in
+            </Typography>
+          </Box>
           <Button
             variant="outlined"
             size="small"
@@ -772,16 +745,28 @@ ${exportLine} {
           >
             Sign out
           </Button>
-        </Stack>
-        <Counter />
-      </Box>
-    </RequireAuth>
-  );
-}
-`;
-  }
+        </Box>`;
 
-  return `${clientDirective}import { useAuth } from "${authImport}";
+  const topBarTailwind = `<div className="flex items-center gap-3">
+          <div className="hidden text-right sm:block">
+            <p className="max-w-[180px] truncate text-sm font-medium text-slate-900">{user?.email}</p>
+            <p className="text-xs text-slate-500">Signed in</p>
+          </div>
+          <button
+            type="button"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50"
+            onClick={() => {
+              logout();
+              window.location.href = "/login";
+            }}
+          >
+            Sign out
+          </button>
+        </div>`;
+
+  const topBarJsx = usesTailwindStyling(config) ? topBarTailwind : topBarMui;
+
+  return `${clientDirective}${muiImports}import { useAuth } from "${authImport}";
 import { RequireAuth } from "${requireAuthImport}";
 import { Counter } from "${counterImport}";
 
@@ -790,22 +775,7 @@ ${exportLine} {
 
   return (
     <RequireAuth>
-      <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-8">
-        <div className="flex w-full max-w-md items-center justify-between gap-4">
-          <p className="text-sm text-slate-600">Signed in as {user?.email}</p>
-          <button
-            type="button"
-            className="rounded-md border px-3 py-1.5 text-sm"
-            onClick={() => {
-              logout();
-              window.location.href = "/login";
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-        <Counter />
-      </main>
+      ${frontendDashboardShell(config, "<Counter />", { topBarJsx })}
     </RequireAuth>
   );
 }
@@ -902,55 +872,9 @@ export default function App() {
     {
       relativePath: `${rel}src/main.tsx`,
       writePhase: "post",
-        content: buildViteMainEntry(config),
+      content: buildViteMainEntry(config),
     },
   ];
-}
-
-function buildViteMainEntry(config: ProjectSetupConfig): string {
-  const state = config.stateManagement;
-  const counterProviderImport =
-    state === "context"
-      ? `import { CounterProvider } from "./context/counter/CounterContext";\n`
-      : "";
-  const counterWrapStart = state === "context" ? "    <CounterProvider>\n" : "";
-  const counterWrapEnd = state === "context" ? "    </CounterProvider>\n" : "";
-
-  if (state === "redux") {
-    return `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { Provider } from "react-redux";
-import "./index.css";
-import App from "./App.tsx";
-import { store } from "./app/store";
-
-const container = document.getElementById("root");
-if (!container) throw new Error("Root element #root not found");
-
-createRoot(container).render(
-  <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>,
-);
-`;
-  }
-
-  return `import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-${counterProviderImport}import "./index.css";
-import App from "./App.tsx";
-
-const container = document.getElementById("root");
-if (!container) throw new Error("Root element #root not found");
-
-createRoot(container).render(
-  <StrictMode>
-${counterWrapStart}    <App />
-${counterWrapEnd}  </StrictMode>,
-);
-`;
 }
 
 function authCallbackPageSource(config: ProjectSetupConfig): string {
@@ -1094,6 +1018,7 @@ export default function AuthProviderWrapper({
       writePhase: "post",
       content: buildNextLayout(config),
     },
+    nextFontCssFile(rel),
   ];
 }
 
