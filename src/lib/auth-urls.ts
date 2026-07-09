@@ -7,6 +7,15 @@ export function getSiteUrl(): string {
   return url.replace(/\/$/, "");
 }
 
+function isLoopbackOrigin(origin: string): boolean {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
 /** Public origin for server-side redirects behind a reverse proxy. */
 export function getRequestOrigin(request: Request): string {
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -14,7 +23,16 @@ export function getRequestOrigin(request: Request): string {
   if (forwardedHost) {
     return `${forwardedProto}://${forwardedHost.split(",")[0].trim()}`;
   }
-  return getSiteUrl();
+
+  const requestOrigin = new URL(request.url).origin;
+  const siteUrl = getSiteUrl();
+
+  // Proxy passed loopback but app is configured for a public URL.
+  if (isLoopbackOrigin(requestOrigin) && !isLoopbackOrigin(siteUrl)) {
+    return siteUrl;
+  }
+
+  return requestOrigin;
 }
 
 /** Supabase auth callback URL (must be allowlisted in Supabase Auth settings). */
