@@ -74,6 +74,19 @@ SET custom_roles = (
 )
 WHERE custom_roles IS NOT NULL AND jsonb_array_length(COALESCE(custom_roles, '[]'::jsonb)) > 0;
 
+CREATE TABLE public.user_access_overrides (
+  user_id uuid NOT NULL,
+  resource text NOT NULL CHECK (resource IN (
+    'script_review', 'results_analysis', 'project_setup', 'integrations', 'settings', 'users'
+  )),
+  access_level text NOT NULL CHECK (access_level IN ('none', 'read', 'write')),
+  updated_by uuid,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_access_overrides_pkey PRIMARY KEY (user_id, resource),
+  CONSTRAINT user_access_overrides_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+  CONSTRAINT user_access_overrides_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES auth.users(id)
+);
+
 ALTER TABLE public.user_access_overrides
   DROP CONSTRAINT IF EXISTS user_access_overrides_resource_check;
 
