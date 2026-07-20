@@ -28,7 +28,7 @@ function spawnStepProcess(step: CommandStep, cwd: string): ChildProcess {
   const useShell = Boolean(step.allowShell);
   const winPackageManager = isWindowsCmdWrapper(step.exe);
 
-  // Windows .cmd/.bat shims (npm/npx, flutter.bat, dart.bat) need shell:true —
+  // Windows .cmd/.bat shims (npm/npx, flutter.bat, dart.bat) need shell:true -
   // direct spawn yields ENOENT or EINVAL.
   if (winPackageManager || (useShell && process.platform === "win32")) {
     return spawn(formatShellCommand(step.exe, step.args), [], {

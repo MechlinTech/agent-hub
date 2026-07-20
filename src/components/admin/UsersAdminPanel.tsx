@@ -33,7 +33,7 @@ interface AdminUserRow {
 const RESOURCE_BADGE_LABELS: Record<Resource, string> = {
   script_review: "Scripts",
   results_analysis: "Results",
-  project_setup: "Project Setup",
+  project_setup: "Dev Scaffold",
   integrations: "Integrations",
   settings: "Settings",
   users: "Users",

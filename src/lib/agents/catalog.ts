@@ -49,7 +49,7 @@ export const AGENT_CATALOG: AgentDefinition[] = [
   },
   {
     id: "project-setup",
-    name: "Project Setup Agent",
+    name: "Dev Scaffold Agent",
     description:
       "Configure a project stack and scaffold frontend, backend, DevOps files on your machine via the Local Executor.",
     status: "active",

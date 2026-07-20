@@ -8,7 +8,7 @@ export default function ProjectSetupNewPage() {
         items={[
           { label: "Home", href: "/dashboard" },
           { label: "Agents", href: "/agents" },
-          { label: "Project Setup", href: "/agents/project-setup" },
+          { label: "Dev Scaffold", href: "/agents/project-setup" },
           { label: "New Setup" },
         ]}
       />

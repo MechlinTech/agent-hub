@@ -84,7 +84,7 @@ dist/
 `;
 }
 
-/** Build pg Pool config — SSL only for remote databases, not localhost. */
+/** Build pg Pool config - SSL only for remote databases, not localhost. */
 function poolConfigBlock(): string {
   return `const poolConfig: PoolConfig = { connectionString };
 
@@ -95,7 +95,7 @@ if (!/localhost|127\\.0\\.0\\.1/.test(connectionString)) {
 const pool = new Pool(poolConfig);`;
 }
 
-/** Express ESM db module — Pool + @prisma/client (no custom generated output). */
+/** Express ESM db module - Pool + @prisma/client (no custom generated output). */
 export function expressPrismaDbSource(): string {
   return `import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
@@ -115,7 +115,7 @@ export default prisma;
 `;
 }
 
-/** NestJS PrismaService — Pool + @prisma/client. */
+/** NestJS PrismaService - Pool + @prisma/client. */
 export function nestPrismaServiceSource(): string {
   return `import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaPg } from "@prisma/adapter-pg";

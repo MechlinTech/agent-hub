@@ -46,7 +46,7 @@ function parsePickerResult(
 }
 
 export type PickNativeFolderOptions = {
-  /** Browser tab title — used to find the window that should own the picker. */
+  /** Browser tab title - used to find the window that should own the picker. */
   windowTitle?: string;
 };
 

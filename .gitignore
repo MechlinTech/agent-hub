@@ -3,7 +3,7 @@ node_modules
 .env
 .env.local
 .env*.local
-.env.example
+.capture-auth.json
 dist
 *.log
 .DS_Store

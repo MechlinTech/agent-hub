@@ -9,7 +9,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!isProjectSetupEnabled()) {
-    return NextResponse.json({ error: "Project Setup Agent is disabled" }, { status: 503 });
+    return NextResponse.json({ error: "Dev Scaffold Agent is disabled" }, { status: 503 });
   }
   const { response } = await requireWrite("project_setup");
   if (response) return response;

@@ -14,7 +14,7 @@ export function supplementErrorRows(
     if (count <= 0 && tx.errorRatePct <= 0) continue;
     rows.push({
       transaction: tx.name,
-      errorCode: "—",
+      errorCode: "-",
       message: `Transaction error rate ${tx.errorRatePct.toFixed(2)}% (${count.toLocaleString()} errors)`,
       count: count || 1,
       pctOfTotal: 0,
@@ -26,7 +26,7 @@ export function supplementErrorRows(
   if (rows.length === 0 && totalRow && (totalRow.errorsCount ?? 0) > 0) {
     rows.push({
       transaction: totalRow.name === "TOTAL" ? "ALL" : totalRow.name,
-      errorCode: "—",
+      errorCode: "-",
       message: "Aggregate errors from BlazeMeter report",
       count: totalRow.errorsCount!,
       pctOfTotal: 100,

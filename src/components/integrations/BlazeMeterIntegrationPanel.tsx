@@ -19,7 +19,10 @@ interface PerformanceTestOption extends BlazeMeterNamedEntity {
 }
 
 function configsEqual(a: BlazeMeterOrgConfig, b: BlazeMeterOrgConfig): boolean {
-  const stripSecret = (config: BlazeMeterOrgConfig) => ({ ...config, apiKeySecret: null });
+  const stripSecret = (config: BlazeMeterOrgConfig) => ({
+    ...config,
+    apiKeySecret: null,
+  });
   return JSON.stringify(stripSecret(a)) === JSON.stringify(stripSecret(b));
 }
 
@@ -41,7 +44,9 @@ export function BlazeMeterIntegrationPanel({
   onStatusChange?: (connected: boolean) => void;
 }) {
   const [status, setStatus] = useState<BlazeMeterPublicStatus | null>(null);
-  const [savedConfig, setSavedConfig] = useState<BlazeMeterOrgConfig | null>(null);
+  const [savedConfig, setSavedConfig] = useState<BlazeMeterOrgConfig | null>(
+    null,
+  );
   const [config, setConfig] = useState<BlazeMeterOrgConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [accounts, setAccounts] = useState<BlazeMeterNamedEntity[]>([]);
@@ -68,7 +73,7 @@ export function BlazeMeterIntegrationPanel({
       setIsEditing(!isConfigSaved(data.config));
       onStatusChange?.(data.connected);
     },
-    [onStatusChange]
+    [onStatusChange],
   );
 
   const loadStatus = useCallback(async () => {
@@ -77,10 +82,15 @@ export function BlazeMeterIntegrationPanel({
     try {
       const res = await fetch("/api/integrations/blazemeter");
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to load BlazeMeter settings");
+      if (!res.ok)
+        throw new Error(data.error ?? "Failed to load BlazeMeter settings");
       applyServerState(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load BlazeMeter settings");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load BlazeMeter settings",
+      );
     } finally {
       setLoading(false);
     }
@@ -97,12 +107,14 @@ export function BlazeMeterIntegrationPanel({
     async function hydrateSavedSelections() {
       try {
         if (saved.accountId) {
-          const accountsRes = await fetch("/api/integrations/blazemeter/accounts");
+          const accountsRes = await fetch(
+            "/api/integrations/blazemeter/accounts",
+          );
           const accountsData = await accountsRes.json();
           if (accountsRes.ok) setAccounts(accountsData.items ?? []);
 
           const workspacesRes = await fetch(
-            `/api/integrations/blazemeter/workspaces?accountId=${saved.accountId}`
+            `/api/integrations/blazemeter/workspaces?accountId=${saved.accountId}`,
           );
           const workspacesData = await workspacesRes.json();
           if (workspacesRes.ok) setWorkspaces(workspacesData.items ?? []);
@@ -110,7 +122,7 @@ export function BlazeMeterIntegrationPanel({
 
         if (saved.workspaceId) {
           const projectsRes = await fetch(
-            `/api/integrations/blazemeter/projects?workspaceId=${saved.workspaceId}`
+            `/api/integrations/blazemeter/projects?workspaceId=${saved.workspaceId}`,
           );
           const projectsData = await projectsRes.json();
           if (projectsRes.ok) setProjects(projectsData.items ?? []);
@@ -121,7 +133,9 @@ export function BlazeMeterIntegrationPanel({
             projectId: String(saved.projectId),
             workspaceId: String(saved.workspaceId),
           });
-          const testsRes = await fetch(`/api/integrations/blazemeter/tests?${params.toString()}`);
+          const testsRes = await fetch(
+            `/api/integrations/blazemeter/tests?${params.toString()}`,
+          );
           const testsData = await testsRes.json();
           if (testsRes.ok) setTests(testsData.items ?? []);
         }
@@ -134,7 +148,13 @@ export function BlazeMeterIntegrationPanel({
   }, [config, status?.credentialsConfigured]);
 
   async function loadAccounts() {
-    if (!config || !canUseCredentialsFromConfig(config, status?.credentialsConfigured ?? false)) {
+    if (
+      !config ||
+      !canUseCredentialsFromConfig(
+        config,
+        status?.credentialsConfigured ?? false,
+      )
+    ) {
       setError("Enter and save API credentials first, or use Fetch details.");
       return;
     }
@@ -164,16 +184,20 @@ export function BlazeMeterIntegrationPanel({
     setError(null);
     try {
       const res = await fetch(
-        `/api/integrations/blazemeter/workspaces?accountId=${accountId}`
+        `/api/integrations/blazemeter/workspaces?accountId=${accountId}`,
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to load workspaces");
       setWorkspaces(data.items ?? []);
       if (!data.items?.length) {
-        setError("No workspaces found for this account. Check the Account ID or API key permissions.");
+        setError(
+          "No workspaces found for this account. Check the Account ID or API key permissions.",
+        );
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load workspaces");
+      setError(
+        err instanceof Error ? err.message : "Failed to load workspaces",
+      );
     } finally {
       setLoadingWorkspaces(false);
     }
@@ -184,7 +208,7 @@ export function BlazeMeterIntegrationPanel({
     setError(null);
     try {
       const res = await fetch(
-        `/api/integrations/blazemeter/projects?workspaceId=${workspaceId}`
+        `/api/integrations/blazemeter/projects?workspaceId=${workspaceId}`,
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to load projects");
@@ -204,7 +228,9 @@ export function BlazeMeterIntegrationPanel({
         projectId: String(projectId),
         workspaceId: String(workspaceId),
       });
-      const res = await fetch(`/api/integrations/blazemeter/tests?${params.toString()}`);
+      const res = await fetch(
+        `/api/integrations/blazemeter/tests?${params.toString()}`,
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to load tests");
       setTests(data.items ?? []);
@@ -251,7 +277,7 @@ export function BlazeMeterIntegrationPanel({
       setMessage(
         data.connected
           ? "BlazeMeter settings saved."
-          : "BlazeMeter settings saved. Use Test connection to verify access."
+          : "BlazeMeter settings saved. Use Test connection to verify access.",
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save settings");
@@ -269,7 +295,9 @@ export function BlazeMeterIntegrationPanel({
       const res = await fetch("/api/integrations/blazemeter/test-connection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildBlazeMeterSavePayload({ ...config, enabled: true })),
+        body: JSON.stringify(
+          buildBlazeMeterSavePayload({ ...config, enabled: true }),
+        ),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Connection test failed");
@@ -306,7 +334,8 @@ export function BlazeMeterIntegrationPanel({
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to fetch BlazeMeter details");
+      if (!res.ok)
+        throw new Error(data.error ?? "Failed to fetch BlazeMeter details");
 
       setAccounts(data.accounts ?? []);
       setWorkspaces(data.workspaces ?? []);
@@ -322,7 +351,7 @@ export function BlazeMeterIntegrationPanel({
                 ...clientConfig,
                 apiKeySecret: prev.apiKeySecret || "",
               }
-            : clientConfig
+            : clientConfig,
         );
       }
 
@@ -334,17 +363,21 @@ export function BlazeMeterIntegrationPanel({
               connected: Boolean(data.config?.lastValidatedAt),
               config: data.config ?? prev.config,
             }
-          : prev
+          : prev,
       );
 
       const accountCount = data.accounts?.length ?? 0;
       const workspaceCount = data.workspaces?.length ?? 0;
       const projectCount = data.projects?.length ?? 0;
       setMessage(
-        `Fetched ${accountCount} account(s), ${workspaceCount} workspace(s), and ${projectCount} project(s). Select the values you need, then save settings.`
+        `Fetched ${accountCount} account(s), ${workspaceCount} workspace(s), and ${projectCount} project(s). Select the values you need, then save settings.`,
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch BlazeMeter details");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch BlazeMeter details",
+      );
     } finally {
       setFetchingDetails(false);
     }
@@ -361,7 +394,10 @@ export function BlazeMeterIntegrationPanel({
 
   const connected = status.connected;
   const credentialsConfigured = status.credentialsConfigured;
-  const canUseCredentials = canUseCredentialsFromConfig(config, credentialsConfigured);
+  const canUseCredentials = canUseCredentialsFromConfig(
+    config,
+    credentialsConfigured,
+  );
   const showViewMode = readOnly || (!isEditing && isConfigSaved(savedConfig));
   const hasUnsavedChanges = !configsEqual(config, savedConfig);
 
@@ -374,8 +410,8 @@ export function BlazeMeterIntegrationPanel({
             <h2 className="text-lg font-semibold text-slate-900">BlazeMeter</h2>
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Configure your BlazeMeter API credentials, workspace, project, and test provisioning
-            behavior here.
+            Configure your BlazeMeter API credentials, workspace, project, and
+            test provisioning behavior here.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -432,7 +468,9 @@ export function BlazeMeterIntegrationPanel({
             onLoadAccounts={loadAccounts}
             onLoadWorkspaces={() => loadWorkspaces()}
             onLoadProjects={(id) => loadProjects(id)}
-            onLoadTests={(projectId, workspaceId) => loadTests(projectId, workspaceId)}
+            onLoadTests={(projectId, workspaceId) =>
+              loadTests(projectId, workspaceId)
+            }
             onClearWorkspaces={() => setWorkspaces([])}
             onClearProjects={() => setProjects([])}
             onClearTests={() => setTests([])}
@@ -441,7 +479,8 @@ export function BlazeMeterIntegrationPanel({
 
         {savedConfig.lastValidatedAt && (
           <p className="text-xs text-slate-500">
-            Last validated: {new Date(savedConfig.lastValidatedAt).toLocaleString()}
+            Last validated:{" "}
+            {new Date(savedConfig.lastValidatedAt).toLocaleString()}
           </p>
         )}
 
@@ -516,11 +555,11 @@ function SavedConfigurationView({
   const rows = [
     {
       label: "API Key ID",
-      value: config.apiKeyId ? config.apiKeyId : "—",
+      value: config.apiKeyId ? config.apiKeyId : "-",
     },
     {
       label: "API Key Secret",
-      value: credentialsConfigured ? "Configured" : "—",
+      value: credentialsConfigured ? "Configured" : "-",
     },
     { label: "Status", value: config.enabled ? "Enabled" : "Disabled" },
     {
@@ -548,7 +587,10 @@ function SavedConfigurationView({
           : "-",
     },
     { label: "Default location", value: config.defaultLocation },
-    { label: "Test provisioning", value: provisioningLabel(config.testProvisioningMode) },
+    {
+      label: "Test provisioning",
+      value: provisioningLabel(config.testProvisioningMode),
+    },
   ];
 
   if (config.testProvisioningMode === "reuse_existing" && config.reuseTestId) {
@@ -572,7 +614,9 @@ function SavedConfigurationView({
             <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
               {row.label}
             </dt>
-            <dd className="mt-0.5 text-sm font-medium text-slate-900">{row.value}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-slate-900">
+              {row.value}
+            </dd>
           </div>
         ))}
       </dl>
@@ -582,10 +626,11 @@ function SavedConfigurationView({
 
 function canUseCredentialsFromConfig(
   config: BlazeMeterOrgConfig,
-  credentialsConfigured: boolean
+  credentialsConfigured: boolean,
 ): boolean {
   return (
-    credentialsConfigured || Boolean(config.apiKeyId?.trim() && config.apiKeySecret?.trim())
+    credentialsConfigured ||
+    Boolean(config.apiKeyId?.trim() && config.apiKeySecret?.trim())
   );
 }
 
@@ -637,10 +682,14 @@ function ConfigurationForm({
   return (
     <>
       <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-        <h3 className="mb-3 text-sm font-semibold text-slate-900">API credentials</h3>
+        <h3 className="mb-3 text-sm font-semibold text-slate-900">
+          API credentials
+        </h3>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">API Key ID</span>
+            <span className="mb-1 block font-medium text-slate-700">
+              API Key ID
+            </span>
             <input
               type="text"
               value={config.apiKeyId ?? ""}
@@ -651,11 +700,15 @@ function ConfigurationForm({
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">API Key Secret</span>
+            <span className="mb-1 block font-medium text-slate-700">
+              API Key Secret
+            </span>
             <input
               type="password"
               value={config.apiKeySecret ?? ""}
-              onChange={(e) => onUpdate({ apiKeySecret: e.target.value || null })}
+              onChange={(e) =>
+                onUpdate({ apiKeySecret: e.target.value || null })
+              }
               className="input w-full font-mono text-sm"
               placeholder={
                 credentialsConfigured
@@ -681,8 +734,8 @@ function ConfigurationForm({
             {fetchingDetails ? "Fetching details…" : "Fetch details"}
           </button>
           <p className="text-xs text-slate-500">
-            Saves your API credentials and loads accounts, workspaces, and projects into the
-            dropdowns below.
+            Saves your API credentials and loads accounts, workspaces, and
+            projects into the dropdowns below.
           </p>
         </div>
       </div>
@@ -702,7 +755,9 @@ function ConfigurationForm({
               type="button"
               onClick={onLoadAccounts}
               disabled={loadingAccounts || !canUseCredentials}
-              title={canUseCredentials ? undefined : "Enter API credentials first"}
+              title={
+                canUseCredentials ? undefined : "Enter API credentials first"
+              }
               className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 disabled:opacity-50"
             >
               {loadingAccounts ? (
@@ -740,7 +795,8 @@ function ConfigurationForm({
                 value: String(a.id),
                 label: `${a.name} (${a.id})`,
               })),
-              ...(config.accountId && !accounts.some((a) => a.id === config.accountId)
+              ...(config.accountId &&
+              !accounts.some((a) => a.id === config.accountId)
                 ? [
                     {
                       value: String(config.accountId),
@@ -753,7 +809,9 @@ function ConfigurationForm({
         </div>
 
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700">Default cloud location</span>
+          <span className="mb-1 block font-medium text-slate-700">
+            Default cloud location
+          </span>
           <input
             type="text"
             value={config.defaultLocation}
@@ -767,7 +825,9 @@ function ConfigurationForm({
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">Workspace</span>
+            <span className="text-sm font-medium text-slate-700">
+              Workspace
+            </span>
             <button
               type="button"
               onClick={onLoadWorkspaces}
@@ -805,7 +865,8 @@ function ConfigurationForm({
                 value: String(w.id),
                 label: `${w.name} (${w.id})`,
               })),
-              ...(config.workspaceId && !workspaces.some((w) => w.id === config.workspaceId)
+              ...(config.workspaceId &&
+              !workspaces.some((w) => w.id === config.workspaceId)
                 ? [
                     {
                       value: String(config.workspaceId),
@@ -823,7 +884,9 @@ function ConfigurationForm({
             {config.workspaceId ? (
               <button
                 type="button"
-                onClick={() => config.workspaceId && onLoadProjects(config.workspaceId)}
+                onClick={() =>
+                  config.workspaceId && onLoadProjects(config.workspaceId)
+                }
                 disabled={loadingProjects}
                 className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 disabled:opacity-50"
               >
@@ -859,7 +922,8 @@ function ConfigurationForm({
                 value: String(p.id),
                 label: `${p.name} (${p.id})`,
               })),
-              ...(config.projectId && !projects.some((p) => p.id === config.projectId)
+              ...(config.projectId &&
+              !projects.some((p) => p.id === config.projectId)
                 ? [
                     {
                       value: String(config.projectId),
@@ -873,7 +937,9 @@ function ConfigurationForm({
       </div>
 
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium text-slate-700">Test provisioning</legend>
+        <legend className="text-sm font-medium text-slate-700">
+          Test provisioning
+        </legend>
         {(
           [
             {
@@ -905,15 +971,25 @@ function ConfigurationForm({
               onChange={() =>
                 onUpdate({
                   testProvisioningMode: option.value,
-                  reuseTestId: option.value === "reuse_existing" ? config.reuseTestId : null,
-                  reuseTestName: option.value === "reuse_existing" ? config.reuseTestName : null,
+                  reuseTestId:
+                    option.value === "reuse_existing"
+                      ? config.reuseTestId
+                      : null,
+                  reuseTestName:
+                    option.value === "reuse_existing"
+                      ? config.reuseTestName
+                      : null,
                 })
               }
               className="mt-1"
             />
             <span>
-              <span className="block text-sm font-medium text-slate-900">{option.title}</span>
-              <span className="mt-0.5 block text-sm text-slate-500">{option.description}</span>
+              <span className="block text-sm font-medium text-slate-900">
+                {option.title}
+              </span>
+              <span className="mt-0.5 block text-sm text-slate-500">
+                {option.description}
+              </span>
             </span>
           </label>
         ))}
@@ -922,7 +998,9 @@ function ConfigurationForm({
       {config.testProvisioningMode === "reuse_existing" && (
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">Existing test to reuse</span>
+            <span className="text-sm font-medium text-slate-700">
+              Existing test to reuse
+            </span>
             {config.projectId && config.workspaceId ? (
               <button
                 type="button"

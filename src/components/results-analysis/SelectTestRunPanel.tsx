@@ -41,7 +41,11 @@ interface RunPreview {
   endedAt: string | null;
 }
 
-export function SelectTestRunPanel({ configured = true }: { configured?: boolean }) {
+export function SelectTestRunPanel({
+  configured = true,
+}: {
+  configured?: boolean;
+}) {
   const router = useRouter();
   const [runs, setRuns] = useState<TestRunRow[]>([]);
   const [loading, setLoading] = useState(configured);
@@ -67,7 +71,9 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
         setRuns(data.runs ?? []);
         if (data.runs?.[0]) setSelectedId(String(data.runs[0].id));
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load runs"))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Failed to load runs"),
+      )
       .finally(() => setLoading(false));
   }, [configured]);
 
@@ -109,14 +115,17 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
     return (
       <div className="card space-y-4 p-8 text-center">
         <p className="text-sm text-slate-600">
-          Connect BlazeMeter under Integrations to browse and import test runs from your
-          workspace project.
+          Connect BlazeMeter under Integrations to browse and import test runs
+          from your workspace project.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link href="/integrations" className="btn-primary px-4 py-2 text-sm">
             Configure BlazeMeter
           </Link>
-          <Link href="/agents/results-analysis/new" className="btn-secondary px-4 py-2 text-sm">
+          <Link
+            href="/agents/results-analysis/new"
+            className="btn-secondary px-4 py-2 text-sm"
+          >
             Upload CSV instead
           </Link>
         </div>
@@ -136,7 +145,10 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
     return (
       <div className="card p-8 text-center">
         <p className="text-sm text-red-600">{error}</p>
-        <Link href="/integrations" className="mt-3 inline-block text-sm text-brand-600 underline">
+        <Link
+          href="/integrations"
+          className="mt-3 inline-block text-sm text-brand-600 underline"
+        >
           Configure BlazeMeter integration
         </Link>
       </div>
@@ -146,9 +158,12 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
   return (
     <div className="space-y-6">
       <div className="card p-5">
-        <h3 className="mb-2 font-semibold text-slate-900">Fetch by Master ID</h3>
+        <h3 className="mb-2 font-semibold text-slate-900">
+          Fetch by Master ID
+        </h3>
         <p className="mb-3 text-sm text-slate-500">
-          Enter the Master ID from your BlazeMeter report URL to import results directly.
+          Enter the Master ID from your BlazeMeter report URL to import results
+          directly.
         </p>
         <div className="flex flex-wrap gap-3">
           <input
@@ -163,7 +178,11 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
             disabled={!masterIdInput.trim() || importing}
             onClick={() => analyzeMasterId(masterIdInput.trim())}
           >
-            {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            {importing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="h-4 w-4" />
+            )}
             Fetch Result
           </button>
         </div>
@@ -199,10 +218,16 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
                     </td>
                     <td className="px-4 py-3 font-medium">{run.name}</td>
                     <td className="px-4 py-3 text-slate-500">{run.id}</td>
-                    <td className="px-4 py-3">{formatDate(new Date(run.created * 1000).toISOString())}</td>
+                    <td className="px-4 py-3">
+                      {formatDate(new Date(run.created * 1000).toISOString())}
+                    </td>
                     <td className="px-4 py-3">{run.maxUsers ?? "-"}</td>
                     <td className="px-4 py-3">
-                      {run.passed === true ? "Completed" : run.passed === false ? "Completed with Issues" : "-"}
+                      {run.passed === true
+                        ? "Completed"
+                        : run.passed === false
+                          ? "Completed with Issues"
+                          : "-"}
                     </td>
                   </tr>
                 ))}
@@ -227,26 +252,56 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <Metric label="Started" value={formatDate(preview.createdAt)} />
-                <Metric label="Ended" value={preview.endedAt ? formatDate(preview.endedAt) : "—"} />
-                <Metric label="Duration" value={`${preview.activeDurationMinutes ?? preview.durationMinutes} min`} />
+                <Metric
+                  label="Ended"
+                  value={preview.endedAt ? formatDate(preview.endedAt) : "-"}
+                />
+                <Metric
+                  label="Duration"
+                  value={`${preview.activeDurationMinutes ?? preview.durationMinutes} min`}
+                />
                 <Metric label="Users" value={String(preview.maxUsers)} />
-                <Metric label="Avg Response Time" value={fmtRt(preview.avgResponseTimeSec)} />
+                <Metric
+                  label="Avg Response Time"
+                  value={fmtRt(preview.avgResponseTimeSec)}
+                />
                 {preview.p90ResponseTimeSec != null && (
-                  <Metric label="P90 Response Time" value={fmtRt(preview.p90ResponseTimeSec)} />
+                  <Metric
+                    label="P90 Response Time"
+                    value={fmtRt(preview.p90ResponseTimeSec)}
+                  />
                 )}
                 {preview.p95ResponseTimeSec != null && (
-                  <Metric label="P95 Response Time" value={fmtRt(preview.p95ResponseTimeSec)} />
+                  <Metric
+                    label="P95 Response Time"
+                    value={fmtRt(preview.p95ResponseTimeSec)}
+                  />
                 )}
-                <Metric label="Error Rate" value={fmtPct(preview.errorRatePct)} />
+                <Metric
+                  label="Error Rate"
+                  value={fmtPct(preview.errorRatePct)}
+                />
                 {preview.errorsCount != null && (
-                  <Metric label="Error Count" value={fmtCount(preview.errorsCount)} />
+                  <Metric
+                    label="Error Count"
+                    value={fmtCount(preview.errorsCount)}
+                  />
                 )}
-                <Metric label="Throughput" value={fmtThroughput(preview.throughput)} />
+                <Metric
+                  label="Throughput"
+                  value={fmtThroughput(preview.throughput)}
+                />
                 {preview.avgBandwidthKiBps != null && (
-                  <Metric label="Bandwidth" value={fmtBandwidth(preview.avgBandwidthKiBps)} />
+                  <Metric
+                    label="Bandwidth"
+                    value={fmtBandwidth(preview.avgBandwidthKiBps)}
+                  />
                 )}
                 {preview.totalSamples != null && (
-                  <Metric label="Samples" value={fmtCount(preview.totalSamples)} />
+                  <Metric
+                    label="Samples"
+                    value={fmtCount(preview.totalSamples)}
+                  />
                 )}
                 <Metric
                   label="Status"
@@ -255,7 +310,7 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
                       ? "Passed"
                       : preview.passed === false
                         ? "Issues"
-                        : "—"
+                        : "-"
                   }
                 />
               </div>
@@ -265,15 +320,22 @@ export function SelectTestRunPanel({ configured = true }: { configured?: boolean
                 disabled={importing}
                 onClick={() => analyzeMasterId(preview.masterId)}
               >
-                {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                {importing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Zap className="h-4 w-4" />
+                )}
                 Analyze This Run
               </button>
               <p className="text-xs text-slate-500">
-                This run will be used to generate insights, identifications, and recommendations.
+                This run will be used to generate insights, identifications, and
+                recommendations.
               </p>
             </div>
           ) : (
-            <p className="text-sm text-slate-500">Select a run to preview metrics.</p>
+            <p className="text-sm text-slate-500">
+              Select a run to preview metrics.
+            </p>
           )}
         </div>
       </div>

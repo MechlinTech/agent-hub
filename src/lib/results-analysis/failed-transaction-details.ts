@@ -95,7 +95,7 @@ function buildErrorEntries(label: BlazeMeterErrorReportLabelLike): FailedTransac
     if (!code) {
       if (isTransactionSampleMessage(message)) {
         entries.push({
-          errorCode: "—",
+          errorCode: "-",
           description: message,
           errorCount: count,
           labelId: label.labelId,
@@ -171,7 +171,7 @@ export function buildFailedTransactionDetailsFromErrorReport(
           ? entries
           : [
               {
-                errorCode: "—",
+                errorCode: "-",
                 description: "Transaction reported errors in aggregate report",
                 errorCount: aggregateRow?.errorsCount ?? 1,
                 labelId: label.labelId,
@@ -211,7 +211,7 @@ export function buildFailedTransactionDetailsFromErrorRows(
     errors: byTransaction.get(name) ??
       byTransaction.get(name.trim().toLowerCase()) ?? [
         {
-          errorCode: "—",
+          errorCode: "-",
           description: "Failed in request statistics",
           errorCount: 1,
         },
@@ -240,7 +240,7 @@ export function collectUniqueScriptErrorCodes(
   for (const detail of details) {
     for (const entry of detail.errors) {
       const code = entry.errorCode?.trim();
-      if (!code || code === "—") continue;
+      if (!code || code === "-") continue;
       if (seen.has(code)) continue;
       seen.add(code);
       codes.push(code);

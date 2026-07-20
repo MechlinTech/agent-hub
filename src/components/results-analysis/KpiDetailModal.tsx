@@ -62,7 +62,15 @@ const KPI_TITLES: Record<ExecutiveKpiKey, string> = {
   total_samples: "Total Samples",
 };
 
-type TabId = "executive" | "technical" | "errors" | "timeline" | "baseline" | "rca" | "defects" | "reports";
+type TabId =
+  | "executive"
+  | "technical"
+  | "errors"
+  | "timeline"
+  | "baseline"
+  | "rca"
+  | "defects"
+  | "reports";
 
 const KPI_MODAL_MAX_WIDTH: Partial<Record<ExecutiveKpiKey, string>> = {
   overall_status: "max-w-6xl",
@@ -85,22 +93,32 @@ export function KpiDetailModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
+      <button
+        type="button"
+        className="absolute inset-0"
+        aria-label="Close"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="kpi-detail-title"
         className={cn(
           "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl",
-          KPI_MODAL_MAX_WIDTH[kpiKey] ?? "max-w-3xl"
+          KPI_MODAL_MAX_WIDTH[kpiKey] ?? "max-w-3xl",
         )}
       >
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div>
-            <h2 id="kpi-detail-title" className="text-lg font-semibold text-slate-900">
+            <h2
+              id="kpi-detail-title"
+              className="text-lg font-semibold text-slate-900"
+            >
               {KPI_TITLES[kpiKey]}
             </h2>
-            <p className="mt-0.5 text-sm text-slate-500">Detailed breakdown for this metric</p>
+            <p className="mt-0.5 text-sm text-slate-500">
+              Detailed breakdown for this metric
+            </p>
           </div>
           <button
             type="button"
@@ -150,18 +168,29 @@ function KpiDetailBody({
         <div className="space-y-4">
           <DetailSection title="Assessment">
             <p className="text-sm text-slate-600">
-              Overall status is <strong className="capitalize">{result.overallStatus}</strong> with a{" "}
-              <strong>{result.goNoGo.replace("_", " ")}</strong> recommendation.
+              Overall status is{" "}
+              <strong className="capitalize">{result.overallStatus}</strong>{" "}
+              with a <strong>{result.goNoGo.replace("_", " ")}</strong>{" "}
+              recommendation.
             </p>
           </DetailSection>
-          <ScriptLevelExecutiveSummary rows={scriptSummaries} embedded analysis={analysis} />
+          <ScriptLevelExecutiveSummary
+            rows={scriptSummaries}
+            embedded
+            analysis={analysis}
+          />
 
           <DetailSection title="Release recommendation">
             {(() => {
-              const { headline, bullets, guidance } = buildGoNoGoRationale(result, scriptSummaries);
+              const { headline, bullets, guidance } = buildGoNoGoRationale(
+                result,
+                scriptSummaries,
+              );
               return (
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-slate-900">{headline}</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    {headline}
+                  </p>
                   <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
                     {bullets.map((bullet) => (
                       <li key={bullet}>{bullet}</li>
@@ -182,7 +211,12 @@ function KpiDetailBody({
               </ul>
             </DetailSection>
           )}
-          <NavLink label="View technical findings" tab="technical" onNavigateTab={onNavigateTab} onClose={onClose} />
+          <NavLink
+            label="View technical findings"
+            tab="technical"
+            onNavigateTab={onNavigateTab}
+            onClose={onClose}
+          />
         </div>
       );
     }
@@ -191,17 +225,37 @@ function KpiDetailBody({
       return (
         <div className="space-y-4">
           <DetailSection title="Score">
-            <p className={cn("text-2xl font-bold", scoreColor(result.performanceScore))}>
+            <p
+              className={cn(
+                "text-2xl font-bold",
+                scoreColor(result.performanceScore),
+              )}
+            >
               {result.performanceScore} / 100
             </p>
           </DetailSection>
           <DetailSection title="Score breakdown">
             <dl className="grid gap-3 sm:grid-cols-2">
-              <ScoreRow label="SLA compliance" value={result.scoreBreakdown.slaScore} />
-              <ScoreRow label="Error impact" value={result.scoreBreakdown.errorScore} />
-              <ScoreRow label="Throughput" value={result.scoreBreakdown.throughputScore} />
-              <ScoreRow label="Stability" value={result.scoreBreakdown.stabilityScore} />
-              <ScoreRow label="Baseline" value={result.scoreBreakdown.baselineScore} />
+              <ScoreRow
+                label="SLA compliance"
+                value={result.scoreBreakdown.slaScore}
+              />
+              <ScoreRow
+                label="Error impact"
+                value={result.scoreBreakdown.errorScore}
+              />
+              <ScoreRow
+                label="Throughput"
+                value={result.scoreBreakdown.throughputScore}
+              />
+              <ScoreRow
+                label="Stability"
+                value={result.scoreBreakdown.stabilityScore}
+              />
+              <ScoreRow
+                label="Baseline"
+                value={result.scoreBreakdown.baselineScore}
+              />
             </dl>
           </DetailSection>
           {result.findings.filter((f) => f.status === "fail").length > 0 && (
@@ -212,7 +266,8 @@ function KpiDetailBody({
                   .slice(0, 5)
                   .map((f) => (
                     <li key={f.id}>
-                      <span className="font-medium">{f.transaction}:</span> {f.finding}
+                      <span className="font-medium">{f.transaction}:</span>{" "}
+                      {f.finding}
                     </li>
                   ))}
               </ul>
@@ -230,10 +285,20 @@ function KpiDetailBody({
                 ["Peak users (report)", String(m.maxUsers)],
                 ["Target users (test context)", String(ctx.targetUsers)],
                 ...(snap?.apiSummary
-                  ? [["Concurrency (API summary)", `${snap.apiSummary.concurrency} VU`]]
+                  ? [
+                      [
+                        "Concurrency (API summary)",
+                        `${snap.apiSummary.concurrency} VU`,
+                      ],
+                    ]
                   : []),
                 ...(snap?.master.maxUsers != null
-                  ? [["BlazeMeter master max users", String(snap.master.maxUsers)]]
+                  ? [
+                      [
+                        "BlazeMeter master max users",
+                        String(snap.master.maxUsers),
+                      ],
+                    ]
                   : []),
               ]}
             />
@@ -246,7 +311,12 @@ function KpiDetailBody({
               />
             </DetailSection>
           ) : null}
-          <NavLink label="View timeline charts" tab="timeline" onNavigateTab={onNavigateTab} onClose={onClose} />
+          <NavLink
+            label="View timeline charts"
+            tab="timeline"
+            onNavigateTab={onNavigateTab}
+            onClose={onClose}
+          />
         </div>
       );
 
@@ -264,43 +334,78 @@ function KpiDetailBody({
                   : []),
                 ["Wall-clock duration", `${m.durationMinutes} min`],
                 ...(m.activeDurationMinutes != null
-                  ? [["Active duration (report)", `${m.activeDurationMinutes} min`]]
+                  ? [
+                      [
+                        "Active duration (report)",
+                        `${m.activeDurationMinutes} min`,
+                      ],
+                    ]
                   : []),
                 ...(m.durationSec != null
                   ? [["Report duration (sec)", fmtDurationSec(m.durationSec)]]
                   : []),
                 ...(snap?.apiSummary
-                  ? [["API summary duration", fmtDurationSec(snap.apiSummary.durationSec)]]
+                  ? [
+                      [
+                        "API summary duration",
+                        fmtDurationSec(snap.apiSummary.durationSec),
+                      ],
+                    ]
                   : []),
               ]}
             />
           </DetailSection>
-          <NavLink label="View timeline" tab="timeline" onNavigateTab={onNavigateTab} onClose={onClose} />
+          <NavLink
+            label="View timeline"
+            tab="timeline"
+            onNavigateTab={onNavigateTab}
+            onClose={onClose}
+          />
         </div>
       );
 
     case "error_rate":
     case "error_count":
-      return <ErrorDetailContent result={result} analysis={analysis} onNavigateTab={onNavigateTab} onClose={onClose} />;
+      return (
+        <ErrorDetailContent
+          result={result}
+          analysis={analysis}
+          onNavigateTab={onNavigateTab}
+          onClose={onClose}
+        />
+      );
 
     case "throughput":
       return (
         <div className="space-y-4">
           <DetailSection title="Throughput summary">
             <p className="text-sm text-slate-600">
-              Aggregate throughput is <strong>{fmtThroughput(m.throughput)}</strong> across{" "}
+              Aggregate throughput is{" "}
+              <strong>{fmtThroughput(m.throughput)}</strong> across{" "}
               {fmtCount(m.totalSamples ?? 0)} samples.
             </p>
           </DetailSection>
           <TransactionMetricTable
-            transactions={sortedTransactions(result.transactions, (tx) => tx.throughput, "desc")}
+            transactions={sortedTransactions(
+              result.transactions,
+              (tx) => tx.throughput,
+              "desc",
+            )}
             columns={[
               { header: "Transaction", cell: (tx) => tx.name },
-              { header: "Throughput", cell: (tx) => fmtThroughput(tx.throughput) },
+              {
+                header: "Throughput",
+                cell: (tx) => fmtThroughput(tx.throughput),
+              },
               { header: "Samples", cell: (tx) => fmtCount(tx.samples) },
             ]}
           />
-          <NavLink label="View full transaction metrics" tab="technical" onNavigateTab={onNavigateTab} onClose={onClose} />
+          <NavLink
+            label="View full transaction metrics"
+            tab="technical"
+            onNavigateTab={onNavigateTab}
+            onClose={onClose}
+          />
         </div>
       );
 
@@ -309,18 +414,24 @@ function KpiDetailBody({
         <div className="space-y-4">
           <DetailSection title="Bandwidth summary">
             <p className="text-sm text-slate-600">
-              Average bandwidth is <strong>{fmtBandwidth(m.avgBandwidthKiBps ?? 0)}</strong>.
+              Average bandwidth is{" "}
+              <strong>{fmtBandwidth(m.avgBandwidthKiBps ?? 0)}</strong>.
             </p>
           </DetailSection>
           <TransactionMetricTable
             transactions={sortedTransactions(
-              result.transactions.filter((tx) => tx.avgBytes != null && tx.avgBytes > 0),
+              result.transactions.filter(
+                (tx) => tx.avgBytes != null && tx.avgBytes > 0,
+              ),
               (tx) => tx.avgBytes ?? 0,
-              "desc"
+              "desc",
             )}
             columns={[
               { header: "Transaction", cell: (tx) => tx.name },
-              { header: "Avg bandwidth", cell: (tx) => fmtBandwidth(tx.avgBytes ?? 0) },
+              {
+                header: "Avg bandwidth",
+                cell: (tx) => fmtBandwidth(tx.avgBytes ?? 0),
+              },
               { header: "Samples", cell: (tx) => fmtCount(tx.samples) },
             ]}
             emptyMessage="No per-transaction bandwidth in the report."
@@ -341,11 +452,16 @@ function KpiDetailBody({
         <div className="space-y-4">
           <DetailSection title="Sample count">
             <p className="text-sm text-slate-600">
-              Total samples recorded: <strong>{fmtCount(m.totalSamples ?? 0)}</strong>
+              Total samples recorded:{" "}
+              <strong>{fmtCount(m.totalSamples ?? 0)}</strong>
             </p>
           </DetailSection>
           <TransactionMetricTable
-            transactions={sortedTransactions(result.transactions, (tx) => tx.samples, "desc")}
+            transactions={sortedTransactions(
+              result.transactions,
+              (tx) => tx.samples,
+              "desc",
+            )}
             columns={[
               { header: "Transaction", cell: (tx) => tx.name },
               { header: "Samples", cell: (tx) => fmtCount(tx.samples) },
@@ -410,7 +526,10 @@ function ErrorDetailContent({
 
       <DetailSection title={`Error breakdown (${rows.length} rows)`}>
         {rows.length === 0 ? (
-          <p className="text-sm text-slate-500">No detailed error rows available. Re-import from BlazeMeter to refresh.</p>
+          <p className="text-sm text-slate-500">
+            No detailed error rows available. Re-import from BlazeMeter to
+            refresh.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -425,14 +544,25 @@ function ErrorDetailContent({
               </thead>
               <tbody>
                 {rows.map((row, i) => (
-                  <tr key={`${row.transaction}-${row.errorCode}-${i}`} className="border-t border-slate-100">
+                  <tr
+                    key={`${row.transaction}-${row.errorCode}-${i}`}
+                    className="border-t border-slate-100"
+                  >
                     <td className="px-3 py-2">{row.transaction}</td>
                     <td className="px-3 py-2">
-                      <span className={pillBadge("bg-red-100 text-red-800 border-red-200")}>{row.errorCode}</span>
+                      <span
+                        className={pillBadge(
+                          "bg-red-100 text-red-800 border-red-200",
+                        )}
+                      >
+                        {row.errorCode}
+                      </span>
                     </td>
                     <td className="px-3 py-2">{row.message}</td>
                     <td className="px-3 py-2">{row.count.toLocaleString()}</td>
-                    <td className="px-3 py-2 text-slate-600">{row.possibleCause}</td>
+                    <td className="px-3 py-2 text-slate-600">
+                      {row.possibleCause}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -443,12 +573,21 @@ function ErrorDetailContent({
 
       {(e.keyInsight || e.aiInterpretation) && (
         <DetailSection title="Insights">
-          {e.keyInsight ? <p className="mb-2 text-sm font-medium text-slate-800">{e.keyInsight}</p> : null}
+          {e.keyInsight ? (
+            <p className="mb-2 text-sm font-medium text-slate-800">
+              {e.keyInsight}
+            </p>
+          ) : null}
           <p className="text-sm text-slate-600">{e.aiInterpretation}</p>
         </DetailSection>
       )}
 
-      <NavLink label="Open full Error Analysis tab" tab="errors" onNavigateTab={onNavigateTab} onClose={onClose} />
+      <NavLink
+        label="Open full Error Analysis tab"
+        tab="errors"
+        onNavigateTab={onNavigateTab}
+        onClose={onClose}
+      />
     </div>
   );
 }
@@ -466,24 +605,29 @@ function ResponseTimeDetailContent({
 }) {
   const metric = getResponseMetricAccessor(kpiKey);
   if (!metric) {
-    return <p className="text-sm text-slate-500">No detail available for this metric.</p>;
+    return (
+      <p className="text-sm text-slate-500">
+        No detail available for this metric.
+      </p>
+    );
   }
 
   const sorted = sortedTransactions(
     result.transactions.filter((tx) => metric.getValue(tx) != null),
     (tx) => metric.getValue(tx) ?? 0,
-    metric.sort
+    metric.sort,
   );
 
   const latencyFindings = result.findings.filter(
-    (f) => f.status !== "pass" && f.finding.toLowerCase().includes("response")
+    (f) => f.status !== "pass" && f.finding.toLowerCase().includes("response"),
   );
 
   return (
     <div className="space-y-4">
       <DetailSection title={KPI_TITLES[kpiKey]}>
         <p className="text-sm text-slate-600">
-          Aggregate value: <strong>{fmtRt(metric.aggregate(result.summaryMetrics))}</strong>
+          Aggregate value:{" "}
+          <strong>{fmtRt(metric.aggregate(result.summaryMetrics))}</strong>
         </p>
       </DetailSection>
 
@@ -491,12 +635,24 @@ function ResponseTimeDetailContent({
         transactions={sorted}
         columns={[
           { header: "Transaction", cell: (tx) => tx.name },
-          { header: metric.columnLabel, cell: (tx) => fmtRt(metric.getValue(tx) ?? 0) },
+          {
+            header: metric.columnLabel,
+            cell: (tx) => fmtRt(metric.getValue(tx) ?? 0),
+          },
           { header: "Samples", cell: (tx) => fmtCount(tx.samples) },
-          { header: "Status", cell: (tx) => {
-            const status = result.findings.find((f) => f.transaction === tx.name)?.status;
-            return status ? <span className="capitalize">{status}</span> : "—";
-          }},
+          {
+            header: "Status",
+            cell: (tx) => {
+              const status = result.findings.find(
+                (f) => f.transaction === tx.name,
+              )?.status;
+              return status ? (
+                <span className="capitalize">{status}</span>
+              ) : (
+                "-"
+              );
+            },
+          },
         ]}
       />
 
@@ -519,14 +675,20 @@ function ResponseTimeDetailContent({
           <ul className="space-y-2 text-sm text-slate-600">
             {latencyFindings.slice(0, 5).map((f) => (
               <li key={f.id}>
-                <span className="font-medium">{f.transaction}:</span> {f.finding}
+                <span className="font-medium">{f.transaction}:</span>{" "}
+                {f.finding}
               </li>
             ))}
           </ul>
         </DetailSection>
       )}
 
-      <NavLink label="View technical analysis" tab="technical" onNavigateTab={onNavigateTab} onClose={onClose} />
+      <NavLink
+        label="View technical analysis"
+        tab="technical"
+        onNavigateTab={onNavigateTab}
+        onClose={onClose}
+      />
     </div>
   );
 }
@@ -604,7 +766,7 @@ function getResponseMetricAccessor(kpiKey: ExecutiveKpiKey) {
 function sortedTransactions(
   transactions: ParsedTransaction[],
   getValue: (tx: ParsedTransaction) => number,
-  order: "asc" | "desc"
+  order: "asc" | "desc",
 ) {
   return [...transactions].sort((a, b) => {
     const diff = getValue(a) - getValue(b);
@@ -612,7 +774,13 @@ function sortedTransactions(
   });
 }
 
-function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DetailSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section>
       <h3 className="mb-2 text-sm font-semibold text-slate-900">{title}</h3>
@@ -625,7 +793,10 @@ function MetricGrid({ rows }: { rows: string[][] }) {
   return (
     <dl className="grid gap-2 sm:grid-cols-2">
       {rows.map(([label, value]) => (
-        <div key={label} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+        <div
+          key={label}
+          className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+        >
           <dt className="text-xs text-slate-500">{label}</dt>
           <dd className="text-sm font-medium text-slate-900">{value}</dd>
         </div>
@@ -643,7 +814,13 @@ function ScoreRow({ label, value }: { label: string; value: number }) {
   );
 }
 
-function SimpleTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+function SimpleTable({
+  headers,
+  rows,
+}: {
+  headers: string[];
+  rows: string[][];
+}) {
   return (
     <div className="overflow-x-auto rounded-lg border border-slate-100">
       <table className="min-w-full text-sm">
@@ -678,7 +855,10 @@ function TransactionMetricTable({
   emptyMessage = "No transaction data available.",
 }: {
   transactions: ParsedTransaction[];
-  columns: { header: string; cell: (tx: ParsedTransaction) => React.ReactNode }[];
+  columns: {
+    header: string;
+    cell: (tx: ParsedTransaction) => React.ReactNode;
+  }[];
   emptyMessage?: string;
 }) {
   if (transactions.length === 0) {
@@ -768,16 +948,24 @@ function ScriptGroupedTransactionStatus({
             <summary className="cursor-pointer select-none">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className={pillBadge(badge)}>{g.result === "pass" ? "Pass" : "Fail"}</span>
-                  <span className="truncate font-medium text-slate-900">{g.scriptName}</span>
+                  <span className={pillBadge(badge)}>
+                    {g.result === "pass" ? "Pass" : "Fail"}
+                  </span>
+                  <span className="truncate font-medium text-slate-900">
+                    {g.scriptName}
+                  </span>
                 </div>
-                <span className="text-xs text-slate-500">{g.findings.length} txn(s)</span>
+                <span className="text-xs text-slate-500">
+                  {g.findings.length} txn(s)
+                </span>
               </div>
             </summary>
 
             <div className="mt-3 max-h-72 overflow-auto">
               {g.findings.length === 0 ? (
-                <p className="text-sm text-slate-500">No failed/warning transactions for this script.</p>
+                <p className="text-sm text-slate-500">
+                  No failed/warning transactions for this script.
+                </p>
               ) : (
                 <TransactionStatusTable findings={g.findings} />
               )}
@@ -787,14 +975,27 @@ function ScriptGroupedTransactionStatus({
       })}
 
       {unassigned.length > 0 && (
-        <details open className="rounded-lg border border-slate-100 bg-white px-3 py-2">
+        <details
+          open
+          className="rounded-lg border border-slate-100 bg-white px-3 py-2"
+        >
           <summary className="cursor-pointer select-none">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2">
-                <span className={pillBadge("bg-amber-100 text-amber-800 border-amber-200")}>Other</span>
-                <span className="truncate font-medium text-slate-900">Unassigned transactions</span>
+                <span
+                  className={pillBadge(
+                    "bg-amber-100 text-amber-800 border-amber-200",
+                  )}
+                >
+                  Other
+                </span>
+                <span className="truncate font-medium text-slate-900">
+                  Unassigned transactions
+                </span>
               </div>
-              <span className="text-xs text-slate-500">{unassigned.length} txn(s)</span>
+              <span className="text-xs text-slate-500">
+                {unassigned.length} txn(s)
+              </span>
             </div>
           </summary>
           <div className="mt-3 max-h-72 overflow-auto">
@@ -808,14 +1009,22 @@ function ScriptGroupedTransactionStatus({
 
 function statusBadgeClass(status: string): string {
   if (status === "fail") return "bg-red-100 text-red-800 border-red-200";
-  if (status === "warning") return "bg-amber-100 text-amber-800 border-amber-200";
+  if (status === "warning")
+    return "bg-amber-100 text-amber-800 border-amber-200";
   return "bg-green-100 text-green-800 border-green-200";
 }
 
-function TransactionStatusTable({ findings }: { findings: TechnicalFinding[] }) {
+function TransactionStatusTable({
+  findings,
+}: {
+  findings: TechnicalFinding[];
+}) {
   const sorted = [...findings].sort((a, b) => {
     const rank = (s: string) => (s === "fail" ? 2 : s === "warning" ? 1 : 0);
-    return rank(b.status) - rank(a.status) || a.transaction.localeCompare(b.transaction);
+    return (
+      rank(b.status) - rank(a.status) ||
+      a.transaction.localeCompare(b.transaction)
+    );
   });
 
   return (
@@ -834,13 +1043,20 @@ function TransactionStatusTable({ findings }: { findings: TechnicalFinding[] }) 
             <tr key={f.id} className="border-t border-slate-100 align-top">
               <td className="px-3 py-2 break-words">{f.transaction}</td>
               <td className="px-3 py-2">
-                <span className={pillBadge(statusBadgeClass(f.status))}>{f.status}</span>
+                <span className={pillBadge(statusBadgeClass(f.status))}>
+                  {f.status}
+                </span>
               </td>
-              <td className="px-3 py-2 whitespace-pre-wrap break-words text-slate-600">{f.finding}</td>
+              <td className="px-3 py-2 whitespace-pre-wrap break-words text-slate-600">
+                {f.finding}
+              </td>
               <td className="px-3 py-2 text-xs text-slate-600">
                 {f.evidence.slice(0, 3).join(" • ")}
                 {f.evidence.length > 3 ? (
-                  <span className="text-slate-500"> +{f.evidence.length - 3} more</span>
+                  <span className="text-slate-500">
+                    {" "}
+                    +{f.evidence.length - 3} more
+                  </span>
                 ) : null}
               </td>
             </tr>

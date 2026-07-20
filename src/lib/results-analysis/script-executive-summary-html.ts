@@ -30,17 +30,17 @@ function escapeHtml(value: string): string {
 }
 
 function fmtSamples(value?: number): string {
-  if (value == null || value <= 0) return "—";
+  if (value == null || value <= 0) return "-";
   return value.toLocaleString();
 }
 
 function fmtPct(value?: number): string {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return `${value.toFixed(2)}%`;
 }
 
 function fmtMs(value?: number): string {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return `${Math.round(value)}`;
 }
 
@@ -66,13 +66,13 @@ function renderLabelStatsTable(labels: ScriptLabelStat[]): string {
         <td><strong>${escapeHtml(label.name)}</strong></td>
         <td>${fmtSamples(label.samples)}</td>
         <td>${fmtMs(label.avgResponseTimeMs)}</td>
-        <td>${label.avgHitsPerSec != null ? label.avgHitsPerSec.toFixed(2) : "—"}</td>
+        <td>${label.avgHitsPerSec != null ? label.avgHitsPerSec.toFixed(2) : "-"}</td>
         <td>${fmtMs(label.p90Ms)}</td>
         <td>${fmtMs(label.p95Ms)}</td>
         <td>${fmtMs(label.p99Ms)}</td>
         <td>${fmtMs(label.minResponseTimeMs)}</td>
         <td>${fmtMs(label.maxResponseTimeMs)}</td>
-        <td>${label.avgBandwidthKibps != null ? label.avgBandwidthKibps.toFixed(2) : "—"}</td>
+        <td>${label.avgBandwidthKibps != null ? label.avgBandwidthKibps.toFixed(2) : "-"}</td>
         <td>${fmtPct(label.errorRatePct)}</td>
       </tr>`
     )
@@ -146,20 +146,20 @@ function renderScriptDetailSection(
     <div class="script-meta-grid">
       <div><label>User Load</label><span>${row.userLoad}</span></div>
       <div><label># Samples (ALL)</label><span>${fmtSamples(row.totalSamples)}</span></div>
-      <div><label>Error Samples</label><span>${row.errorSamples != null && row.errorSamples > 0 ? row.errorSamples.toLocaleString() : "—"}</span></div>
-      <div><label>Error Codes</label><span>${codes.length ? escapeHtml(codes.join(", ")) : "—"}</span></div>
-      <div><label>Labels</label><span>${labelCount > 0 ? labelCount : "—"}</span></div>
-      <div><label>Failed Transactions</label><span>${failedDetails.length > 0 ? failedDetails.length : "—"}</span></div>
+      <div><label>Error Samples</label><span>${row.errorSamples != null && row.errorSamples > 0 ? row.errorSamples.toLocaleString() : "-"}</span></div>
+      <div><label>Error Codes</label><span>${codes.length ? escapeHtml(codes.join(", ")) : "-"}</span></div>
+      <div><label>Labels</label><span>${labelCount > 0 ? labelCount : "-"}</span></div>
+      <div><label>Failed Transactions</label><span>${failedDetails.length > 0 ? failedDetails.length : "-"}</span></div>
       ${
         includeBugFields
-          ? `<div><label>Bug ID</label><span>${escapeHtml(row.bugId?.trim() || "—")}</span></div>
-      <div><label>Comments</label><span>${escapeHtml(row.comments?.trim() || "—")}</span></div>`
+          ? `<div><label>Bug ID</label><span>${escapeHtml(row.bugId?.trim() || "-")}</span></div>
+      <div><label>Comments</label><span>${escapeHtml(row.comments?.trim() || "-")}</span></div>`
           : ""
       }
     </div>`;
 
   if (row.labelStats && row.labelStats.length > 0) {
-    body += `<h4 class="subheading">Request Stats — All Labels</h4>
+    body += `<h4 class="subheading">Request Stats - All Labels</h4>
       ${renderLabelStatsTable(row.labelStats)}`;
   }
 
@@ -181,16 +181,16 @@ function renderSummaryTable(rows: ScriptSummaryRow[], includeBugFields: boolean)
       const codes = collectUniqueScriptErrorCodes(row);
       const labelCount = row.labelStats?.filter((l) => !l.isTotal).length ?? 0;
       const bugCells = includeBugFields
-        ? `<td>${escapeHtml(row.bugId?.trim() || "—")}</td><td>${escapeHtml(row.comments?.trim() || "—")}</td>`
+        ? `<td>${escapeHtml(row.bugId?.trim() || "-")}</td><td>${escapeHtml(row.comments?.trim() || "-")}</td>`
         : "";
       return `<tr>
         <td><strong>${escapeHtml(row.scriptName)}</strong></td>
         <td>${resultBadge(row.result)}</td>
         <td>${row.userLoad}</td>
-        <td>${codes.length ? escapeHtml(codes.join(", ")) : "—"}</td>
+        <td>${codes.length ? escapeHtml(codes.join(", ")) : "-"}</td>
         <td>${fmtSamples(row.totalSamples)}</td>
-        <td>${labelCount > 0 ? labelCount : "—"}</td>
-        <td>${row.failedTransactions.length > 0 ? `${row.failedTransactions.length} failed` : "—"}</td>
+        <td>${labelCount > 0 ? labelCount : "-"}</td>
+        <td>${row.failedTransactions.length > 0 ? `${row.failedTransactions.length} failed` : "-"}</td>
         ${bugCells}
       </tr>`;
     })
@@ -392,7 +392,7 @@ export function renderScriptExecutiveSummaryEmbed(
   if (includeDetails) {
     const detailRows = onlyFailedDetails ? rows.filter((r) => r.result === "fail") : rows;
     if (detailRows.length > 0) {
-      html += `<h2 style="margin-top:24px;">Script Details — Request Stats &amp; Failed Transactions</h2>
+      html += `<h2 style="margin-top:24px;">Script Details - Request Stats &amp; Failed Transactions</h2>
         ${detailRows.map((row) => renderScriptDetailSection(row, includeBugFields)).join("")}`;
     }
   }
@@ -473,7 +473,7 @@ export function generateScriptExecutiveSummaryPdfHtml(
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Script-Level Executive Summary — ${escapeHtml(runName)}</title>
+  <title>Script-Level Executive Summary - ${escapeHtml(runName)}</title>
   <style>${PDF_PAGE_STYLES}</style>
 </head>
 <body>
@@ -499,7 +499,7 @@ export function generateScriptExecutiveSummaryPdfHtml(
     ${renderScriptExecutiveSummaryOverviewChips(rows)}
     ${renderSummaryTable(rows, includeBugFields)}
 
-    <h2>Script Details — Request Stats &amp; Failed Transactions</h2>
+    <h2>Script Details - Request Stats &amp; Failed Transactions</h2>
     ${detailSections}
 
     <div class="footer">
