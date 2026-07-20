@@ -254,8 +254,8 @@ function renderFindingsTable(findings: TechnicalFinding[]): string {
         <td><strong>${escapeHtml(f.transaction)}</strong></td>
         <td class="col-status">${statusBadge(f.status)}</td>
         <td>${escapeHtml(f.finding)}</td>
-        <td>${escapeHtml(f.ownerTeam ?? "—")}</td>
-        <td class="col-narrow">${escapeHtml(f.priority ?? "—")}</td>
+        <td>${escapeHtml(f.ownerTeam ?? "-")}</td>
+        <td class="col-narrow">${escapeHtml(f.priority ?? "-")}</td>
       </tr>`
     )
     .join("");

@@ -108,7 +108,7 @@ export interface FailedTransactionDetail {
 export interface ScriptLabelStat {
   name: string;
   labelId?: string;
-  /** BlazeMeter # Samples — HTTP request executions for this label */
+  /** BlazeMeter # Samples - HTTP request executions for this label */
   samples: number;
   avgResponseTimeMs?: number;
   avgHitsPerSec?: number;
@@ -132,14 +132,14 @@ export interface ScriptSummaryRow {
   totalSamples?: number;
   /** Samples that resulted in errors (ALL row errorsCount) */
   errorSamples?: number;
-  /** All labels under this script — matches BlazeMeter Request Stats per scenario */
+  /** All labels under this script - matches BlazeMeter Request Stats per scenario */
   labelStats?: ScriptLabelStat[];
   totalIterations: number;
   passIterations: number;
   failedIterations: number;
   failedTransactions: string[];
   failedTransactionDetails?: FailedTransactionDetail[];
-  /** Manual defect tracking — editable per script in library / before export */
+  /** Manual defect tracking - editable per script in library / before export */
   bugId?: string;
   comments?: string;
 }

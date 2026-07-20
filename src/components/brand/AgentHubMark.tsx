@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Compass Core mark — pair with `brand-gradient` container or use on purple backgrounds. */
+/** Compass Core mark - pair with `brand-gradient` container or use on purple backgrounds. */
 export function AgentHubMark({ className }: { className?: string }) {
   return (
     <svg

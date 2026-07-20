@@ -38,7 +38,7 @@ const projectRef =
   process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
 
 if (!token || !projectRef) {
-  console.log("Supabase email templates (preview only — set SUPABASE_ACCESS_TOKEN to apply):\n");
+  console.log("Supabase email templates (preview only - set SUPABASE_ACCESS_TOKEN to apply):\n");
   for (const [key, value] of Object.entries(templates)) {
     console.log(`--- ${key} ---`);
     console.log(`Subject: ${value.subject}`);

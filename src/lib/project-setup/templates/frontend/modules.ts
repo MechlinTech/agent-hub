@@ -254,7 +254,7 @@ export const nextjsModule: StackModule = {
   },
   commands: (config, root) => {
     const args = [
-      // Force npx to skip its own "ok to install create-next-app?" prompt —
+      // Force npx to skip its own "ok to install create-next-app?" prompt -
       // without this, a non-TTY child process (the local executor) can hang
       // waiting on stdin that will never arrive.
       "--yes",
@@ -278,7 +278,7 @@ export const nextjsModule: StackModule = {
         label: "Initializing Next.js",
         exe: "npx",
         args,
-        // cwd is always root regardless of scope — the scope distinction is
+        // cwd is always root regardless of scope - the scope distinction is
         // handled by the target-directory positional arg above ("." vs
         // "frontend"), not by cwd. (Previously this was a no-op ternary
         // that always evaluated to `root` either way.)
@@ -608,7 +608,7 @@ export function Counter() {
   };
 }
 
-/** Redux Toolkit quick start for Vite — https://redux-toolkit.js.org/tutorials/quick-start */
+/** Redux Toolkit quick start for Vite - https://redux-toolkit.js.org/tutorials/quick-start */
 function reduxViteSourceFiles(
   rel: string,
   styling: ProjectSetupConfig["styling"]
@@ -665,7 +665,7 @@ export const reduxViteModule: StackModule = {
 };
 
 /**
- * Redux Toolkit for Next.js App Router — https://redux-toolkit.js.org/usage/nextjs
+ * Redux Toolkit for Next.js App Router - https://redux-toolkit.js.org/usage/nextjs
  * Uses makeStore + StoreProvider (per-request safe, no global store).
  */
 function reduxNextCounterFile(
@@ -784,7 +784,7 @@ export const reduxNextModule: StackModule = {
   commands: (config, root) => [reduxInstallCommand(config, root)],
 };
 
-/** Zustand counter store — https://zustand.docs.pmnd.rs/learn/getting-started/introduction */
+/** Zustand counter store - https://zustand.docs.pmnd.rs/learn/getting-started/introduction */
 function zustandCounterStoreContent(): string {
   return `import { create } from "zustand";
 
@@ -949,7 +949,7 @@ export const zustandNextModule: StackModule = {
 };
 
 /**
- * React Context + useReducer — https://react.dev/learn/scaling-up-with-reducer-and-context
+ * React Context + useReducer - https://react.dev/learn/scaling-up-with-reducer-and-context
  * Separate state/dispatch contexts so dispatch-only consumers avoid re-renders.
  */
 function contextCounterReducerContent(): string {

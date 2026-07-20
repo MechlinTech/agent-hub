@@ -29,11 +29,11 @@ export interface ProjectSetupConfig {
   docker: boolean;
   githubActions: boolean;
   deploymentTarget: DeploymentTarget;
-  /** Optional — written to .env when PostgreSQL is selected. */
+  /** Optional - written to .env when PostgreSQL is selected. */
   databaseUrl: string;
   /** When true and DATABASE_URL is set, runs prisma migrate dev during setup. */
   runMigrations: boolean;
-  /** Optional — written to .env when JWT auth is selected. */
+  /** Optional - written to .env when JWT auth is selected. */
   jwtSecret: string;
   googleClientId: string;
   googleClientSecret: string;

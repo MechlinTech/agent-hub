@@ -1,4 +1,4 @@
--- Project Setup Agent: job metadata + executor pairing tokens (no project files)
+-- Dev Scaffold Agent: job metadata + executor pairing tokens (no project files)
 
 CREATE TABLE IF NOT EXISTS public.project_setups (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

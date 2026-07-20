@@ -55,10 +55,10 @@ export const dockerModule: StackModule = {
   dependencies: () => [],
   // Previously this always emitted ONE root Dockerfile with
   // CMD ["npm", "run", "dev"], which:
-  //   1. Only makes sense if there's a root package.json — full_stack
+  //   1. Only makes sense if there's a root package.json - full_stack
   //      projects don't have one, since frontend/ and backend/ each have
   //      their own. The old Dockerfile silently doesn't work for that scope.
-  //   2. Used the dev server inside the container, not a real build — fine
+  //   2. Used the dev server inside the container, not a real build - fine
   //      for local convenience, but worth being explicit about instead of
   //      passing it off as a deployable image.
   //   3. Never wired up a database service even though `database` is
@@ -68,7 +68,7 @@ export const dockerModule: StackModule = {
     const dbEnv = dbEnvLine(config);
     // Derive "is there a db?" from whether dbServiceBlock() actually
     // produced something, rather than comparing config.database to a
-    // "none" literal — that literal isn't part of the DatabaseOption type
+    // "none" literal - that literal isn't part of the DatabaseOption type
     // (TS flagged this), and deriving it from dbBlock works regardless of
     // what the actual literal union looks like.
     const hasDb = dbBlock.length > 0;
@@ -84,7 +84,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-# Dev convenience image — for a real deploy, run \`npm run build\` and
+# Dev convenience image - for a real deploy, run \`npm run build\` and
 # serve the output instead (e.g. \`npm run build && npm run start\`).
 CMD ["npm", "run", "dev"]
 `,
@@ -114,7 +114,7 @@ CMD ["npm", "run", "dev"]
       - "4000:4000"
     environment:
       - NODE_ENV=development
-${dbEnv}${dependsOn}${dbBlock}# ${config.projectName} — extend as needed
+${dbEnv}${dependsOn}${dbBlock}# ${config.projectName} - extend as needed
 ${dbVolume}`,
         },
       ];
@@ -130,7 +130,7 @@ ${dbVolume}`,
       - "3000:3000"
     environment:
       - NODE_ENV=development
-${dbEnv}${dependsOn}${dbBlock}# ${config.projectName} — extend as needed
+${dbEnv}${dependsOn}${dbBlock}# ${config.projectName} - extend as needed
 ${dbVolume}`,
       },
       {

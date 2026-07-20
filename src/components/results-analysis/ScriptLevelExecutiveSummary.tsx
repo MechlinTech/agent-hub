@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, FileDown, Library, Loader2, X } from "lucide-react";
-import type { FailedTransactionDetail, ResultsAnalysisRecord, ScriptSummaryRow } from "@/lib/results-analysis/types";
+import type {
+  FailedTransactionDetail,
+  ResultsAnalysisRecord,
+  ScriptSummaryRow,
+} from "@/lib/results-analysis/types";
 import {
   collectUniqueScriptErrorCodes,
   resolveFailedTransactionDetails,
@@ -16,33 +20,44 @@ import { fmtPct } from "@/lib/results-analysis/display-metrics";
 import { pillBadge } from "@/lib/utils";
 
 function fmtSamples(value?: number): string {
-  if (value == null || value <= 0) return "—";
+  if (value == null || value <= 0) return "-";
   return value.toLocaleString();
 }
 
 function fmtMs(value?: number): string {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return `${Math.round(value)}`;
 }
 
 function fmtHits(value?: number): string {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return value.toFixed(2);
 }
 
 function fmtBandwidthKib(value?: number): string {
-  if (value == null || Number.isNaN(value)) return "—";
+  if (value == null || Number.isNaN(value)) return "-";
   return value.toFixed(2);
 }
 
-function ScriptRequestStatsModal({ row, onClose }: { row: ScriptSummaryRow; onClose: () => void }) {
+function ScriptRequestStatsModal({
+  row,
+  onClose,
+}: {
+  row: ScriptSummaryRow;
+  onClose: () => void;
+}) {
   const labels = row.labelStats ?? [];
   const elementLabels = labels.filter((l) => !l.isTotal);
   const totalRow = labels.find((l) => l.isTotal);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
+      <button
+        type="button"
+        className="absolute inset-0"
+        aria-label="Close"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
@@ -50,14 +65,22 @@ function ScriptRequestStatsModal({ row, onClose }: { row: ScriptSummaryRow; onCl
       >
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold text-slate-900">Request Stats</h2>
-            <p className="mt-0.5 truncate text-sm text-slate-500" title={row.scriptName}>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Request Stats
+            </h2>
+            <p
+              className="mt-0.5 truncate text-sm text-slate-500"
+              title={row.scriptName}
+            >
               {row.scriptName}
             </p>
             {labels.length > 0 && (
               <p className="mt-1 text-xs text-slate-500">
-                Results: {elementLabels.length} label{elementLabels.length === 1 ? "" : "s"}
-                {totalRow ? ` · ALL row: ${fmtSamples(totalRow.samples)} samples` : ""}
+                Results: {elementLabels.length} label
+                {elementLabels.length === 1 ? "" : "s"}
+                {totalRow
+                  ? ` · ALL row: ${fmtSamples(totalRow.samples)} samples`
+                  : ""}
               </p>
             )}
           </div>
@@ -74,30 +97,49 @@ function ScriptRequestStatsModal({ row, onClose }: { row: ScriptSummaryRow; onCl
         <div className="overflow-auto px-5 py-4">
           {labels.length === 0 ? (
             <p className="text-sm text-slate-600">
-              Per-label Request Stats are not stored for this analysis. Re-import the BlazeMeter run to
-              load all labels for each script.
+              Per-label Request Stats are not stored for this analysis.
+              Re-import the BlazeMeter run to load all labels for each script.
             </p>
           ) : (
             <>
               <p className="mb-3 text-xs text-slate-500">
-                <strong># Samples</strong> = BlazeMeter request executions per label (same as Request Stats
-                tab). Script total uses the <strong>ALL</strong> row for this scenario, not the sum of
+                <strong># Samples</strong> = BlazeMeter request executions per
+                label (same as Request Stats tab). Script total uses the{" "}
+                <strong>ALL</strong> row for this scenario, not the sum of
                 labels.
               </p>
               <div className="overflow-x-auto rounded-lg border border-slate-100">
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                     <tr>
-                      <th className="px-3 py-2 whitespace-nowrap min-w-[12rem]">Element Label</th>
+                      <th className="px-3 py-2 whitespace-nowrap min-w-[12rem]">
+                        Element Label
+                      </th>
                       <th className="px-3 py-2 whitespace-nowrap"># Samples</th>
-                      <th className="px-3 py-2 whitespace-nowrap">Avg. Response Time (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">Avg. Hits/s</th>
-                      <th className="px-3 py-2 whitespace-nowrap">90% Line (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">95% Line (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">99% Line (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">Min RT (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">Max RT (ms)</th>
-                      <th className="px-3 py-2 whitespace-nowrap">Avg. Bandwidth (KiB/s)</th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        Avg. Response Time (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        Avg. Hits/s
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        90% Line (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        95% Line (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        99% Line (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        Min RT (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        Max RT (ms)
+                      </th>
+                      <th className="px-3 py-2 whitespace-nowrap">
+                        Avg. Bandwidth (KiB/s)
+                      </th>
                       <th className="px-3 py-2 whitespace-nowrap">Error %</th>
                     </tr>
                   </thead>
@@ -107,19 +149,41 @@ function ScriptRequestStatsModal({ row, onClose }: { row: ScriptSummaryRow; onCl
                         key={label.labelId ?? label.name}
                         className={`border-t border-slate-100 ${label.isTotal ? "bg-slate-50/80 font-medium" : ""}`}
                       >
-                        <td className="max-w-[16rem] px-3 py-2.5 break-all text-slate-900">{label.name}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtSamples(label.samples)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.avgResponseTimeMs)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtHits(label.avgHitsPerSec)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.p90Ms)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.p95Ms)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.p99Ms)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.minResponseTimeMs)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtMs(label.maxResponseTimeMs)}</td>
-                        <td className="px-3 py-2.5 whitespace-nowrap">{fmtBandwidthKib(label.avgBandwidthKibps)}</td>
+                        <td className="max-w-[16rem] px-3 py-2.5 break-all text-slate-900">
+                          {label.name}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtSamples(label.samples)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.avgResponseTimeMs)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtHits(label.avgHitsPerSec)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.p90Ms)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.p95Ms)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.p99Ms)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.minResponseTimeMs)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtMs(label.maxResponseTimeMs)}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {fmtBandwidthKib(label.avgBandwidthKibps)}
+                        </td>
                         <td
                           className={`px-3 py-2.5 whitespace-nowrap ${
-                            (label.errorRatePct ?? 0) > 0 ? "font-medium text-red-600" : "text-slate-700"
+                            (label.errorRatePct ?? 0) > 0
+                              ? "font-medium text-red-600"
+                              : "text-slate-700"
                           }`}
                         >
                           {fmtPct(label.errorRatePct)}
@@ -192,7 +256,12 @@ function ResponseBodyModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
+      <button
+        type="button"
+        className="absolute inset-0"
+        aria-label="Close"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
@@ -201,7 +270,10 @@ function ResponseBodyModal({
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
           <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-900">Response</h3>
-            <p className="mt-1 truncate text-sm text-slate-500" title={transactionName}>
+            <p
+              className="mt-1 truncate text-sm text-slate-500"
+              title={transactionName}
+            >
               {transactionName}
             </p>
           </div>
@@ -219,7 +291,9 @@ function ResponseBodyModal({
           <dl className="grid gap-3 sm:grid-cols-2">
             <div>
               <dt className="text-xs text-slate-500">Code</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-slate-900">{errorCode}</dd>
+              <dd className="mt-0.5 text-sm font-semibold text-slate-900">
+                {errorCode}
+              </dd>
             </div>
             <div className="sm:col-span-2">
               <dt className="text-xs text-slate-500">Description</dt>
@@ -229,7 +303,9 @@ function ResponseBodyModal({
 
           <div>
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h4 className="text-sm font-semibold text-slate-900">Response Body</h4>
+              <h4 className="text-sm font-semibold text-slate-900">
+                Response Body
+              </h4>
               <button
                 type="button"
                 onClick={copyBody}
@@ -266,13 +342,18 @@ function FailedTransactionCard({
   detail: FailedTransactionDetail;
   onViewResponse: (entry: FailedTransactionDetail["errors"][number]) => void;
 }) {
-  const totalErrors = detail.errors.reduce((sum, entry) => sum + entry.errorCount, 0);
+  const totalErrors = detail.errors.reduce(
+    (sum, entry) => sum + entry.errorCount,
+    0,
+  );
 
   return (
     <article className="rounded-lg border border-slate-200 bg-white">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
         <div className="min-w-0 flex-1">
-          <h4 className="break-all text-sm font-semibold text-slate-900">{detail.name}</h4>
+          <h4 className="break-all text-sm font-semibold text-slate-900">
+            {detail.name}
+          </h4>
           {detail.apiUrl && (
             <a
               href={detail.apiUrl}
@@ -311,9 +392,16 @@ function FailedTransactionCard({
           </thead>
           <tbody>
             {detail.errors.map((entry, index) => (
-              <tr key={`${entry.errorCode}-${index}`} className="border-t border-slate-100 align-top">
-                <td className="px-4 py-3 font-medium text-slate-900">{entry.errorCode}</td>
-                <td className="px-4 py-3 text-slate-700">{entry.description}</td>
+              <tr
+                key={`${entry.errorCode}-${index}`}
+                className="border-t border-slate-100 align-top"
+              >
+                <td className="px-4 py-3 font-medium text-slate-900">
+                  {entry.errorCode}
+                </td>
+                <td className="px-4 py-3 text-slate-700">
+                  {entry.description}
+                </td>
                 <td className="px-4 py-3">
                   <button
                     type="button"
@@ -349,13 +437,18 @@ function ScriptFailedTransactionsModal({
 
   const failedDetails = useMemo(
     () => resolveFailedTransactionDetails(row),
-    [row]
+    [row],
   );
 
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-        <button type="button" className="absolute inset-0" aria-label="Close" onClick={onClose} />
+        <button
+          type="button"
+          className="absolute inset-0"
+          aria-label="Close"
+          onClick={onClose}
+        />
         <div
           role="dialog"
           aria-modal="true"
@@ -364,10 +457,16 @@ function ScriptFailedTransactionsModal({
         >
           <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
             <div className="min-w-0">
-              <h2 id="script-failed-tx-title" className="text-lg font-semibold text-slate-900">
+              <h2
+                id="script-failed-tx-title"
+                className="text-lg font-semibold text-slate-900"
+              >
                 Failed transactions
               </h2>
-              <p className="mt-0.5 truncate text-sm text-slate-500" title={row.scriptName}>
+              <p
+                className="mt-0.5 truncate text-sm text-slate-500"
+                title={row.scriptName}
+              >
                 {row.scriptName}
               </p>
             </div>
@@ -390,7 +489,7 @@ function ScriptFailedTransactionsModal({
                     className={pillBadge(
                       row.result === "pass"
                         ? "bg-green-100 text-green-800 border-green-200"
-                        : "bg-red-100 text-red-800 border-red-200"
+                        : "bg-red-100 text-red-800 border-red-200",
                     )}
                   >
                     {row.result === "pass" ? "Pass" : "Fail"}
@@ -399,7 +498,9 @@ function ScriptFailedTransactionsModal({
               </div>
               <div>
                 <dt className="text-xs text-slate-500">User load</dt>
-                <dd className="mt-0.5 text-sm font-medium text-slate-900">{row.userLoad}</dd>
+                <dd className="mt-0.5 text-sm font-medium text-slate-900">
+                  {row.userLoad}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-500"># Samples</dt>
@@ -469,22 +570,34 @@ export function ScriptLevelExecutiveSummary({
 }: {
   rows: ScriptSummaryRow[];
   embedded?: boolean;
-  analysis?: Partial<Pick<ResultsAnalysisRecord, "id" | "runName" | "externalId" | "masterId" | "testContext">>;
+  analysis?: Partial<
+    Pick<
+      ResultsAnalysisRecord,
+      "id" | "runName" | "externalId" | "masterId" | "testContext"
+    >
+  >;
   showHeaderActions?: boolean;
   editableFields?: boolean;
   libraryEntryId?: string;
   onRowsChange?: (rows: ScriptSummaryRow[]) => void;
 }) {
   const router = useRouter();
-  const [editableRows, setEditableRows] = useState(() => normalizeEditableRows(rows));
+  const [editableRows, setEditableRows] = useState(() =>
+    normalizeEditableRows(rows),
+  );
   const [detailRow, setDetailRow] = useState<ScriptSummaryRow | null>(null);
   const [statsRow, setStatsRow] = useState<ScriptSummaryRow | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportingLibrary, setExportingLibrary] = useState(false);
   const [libraryMessage, setLibraryMessage] = useState<string | null>(null);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const rowsKey = useMemo(() => rows.map((row) => row.scriptName).join("\0"), [rows]);
+  const rowsKey = useMemo(
+    () => rows.map((row) => row.scriptName).join("\0"),
+    [rows],
+  );
 
   useEffect(() => {
     setEditableRows(normalizeEditableRows(rows));
@@ -499,24 +612,31 @@ export function ScriptLevelExecutiveSummary({
       if (!libraryEntryId) return;
       setSaveState("saving");
       try {
-        const res = await fetch(`/api/results-analysis/library/${libraryEntryId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scriptSummaries: nextRows }),
-        });
+        const res = await fetch(
+          `/api/results-analysis/library/${libraryEntryId}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ scriptSummaries: nextRows }),
+          },
+        );
         if (!res.ok) throw new Error("Save failed");
         setSaveState("saved");
       } catch {
         setSaveState("error");
       }
     },
-    [libraryEntryId]
+    [libraryEntryId],
   );
 
-  function updateScriptField(scriptName: string, field: "bugId" | "comments", value: string) {
+  function updateScriptField(
+    scriptName: string,
+    field: "bugId" | "comments",
+    value: string,
+  ) {
     setEditableRows((prev) => {
       const next = prev.map((row) =>
-        row.scriptName === scriptName ? { ...row, [field]: value } : row
+        row.scriptName === scriptName ? { ...row, [field]: value } : row,
       );
       if (libraryEntryId) {
         if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -533,7 +653,7 @@ export function ScriptLevelExecutiveSummary({
     try {
       exportScriptExecutiveSummaryPdf(
         displayRows,
-        buildScriptExecutiveSummaryPdfContext(analysis)
+        buildScriptExecutiveSummaryPdfContext(analysis),
       );
     } finally {
       setTimeout(() => setExporting(false), 800);
@@ -556,7 +676,10 @@ export function ScriptLevelExecutiveSummary({
           scriptSummaries: rows,
         }),
       });
-      const data = (await res.json()) as { entry?: { id: string }; error?: string };
+      const data = (await res.json()) as {
+        entry?: { id: string };
+        error?: string;
+      };
       if (!res.ok) {
         setLibraryMessage(data.error ?? "Failed to export to library");
         return;
@@ -578,13 +701,21 @@ export function ScriptLevelExecutiveSummary({
 
   return (
     <>
-      <div className={embedded ? "overflow-hidden rounded-lg border border-slate-100" : "card overflow-hidden"}>
+      <div
+        className={
+          embedded
+            ? "overflow-hidden rounded-lg border border-slate-100"
+            : "card overflow-hidden"
+        }
+      >
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3">
-          <h3 className="font-semibold text-slate-900">Script-Level Executive Summary</h3>
+          <h3 className="font-semibold text-slate-900">
+            Script-Level Executive Summary
+          </h3>
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-xs text-slate-500">
-              {displayRows.length} script{displayRows.length === 1 ? "" : "s"} · {passCount} pass ·{" "}
-              {failCount} fail
+              {displayRows.length} script{displayRows.length === 1 ? "" : "s"} ·{" "}
+              {passCount} pass · {failCount} fail
             </p>
             {libraryEntryId && (
               <span className="flex items-center gap-1 text-xs text-slate-500">
@@ -595,7 +726,9 @@ export function ScriptLevelExecutiveSummary({
                   </>
                 )}
                 {saveState === "saved" && "Saved"}
-                {saveState === "error" && <span className="text-rose-600">Save failed</span>}
+                {saveState === "error" && (
+                  <span className="text-rose-600">Save failed</span>
+                )}
               </span>
             )}
             {showHeaderActions && (
@@ -605,7 +738,7 @@ export function ScriptLevelExecutiveSummary({
                   onClick={handleExportToLibrary}
                   disabled={exportingLibrary}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 shadow-sm hover:bg-brand-100 disabled:opacity-60"
-                  title="Save this summary to the library — add Bug ID and comments per script there"
+                  title="Save this summary to the library - add Bug ID and comments per script there"
                 >
                   <Library className="h-3.5 w-3.5" />
                   {exportingLibrary ? "Saving…" : "Export to Library"}
@@ -627,7 +760,13 @@ export function ScriptLevelExecutiveSummary({
             )}
           </div>
         </div>
-        <div className={embedded ? "max-h-[50vh] overflow-auto" : "max-h-[32rem] overflow-auto"}>
+        <div
+          className={
+            embedded
+              ? "max-h-[50vh] overflow-auto"
+              : "max-h-[32rem] overflow-auto"
+          }
+        >
           <table className="min-w-full text-sm">
             <thead className="sticky top-0 z-10 bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
@@ -637,18 +776,27 @@ export function ScriptLevelExecutiveSummary({
                 <th className="px-4 py-3 whitespace-nowrap">Error Code</th>
                 <th className="px-4 py-3 whitespace-nowrap"># Samples</th>
                 <th className="px-4 py-3 whitespace-nowrap">Labels</th>
-                <th className="px-4 py-3 min-w-[16rem] whitespace-nowrap">Failed Transactions</th>
+                <th className="px-4 py-3 min-w-[16rem] whitespace-nowrap">
+                  Failed Transactions
+                </th>
                 {editableFields && (
                   <>
-                    <th className="px-4 py-3 min-w-[8rem] whitespace-nowrap">Bug ID</th>
-                    <th className="px-4 py-3 min-w-[12rem] whitespace-nowrap">Comments</th>
+                    <th className="px-4 py-3 min-w-[8rem] whitespace-nowrap">
+                      Bug ID
+                    </th>
+                    <th className="px-4 py-3 min-w-[12rem] whitespace-nowrap">
+                      Comments
+                    </th>
                   </>
                 )}
               </tr>
             </thead>
             <tbody>
               {displayRows.map((row) => (
-                <tr key={row.scriptName} className="border-t border-slate-100 align-top">
+                <tr
+                  key={row.scriptName}
+                  className="border-t border-slate-100 align-top"
+                >
                   <td className="max-w-[14rem] px-4 py-3 font-medium text-slate-900">
                     <span className="break-all">{row.scriptName}</span>
                   </td>
@@ -657,7 +805,7 @@ export function ScriptLevelExecutiveSummary({
                       className={pillBadge(
                         row.result === "pass"
                           ? "bg-green-100 text-green-800 border-green-200"
-                          : "bg-red-100 text-red-800 border-red-200"
+                          : "bg-red-100 text-red-800 border-red-200",
                       )}
                     >
                       {row.result === "pass" ? "Pass" : "Fail"}
@@ -668,7 +816,7 @@ export function ScriptLevelExecutiveSummary({
                     {(() => {
                       const codes = collectUniqueScriptErrorCodes(row);
                       if (codes.length === 0) {
-                        return <span className="text-slate-400">—</span>;
+                        return <span className="text-slate-400">-</span>;
                       }
                       return (
                         <div className="flex flex-wrap gap-1">
@@ -685,7 +833,9 @@ export function ScriptLevelExecutiveSummary({
                     })()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="font-medium text-slate-900">{fmtSamples(row.totalSamples)}</span>
+                    <span className="font-medium text-slate-900">
+                      {fmtSamples(row.totalSamples)}
+                    </span>
                     {row.errorSamples != null && row.errorSamples > 0 && (
                       <span
                         className="mt-0.5 block text-xs text-red-600"
@@ -701,16 +851,19 @@ export function ScriptLevelExecutiveSummary({
                         type="button"
                         onClick={() => setStatsRow(row)}
                         className="text-xs font-medium text-brand-600 hover:underline"
-                        title="View all labels — BlazeMeter Request Stats"
+                        title="View all labels - BlazeMeter Request Stats"
                       >
                         {row.labelStats.filter((l) => !l.isTotal).length} labels
                       </button>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-slate-400">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <FailedTransactionsCell row={row} onShowDetails={() => setDetailRow(row)} />
+                    <FailedTransactionsCell
+                      row={row}
+                      onShowDetails={() => setDetailRow(row)}
+                    />
                   </td>
                   {editableFields && (
                     <>
@@ -718,7 +871,13 @@ export function ScriptLevelExecutiveSummary({
                         <input
                           type="text"
                           value={row.bugId ?? ""}
-                          onChange={(e) => updateScriptField(row.scriptName, "bugId", e.target.value)}
+                          onChange={(e) =>
+                            updateScriptField(
+                              row.scriptName,
+                              "bugId",
+                              e.target.value,
+                            )
+                          }
                           placeholder="BUG-1234"
                           className="w-full min-w-[7rem] rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         />
@@ -726,7 +885,13 @@ export function ScriptLevelExecutiveSummary({
                       <td className="px-4 py-3">
                         <textarea
                           value={row.comments ?? ""}
-                          onChange={(e) => updateScriptField(row.scriptName, "comments", e.target.value)}
+                          onChange={(e) =>
+                            updateScriptField(
+                              row.scriptName,
+                              "comments",
+                              e.target.value,
+                            )
+                          }
                           rows={2}
                           placeholder="Notes…"
                           className="w-full min-w-[10rem] resize-y rounded border border-slate-200 px-2 py-1.5 text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
@@ -742,11 +907,17 @@ export function ScriptLevelExecutiveSummary({
       </div>
 
       {detailRow && (
-        <ScriptFailedTransactionsModal row={detailRow} onClose={() => setDetailRow(null)} />
+        <ScriptFailedTransactionsModal
+          row={detailRow}
+          onClose={() => setDetailRow(null)}
+        />
       )}
 
       {statsRow && (
-        <ScriptRequestStatsModal row={statsRow} onClose={() => setStatsRow(null)} />
+        <ScriptRequestStatsModal
+          row={statsRow}
+          onClose={() => setStatsRow(null)}
+        />
       )}
     </>
   );

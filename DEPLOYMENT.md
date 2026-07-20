@@ -6,9 +6,9 @@
 
 In **Supabase Dashboard → Authentication → URL Configuration**:
 
-| Setting | Value |
-|---------|--------|
-| Site URL | `https://agenthub.mechlintech.com` |
+| Setting       | Value                                            |
+| ------------- | ------------------------------------------------ |
+| Site URL      | `https://agenthub.mechlintech.com`               |
 | Redirect URLs | `https://agenthub.mechlintech.com/auth/callback` |
 
 For local dev, also add:
@@ -19,17 +19,17 @@ For local dev, also add:
 
 Professional HTML templates live in `supabase/email-templates/`. Apply them in either of these ways:
 
-**Option A — Dashboard (manual)**  
+**Option A - Dashboard (manual)**  
 Authentication → Email Templates → paste each template body and subject from the files:
 
-| Template | Subject | Body file |
-|----------|---------|-----------|
+| Template       | Subject                        | Body file                                            |
+| -------------- | ------------------------------ | ---------------------------------------------------- |
 | Confirm signup | Confirm your Agent Hub account | `confirm-signup.html` (wrap with `base-layout.html`) |
-| Reset password | Reset your Agent Hub password | `reset-password.html` |
-| Magic link | Sign in to Agent Hub | `magic-link.html` |
-| Invite user | You are invited to Agent Hub | `invite-user.html` |
+| Reset password | Reset your Agent Hub password  | `reset-password.html`                                |
+| Magic link     | Sign in to Agent Hub           | `magic-link.html`                                    |
+| Invite user    | You are invited to Agent Hub   | `invite-user.html`                                   |
 
-**Option B — Management API (automated)**
+**Option B - Management API (automated)**
 
 ```bash
 SUPABASE_ACCESS_TOKEN=your_pat SUPABASE_PROJECT_REF=aqrcuwgwwpwijgugdhrk node scripts/apply-email-templates.mjs
@@ -58,7 +58,17 @@ Set in Vercel / your host:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_SITE_URL=https://agenthub.mechlintech.com
+NEXT_PUBLIC_PRODUCT_ENABLED=true
 ```
+
+Set `NEXT_PUBLIC_PRODUCT_ENABLED=false` to serve only the public landing page at `/` (login, signup, dashboard, and APIs except `/api/health` are disabled).
+
+## Landing page
+
+- Public URL: `/` on your site host (e.g. `https://agenthub.mechlintech.com/`)
+- Extractable module: `website/` (see `website/README.md`)
+- Smoke test with product enabled: `/` → Sign up → `/dashboard`
+- Smoke test with product disabled: `/` loads; `/login` redirects to `/`; `GET /api/health` OK; other `/api/*` returns 503
 
 ## Deploy to Vercel
 

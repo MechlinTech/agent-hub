@@ -47,7 +47,7 @@ export const ROLE_LABELS: Record<BuiltInRole, string> = {
 export const RESOURCE_LABELS: Record<Resource, string> = {
   script_review: "Script Review Agent",
   results_analysis: "Results Analysis Agent",
-  project_setup: "Project Setup Agent",
+  project_setup: "Dev Scaffold Agent",
   integrations: "Integrations",
   settings: "Settings",
   users: "User Management",

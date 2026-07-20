@@ -162,7 +162,7 @@ export async function syncProjectSetup(
 
   if (input.status === "completed" && input.result?.success) {
     await pushNotification({
-      title: "Project setup complete",
+      title: "Dev Scaffold complete",
       subtitle: `${input.result.projectName} at ${input.result.location}`,
       notification_type: "project_setup_complete",
     });

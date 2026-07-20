@@ -90,7 +90,7 @@ async function requireAuth(
 ): Promise<boolean> {
   const ok = await verifyBearerToken(req.headers.authorization ?? null);
   if (!ok) {
-    sendJson(res, 401, { error: "Unauthorized — pair executor with a valid token" }, origin);
+    sendJson(res, 401, { error: "Unauthorized - pair executor with a valid token" }, origin);
     return false;
   }
   return true;

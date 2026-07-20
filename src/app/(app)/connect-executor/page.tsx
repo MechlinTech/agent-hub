@@ -74,10 +74,10 @@ export default function ConnectExecutorPage() {
         {status === "done" ? (
           <div className="space-y-4">
             <p className="text-sm font-medium text-emerald-700">
-              Connected! Your computer is ready for Project Setup.
+              Connected! Your computer is ready for Dev Scaffold.
             </p>
             <Link href="/agents/project-setup/new" className="btn-primary inline-block">
-              Start new project setup
+              Start new Dev Scaffold
             </Link>
           </div>
         ) : null}
