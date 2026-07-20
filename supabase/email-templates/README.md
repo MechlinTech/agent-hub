@@ -4,13 +4,13 @@ Branded HTML templates for Supabase Authentication emails.
 
 ## Files
 
-| File | Supabase template | Subject |
-|------|-------------------|---------|
-| `confirm-signup.html` | Confirm signup | Confirm your Agent Hub account |
-| `reset-password.html` | Reset password | Reset your Agent Hub password |
-| `magic-link.html` | Magic link | Sign in to Agent Hub |
-| `invite-user.html` | Invite user | You are invited to Agent Hub |
-| `base-layout.html` | Wrapper (header + footer) | — |
+| File                  | Supabase template         | Subject                        |
+| --------------------- | ------------------------- | ------------------------------ |
+| `confirm-signup.html` | Confirm signup            | Confirm your Agent Hub account |
+| `reset-password.html` | Reset password            | Reset your Agent Hub password  |
+| `magic-link.html`     | Magic link                | Sign in to Agent Hub           |
+| `invite-user.html`    | Invite user               | You are invited to Agent Hub   |
+| `base-layout.html`    | Wrapper (header + footer) | -                              |
 
 Each body file is wrapped inside `base-layout.html` at the `{{BODY}}` placeholder.
 

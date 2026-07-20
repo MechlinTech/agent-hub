@@ -26,7 +26,7 @@ export function buildGoNoGoRationale(
   if (result.overallStatus === "fail") {
     bullets.push("Overall status is Fail based on SLA and error thresholds.");
   } else if (result.overallStatus === "warning") {
-    bullets.push("Overall status is Warning — some metrics are near or beyond limits.");
+    bullets.push("Overall status is Warning - some metrics are near or beyond limits.");
   } else {
     bullets.push("Overall status is Pass against configured SLA thresholds.");
   }

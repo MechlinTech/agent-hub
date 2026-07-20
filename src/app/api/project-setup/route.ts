@@ -9,7 +9,7 @@ import { isProjectSetupEnabled } from "@/lib/project-setup/env";
 
 export async function GET() {
   if (!isProjectSetupEnabled()) {
-    return NextResponse.json({ error: "Project Setup Agent is disabled" }, { status: 503 });
+    return NextResponse.json({ error: "Dev Scaffold Agent is disabled" }, { status: 503 });
   }
   const { response } = await requireRead("project_setup");
   if (response) return response;
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   if (!isProjectSetupEnabled()) {
-    return NextResponse.json({ error: "Project Setup Agent is disabled" }, { status: 503 });
+    return NextResponse.json({ error: "Dev Scaffold Agent is disabled" }, { status: 503 });
   }
   const { response } = await requireWrite("project_setup");
   if (response) return response;

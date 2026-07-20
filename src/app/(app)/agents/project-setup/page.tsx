@@ -15,7 +15,7 @@ export default async function ProjectSetupOverviewPage() {
         items={[
           { label: "Home", href: "/dashboard" },
           { label: "Agents", href: "/agents" },
-          { label: "Project Setup Agent" },
+          { label: "Dev Scaffold Agent" },
         ]}
       />
 
@@ -26,7 +26,7 @@ export default async function ProjectSetupOverviewPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">
-              Project Setup Agent
+              Dev Scaffold Agent
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
               Configure your stack and scaffold projects on your machine.
@@ -68,7 +68,7 @@ export default async function ProjectSetupOverviewPage() {
 
       <details className="card mb-6 p-5">
         <summary className="cursor-pointer font-semibold text-slate-900">
-          How Project Setup works
+          How Dev Scaffold works
         </summary>
         <div className="mt-4">
           <LocalExecutorInstructions />

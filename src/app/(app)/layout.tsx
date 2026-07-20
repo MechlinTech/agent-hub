@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { isProductEnabled } from "@/lib/product-enabled";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthContext } from "@/lib/supabase/get-auth-context";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  if (!isProductEnabled()) redirect("/");
+
   const supabase = await createClient();
   const {
     data: { user },

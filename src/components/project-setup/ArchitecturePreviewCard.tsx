@@ -8,7 +8,9 @@ export function ArchitecturePreviewCard({ plan }: { plan: PlanResult | null }) {
     return (
       <div className="card h-fit p-5">
         <h3 className="font-semibold text-slate-900">Architecture preview</h3>
-        <p className="mt-2 text-sm text-slate-500">Configure your stack to see the file tree.</p>
+        <p className="mt-2 text-sm text-slate-500">
+          Configure your stack to see the file tree.
+        </p>
       </div>
     );
   }
@@ -45,7 +47,7 @@ export function ProjectSummaryCard({
 }) {
   const rows: { label: string; value: string }[] = [
     { label: "Scope", value: config.projectScope.replace(/_/g, " ") },
-    { label: "Location", value: config.locationPath || "—" },
+    { label: "Location", value: config.locationPath || "-" },
   ];
 
   if (config.projectScope !== "backend_only") {
@@ -89,7 +91,9 @@ export function ProjectSummaryCard({
             <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {row.label}
             </dt>
-            <dd className="text-sm font-medium capitalize text-slate-800">{row.value}</dd>
+            <dd className="text-sm font-medium capitalize text-slate-800">
+              {row.value}
+            </dd>
           </div>
         ))}
       </dl>

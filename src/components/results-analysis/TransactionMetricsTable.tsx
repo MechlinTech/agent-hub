@@ -52,7 +52,10 @@ export function TransactionMetricsTable({
           {rows.map((tx) => {
             const status = statusFor?.(tx.name);
             return (
-              <tr key={tx.labelId ?? tx.name} className="border-t border-slate-100">
+              <tr
+                key={tx.labelId ?? tx.name}
+                className="border-t border-slate-100"
+              >
                 <td className="px-4 py-3 font-medium">{tx.name}</td>
                 <td className="px-4 py-3">{fmtCount(tx.samples)}</td>
                 <td className="px-4 py-3">{fmtRt(tx.avgRtSec)}</td>
@@ -64,19 +67,35 @@ export function TransactionMetricsTable({
                 <td className="px-4 py-3">{fmtRt(tx.medianRtSec)}</td>
                 <td className="px-4 py-3">{fmtRt(tx.stDevSec)}</td>
                 <td className="px-4 py-3">{fmtRt(tx.avgLatencySec)}</td>
-                <td className="px-4 py-3">{tx.errorsCount != null ? fmtCount(tx.errorsCount) : "—"}</td>
+                <td className="px-4 py-3">
+                  {tx.errorsCount != null ? fmtCount(tx.errorsCount) : "-"}
+                </td>
                 <td className="px-4 py-3">{fmtPct(tx.errorRatePct)}</td>
                 <td className="px-4 py-3">{fmtThroughput(tx.throughput)}</td>
                 <td className="px-4 py-3">{fmtBandwidth(tx.avgBytes)}</td>
-                <td className="px-4 py-3">{tx.durationSec ? fmtDurationSec(tx.durationSec) : "—"}</td>
-                <td className="px-4 py-3">{tx.concurrency ?? "—"}</td>
+                <td className="px-4 py-3">
+                  {tx.durationSec ? fmtDurationSec(tx.durationSec) : "-"}
+                </td>
+                <td className="px-4 py-3">{tx.concurrency ?? "-"}</td>
                 <td className="px-4 py-3">
                   {tx.passedThresholds === true ? (
-                    <span className={pillBadge("bg-green-100 text-green-800 border-green-200")}>Pass</span>
+                    <span
+                      className={pillBadge(
+                        "bg-green-100 text-green-800 border-green-200",
+                      )}
+                    >
+                      Pass
+                    </span>
                   ) : tx.passedThresholds === false ? (
-                    <span className={pillBadge("bg-red-100 text-red-800 border-red-200")}>Fail</span>
+                    <span
+                      className={pillBadge(
+                        "bg-red-100 text-red-800 border-red-200",
+                      )}
+                    >
+                      Fail
+                    </span>
                   ) : (
-                    "—"
+                    "-"
                   )}
                 </td>
                 {showStatus && (
@@ -88,13 +107,13 @@ export function TransactionMetricsTable({
                             ? "bg-green-100 text-green-800 border-green-200"
                             : status === "warning"
                               ? "bg-amber-100 text-amber-800 border-amber-200"
-                              : "bg-red-100 text-red-800 border-red-200"
+                              : "bg-red-100 text-red-800 border-red-200",
                         )}
                       >
                         {status}
                       </span>
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </td>
                 )}

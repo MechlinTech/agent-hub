@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!isProjectSetupEnabled()) {
-    return NextResponse.json({ error: "Project Setup Agent is disabled" }, { status: 503 });
+    return NextResponse.json({ error: "Dev Scaffold Agent is disabled" }, { status: 503 });
   }
   const { response } = await requireRead("project_setup");
   if (response) return response;

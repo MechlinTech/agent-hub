@@ -300,7 +300,7 @@ export function ConfigSectionCards({
               {feHasOAuth && !isMobileFramework ? (
                 <Field
                   label="Frontend URL"
-                  hint="Your app origin — used for OAuth callback redirect (/auth/callback)."
+                  hint="Your app origin - used for OAuth callback redirect (/auth/callback)."
                 >
                   <input
                     className="input w-full font-mono text-sm"

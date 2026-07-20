@@ -127,7 +127,7 @@ export const prismaModule: StackModule = {
   checklist: (config) => {
     const items = ["Prisma schema and src/config/db.ts"];
     if (!shouldRunPrismaMigrate(config)) {
-      items.push("Initial migration skipped — enable “Run migration during setup” and provide DATABASE_URL");
+      items.push("Initial migration skipped - enable “Run migration during setup” and provide DATABASE_URL");
     }
     return items;
   },

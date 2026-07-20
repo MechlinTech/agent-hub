@@ -1,18 +1,36 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isProductEnabled } from "@/lib/product-enabled";
 
-const publicRoutes = [
+const authPublicRoutes = [
   "/login",
   "/signup",
   "/auth/callback",
   "/verify-email",
-  "/api/health",
 ];
+
+const marketingRoutes = ["/", "/about", "/privacy", "/terms"];
+
+function isMarketingRoute(path: string): boolean {
+  return marketingRoutes.some((route) => (route === "/" ? path === "/" : path === route));
+}
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const productEnabled = isProductEnabled();
 
-  // PKCE code verifier cookie must survive until /auth/callback exchanges the code.
+  if (!productEnabled) {
+    if (isMarketingRoute(path) || path.startsWith("/api/health")) {
+      return NextResponse.next();
+    }
+    if (path.startsWith("/api/")) {
+      return NextResponse.json({ error: "Product disabled" }, { status: 503 });
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
   if (path.startsWith("/auth/callback")) {
     return NextResponse.next();
   }
@@ -42,9 +60,10 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublic = publicRoutes.some((r) => path.startsWith(r));
+  const isAuthPublic = authPublicRoutes.some((r) => path.startsWith(r));
+  const isMarketing = isMarketingRoute(path);
 
-  if (!user && !isPublic && path !== "/") {
+  if (!user && !isAuthPublic && !isMarketing) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", path);
@@ -69,17 +88,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (path === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = user ? "/dashboard" : "/login";
-    return NextResponse.redirect(url);
-  }
-
   return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|js|json|webmanifest|css|woff2?)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webm|mp4|ico|js|json|webmanifest|css|woff2?)$).*)",
   ],
 };

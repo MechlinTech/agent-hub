@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "sync-website-public": "node scripts/sync-website-public.mjs",
+    "capture-landing-media": "node scripts/capture-landing-media.mjs",
+    "predev": "npm run sync-website-public",
+    "prebuild": "npm run sync-website-public",
+    "dev": "next dev -p 3040",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

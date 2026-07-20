@@ -21,7 +21,9 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3040 → Sign up → **New Review** → upload `public/sample-checkout.jmx`.
+Open http://localhost:3040 → landing page → **Sign up** → **New Review** → upload `public/sample-checkout.jmx`.
+
+Landing assets live in `website/public/` and sync to `public/` on `npm run dev` / `npm run build`. Recapture with `npm run capture-landing-media` (requires `CAPTURE_EMAIL` / `CAPTURE_PASSWORD` and a running dev server).
 
 ## Environment
 
@@ -30,6 +32,7 @@ Open http://localhost:3040 → Sign up → **New Review** → upload `public/sam
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Anon/public key |
 | `NEXT_PUBLIC_SITE_URL` | Prod | Used for auth redirects |
+| `NEXT_PUBLIC_PRODUCT_ENABLED` | No | Default `true`. Set `false` for landing-only mode (disables login, signup, and app routes) |
 | `OPENAI_API_KEY` | For AI mode | OpenAI API key (server-only) |
 | `OPENAI_MODEL` | No | Default `gpt-4o-mini` |
 | `GEMINI_API_KEY` | For AI mode | Google Gemini API key |
@@ -76,8 +79,9 @@ If AI is enabled but the API key is missing or the call fails, findings fall bac
 ## Project structure
 
 ```
+website/            # Extractable landing page (see website/README.md)
 src/
-  app/              # Routes (auth, dashboard, script-review flow)
+  app/              # Routes (auth, dashboard, agents, landing shell at page.tsx)
   components/       # Layout, exports, test assets
   lib/
     jmx/            # Parser, rules, scoring, templates

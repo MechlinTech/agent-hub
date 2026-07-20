@@ -116,7 +116,7 @@ export default function LocalExecutorSettingsPage() {
         <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-600">
           <li>Generate a pairing token below</li>
           <li>Click Pair executor</li>
-          <li>Use Project Setup Agent from the wizard</li>
+          <li>Use Dev Scaffold Agent from the wizard</li>
         </ol> */}
       </div>
 

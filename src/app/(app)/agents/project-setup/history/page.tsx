@@ -12,12 +12,12 @@ export default async function ProjectSetupHistoryPage() {
         items={[
           { label: "Home", href: "/dashboard" },
           { label: "Agents", href: "/agents" },
-          { label: "Project Setup", href: "/agents/project-setup" },
+          { label: "Dev Scaffold", href: "/agents/project-setup" },
           { label: "History" },
         ]}
       />
       <h1 className="page-title">Setup History</h1>
-      <p className="page-subtitle mb-6">Past project setup jobs (metadata only).</p>
+      <p className="page-subtitle mb-6">Past Dev Scaffold jobs (metadata only).</p>
 
       <div className="card overflow-hidden">
         {setups.length === 0 ? (

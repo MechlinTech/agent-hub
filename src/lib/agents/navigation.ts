@@ -147,8 +147,8 @@ export const AGENT_NAV: Record<string, AgentNavConfig> = {
   "project-setup": {
     id: "project-setup",
     basePath: PROJECT_SETUP_BASE,
-    name: "Project Setup Agent",
-    shortName: "Project Setup",
+    name: "Dev Scaffold Agent",
+    shortName: "Dev Scaffold",
     scopedPaths: [],
     items: [
       {

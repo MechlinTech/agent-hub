@@ -18,7 +18,7 @@ export const WHIMSICAL_STATUS_LINES = [
   "Making sure nothing is undefined…",
   "Generating just the right amount of boilerplate…",
   "Checking that all the ducks are in a row…",
-  "Almost there — probably…",
+  "Almost there - probably…",
 ] as const;
 
 export function pickWhimsicalStatus(seed: number): string {
