@@ -4,7 +4,7 @@ export const TERMS_OF_USE = {
   title: "Terms of Use",
   lastUpdated: "July 20, 2026",
   intro:
-    "These Terms of Use (“Terms”) govern access to Agent Hub provided by Mechlin Technologies. By using agenthub.mechlintech.com or related services, you agree to these Terms.",
+    "These Terms of Use (“Terms”) govern access to Agent Hub. By using this site and related services, you agree to these Terms.",
   sections: [
     {
       heading: "Service description",
@@ -31,20 +31,20 @@ export const TERMS_OF_USE = {
       heading: "AI outputs and disclaimers",
       paragraphs: [
         "Agent responses are generated automatically and may be incomplete or incorrect. You must review outputs before relying on them for production testing, capacity planning, or code generation.",
-        "Agent Hub is provided “as is” without warranties of any kind, to the maximum extent permitted by law. Mechlin Technologies is not liable for indirect, incidental, or consequential damages arising from use of the service.",
+        "Agent Hub is provided “as is” without warranties of any kind, to the maximum extent permitted by law. The operator of your deployment is not liable for indirect, incidental, or consequential damages arising from use of the service.",
       ],
     },
     {
       heading: "Intellectual property",
       paragraphs: [
-        "Mechlin Technologies and its licensors retain rights in Agent Hub software, branding, and documentation. You retain rights in content you submit, subject to the license needed for us to operate the service.",
+        "The operator of Agent Hub and its licensors retain rights in Agent Hub software, branding, and documentation. You retain rights in content you submit, subject to the license needed for us to operate the service.",
       ],
     },
     {
       heading: "Changes and contact",
       paragraphs: [
         "We may modify these Terms or discontinue features with notice where reasonable. Continued use after changes constitutes acceptance.",
-        "Questions about these Terms should be directed to Mechlin Technologies through your organization’s support channel or the contact information provided with your deployment.",
+        "Questions about these Terms should be directed through your organization’s support channel or the contact information provided with your deployment.",
       ],
     },
   ] satisfies LegalSection[],
