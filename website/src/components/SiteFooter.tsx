@@ -103,11 +103,8 @@ export function SiteFooter({ productEnabled, isAuthenticated }: SiteFooterProps)
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-indigo-950/5 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-indigo-800/50">
-            © {year} Mechlin Technologies. All rights reserved.
-          </p>
-          <p className="text-sm text-indigo-800/45">agenthub.mechlintech.com</p>
+        <div className="mt-10 border-t border-indigo-950/5 pt-6">
+          <p className="text-sm text-indigo-800/50">© {year} Agent Hub. All rights reserved.</p>
         </div>
       </div>
     </footer>
