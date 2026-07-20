@@ -7,7 +7,7 @@ export const PRIVACY_POLICY = {
   title: "Privacy Policy",
   lastUpdated: "July 20, 2026",
   intro:
-    "This Privacy Policy describes how Mechlin Technologies (“we”, “us”) collects and uses information when you use Agent Hub at agenthub.mechlintech.com and related services.",
+    "This Privacy Policy describes how the operator of your Agent Hub deployment (“we”, “us”) collects and uses information when you use Agent Hub and related services.",
   sections: [
     {
       heading: "Information you provide",
@@ -41,7 +41,7 @@ export const PRIVACY_POLICY = {
       heading: "Your choices",
       paragraphs: [
         "You may access and update certain account information in the product. Depending on your region, you may have rights to access, correct, delete, or restrict processing of personal data.",
-        "To exercise privacy rights or ask questions about this policy, contact Mechlin Technologies through your organization’s designated support channel or the contact information provided with your deployment.",
+        "To exercise privacy rights or ask questions about this policy, contact your organization’s designated support channel or the contact information provided with your deployment.",
       ],
     },
     {
