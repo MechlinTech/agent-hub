@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About - Agent Hub",
-  description: "Learn about Agent Hub and Mechlin Technologies.",
+  description: "Learn about Agent Hub and its AI agents for performance engineering.",
 };
 
 export default async function AboutRoute() {
