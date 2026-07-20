@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Use - Agent Hub",
-  description: "Terms of Use for Agent Hub by Mechlin Technologies.",
+  description: "Terms of Use for Agent Hub.",
 };
 
 export default async function TermsRoute() {
