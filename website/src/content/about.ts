@@ -1,7 +1,7 @@
 export const ABOUT_CONTENT = {
   title: "About Agent Hub",
   intro:
-    "Agent Hub is a performance engineering workspace from Mechlin Technologies. It brings together specialized AI agents so teams can review load scripts, interpret test results, and scaffold development environments without switching tools.",
+    "Agent Hub is a performance engineering workspace that brings together specialized AI agents so teams can review load scripts, interpret test results, and scaffold development environments without switching tools.",
   mission:
     "We built Agent Hub for engineers who live in JMeter, BlazeMeter, and modern app stacks. Each agent focuses on one job, with clear inputs and outputs you can trust in a production workflow.",
   agentsHeading: "Three agents, one workspace",
@@ -22,7 +22,7 @@ export const ABOUT_CONTENT = {
         "Configure frontend, backend, and DevOps choices, then generate a project on your machine through AgentHub Desktop and the local executor.",
     },
   ],
-  companyHeading: "Mechlin Technologies",
+  companyHeading: "Deployment & support",
   company:
-    "Agent Hub is developed and operated by Mechlin Technologies. The product is available at agenthub.mechlintech.com. For product questions, use the channels provided in your organization’s Agent Hub deployment or contact your Mechlin account team.",
+    "Agent Hub can be self-hosted or operated by your organization. For product questions, use the support channels configured for your deployment or reach out to your workspace administrator.",
 };
