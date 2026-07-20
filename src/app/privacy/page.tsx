@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Agent Hub",
-  description: "Privacy Policy for Agent Hub by Mechlin Technologies.",
+  description: "Privacy Policy for Agent Hub.",
 };
 
 export default async function PrivacyRoute() {
