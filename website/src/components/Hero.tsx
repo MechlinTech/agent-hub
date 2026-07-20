@@ -21,8 +21,7 @@ export function Hero({ productEnabled, isAuthenticated }: HeroProps) {
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-indigo-900/75 sm:text-xl">
             Review JMeter scripts, analyze BlazeMeter results, and scaffold
-            projects on your machine-all from one hub built for load testing
-            teams.
+            projects on your machine-all from one hub built for teams.
           </p>
           <div className="mt-10">
             <CtaButtons
